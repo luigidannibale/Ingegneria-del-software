@@ -1,0 +1,75 @@
+-----------------------------------------------------Definizioni
+Cadenza di gioco:
+	Sia il tempo iniziale : x e il tempo incrementale : y,
+	se fai una mossa entro y al tuo tempo viene aggiunto y.
+	X decorre con il naturale passare del tempo.
+
+Caratteristiche di una partita:
+	- Cadenza di gioco
+	- Squadra, la scelta delle pedine bianche e nere (casuale,bianco,nero)
+	- Se partita classificata
+
+Profilo di un giocatore:
+	- Nome
+	- Cognome
+	- Username
+	- Password
+	- Punteggio elo
+
+Impostazioni del sistema:
+	- Colore scacchiera
+	- Stile pedine
+
+-------------------------------------------------------Funzioni
+Matchmaking casuale:
+	Siano giocatori g1,g2, che hanno entrambi cercato partita con cadenza di gioco c, (e |g1-g2| <= 100)
+	crea partita tra g1 e g2 con cadenza di gioco c.
+
+-------------------------------------------------------DB
+
+CREATE TYPE Esito AS ENUM("B","N","P")
+
+CREATE TABLE Giocatori( 
+	Username	PRIMARY KEY	Varchar(20) NOT NULL,
+	Nome 				Varchar(20),
+	Cognome 			Varchar(25),
+	Password			Varchar(15) NOT NULL,
+	PuntiElo 			Integer NOT	NULL
+	)
+
+
+CREATE TABLE Preferenze( 
+	Giocatore 	Varchar(20) NOT NULL REFERENCES Giocatori(Username),
+	Tema 		Integer NOT NULL REFERENCES Temi(ID)
+	)
+
+CREATE TABLE Temi(
+	ID				SERIAL PRIMARY KEY	NOT NULL,
+	ColoreScacchiera	Integer NOT NULL,
+	TemaPedine			Integer NOT NULL	
+	)
+
+CREATE TABLE Partite (
+	ID				SERIAL PRIMARY KEY	NOT NULL,
+	GiocatoreBianco		Varchar(20) NOT NULL REFERENCES Giocatori(Username),
+	GiocatoreNero		Varchar(20) NOT NULL REFERENCES Giocatori(Username),
+	Cadenza				Varchar(20) NOT NULL,
+	MosseGiocate		Varchar NOT NULL,
+	Esito				Esito NOT NULL
+	)
+
+CREATE TABLE Logs(
+	ID				SERIAL PRIMARY KEY	NOT NULL,
+	Azione				Varchar NOT NULL,
+	Timestamp			Timestamp NOT NULL 	
+	)
+---------------------------------------------------------------------------------------------------
+Design scacchiera:
+- matrice 8x8 di celle
+
+Design cella:
+    Coordinate:
+        -riga
+        -colonna
+    Contenuto:
+        -da definire            
