@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-// using namespace std;
 
 class Icon{};
 
@@ -75,9 +74,7 @@ public:
     } */
 
     // To be overridden
-    virtual std::vector<Move> nextMoves(){
-        return std::vector<Move>();
-    }
+    virtual std::vector<Move> nextMoves();
 };
 
 class Move {
