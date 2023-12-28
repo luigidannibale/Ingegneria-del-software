@@ -10,7 +10,7 @@ WXCONFIG=wx-config
 WXFLAGS=$(shell $(WXCONFIG) --cxxflags)
 WXLIBS=$(shell $(WXCONFIG) --libs)
 
-CFLAGS=-std=c++20 -g -ggdb -fpermissive -L/usr/local/lib -Wall -I. -I$(IDIR) $(WXFLAGS) -lm -lhiredis $(WXLIBS)
+CFLAGS=-std=c++20 -g -ggdb -fpermissive -L/usr/local/lib -I. -I$(IDIR) $(WXFLAGS) -lm -lhiredis $(WXLIBS) #-Wall 
 
 # use this when no connection to Postgresql (library lpq) is needed
 #CFLAGS=-std=c++11 -I. -I$(IDIR) -lm 
@@ -20,7 +20,6 @@ DEPS = $(wildcard $(IDIR)/*.h)
 SRC = $(wildcard *.cpp)
 OBJ = $(patsubst %.cpp, $(ODIR)/%.o, $(SRC))
 
-
 #all:	$(ODIR)/%.o
 
 all:	$(ODIR)/$(OBJ) $(BDIR)/main
@@ -29,7 +28,7 @@ $(ODIR)/%.o: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(BDIR)/main: $(OBJ) $(DEPS)
-	$(CC) -o $@ $(OBJ) $(con2db_OBJ) $(CFLAGS)
+	$(CC) -o $@ $(OBJ) $(CFLAGS)
 
 .PHONY: clean
 

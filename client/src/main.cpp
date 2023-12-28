@@ -1,21 +1,19 @@
 #include "main.h"
-#include <wx/wx.h>
 
-// int main() {
-//     // MyApp a = new MyApp();    
-//     // istanzia View
-//     // istanzia Model(View)
-//     // istanzia Controller(View, Model)
-// }
-
-
-class MyApp : public wxApp {
+class ChessClient : public wxApp {
 public:
-    virtual bool OnInit() {
-        wxFrame *frame = new wxFrame(nullptr, wxID_ANY, "Hello wxWidgets");
-        frame->Show(true);
-        return true;
-    }
+    virtual bool OnInit();
 };
 
-wxIMPLEMENT_APP(MyApp);
+bool ChessClient::OnInit() {
+    Controller* c = new Controller();
+
+    // HomePage *frame = new HomePage("Gioco degli scacchi",wxPoint(10,20),wxSize(800,600));
+    // frame->SetSize(800,600);
+    // frame->Center();
+    // frame->Show(true);
+    
+    return true;
+}
+
+wxIMPLEMENT_APP(ChessClient);
