@@ -3,15 +3,6 @@
 #include <stdlib.h>
 // #include "GameMode.h"
 
-enum {
-    ID_Hello = 1,
-    ID_btnPlay,
-    ID_btnSettings,
-    ID_btnProfile,
-    ID_btnClose,
-    ID_btnViewGame
-};
-
 class HomePage : public wxFrame {
 public:
     HomePage(const wxString& title, const wxPoint& pos, const wxSize& size);
@@ -21,6 +12,7 @@ public:
     wxButton* GetBtnProfile() const { return btnProfile; }
     wxButton* GetBtnViewGame() const { return btnViewGame; }
     wxButton* GetBtnExit() const { return btnExit; }
+    wxPanel* GetHomePanel() const { return homePanel; }
     void HidePanel() const { homePanel->Hide(); }
 
 private:
@@ -56,11 +48,11 @@ HomePage::HomePage(const wxString& title, const wxPoint& pos, const wxSize& size
 
     wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
 
-    wxButton* btnPlay = new wxButton(homePanel, ID_btnPlay, "Play game");
-    wxButton* btnSettings = new wxButton(homePanel, ID_btnSettings, "Settings");
-    wxButton* btnProfile = new wxButton(homePanel, ID_btnProfile, "Profile");
-    wxButton* btnViewGame = new wxButton(homePanel, ID_btnViewGame, "View a game");
-    wxButton* btnExit = new wxButton(homePanel, ID_btnClose, "Exit");
+    btnPlay = new wxButton(homePanel, wxID_ANY, "Play game");
+    btnSettings = new wxButton(homePanel, wxID_ANY, "Settings");
+    btnProfile = new wxButton(homePanel, wxID_ANY, "Profile");
+    btnViewGame = new wxButton(homePanel, wxID_ANY, "View a game");
+    btnExit = new wxButton(homePanel, wxID_ANY, "Exit");
 
     // Add buttons to the vertical sizer
     vbox->Add(btnPlay, 1, wxEXPAND | wxALL, 10);      // 1 indicates proportion
@@ -80,33 +72,3 @@ HomePage::HomePage(const wxString& title, const wxPoint& pos, const wxSize& size
 
     homePanel->Show();
 }
-
-
-
-
-
-// void HomePage::btnPlay(wxCommandEvent& event){
-//     //wxLogMessage("Gioca");    
-
-//     // GameMode *frame = new GameMode("Choose the gamemode!", wxPoint(50, 50), wxSize(450, 340));
-//     GameMode *gameModePanel = new GameMode(this, homePanel);
-//     homePanel->Hide();
-//     gameModePanel->Show();
-//     std::cout << "PROVA?" << std::endl;
-//     // printf(gameModePanel->GetSize());
-//     gameModePanel->Layout();
- 
-//     //Show(false);
-// }
-// void HomePage::btnSettings(wxCommandEvent& event) {    
-//     wxLogMessage("Impostazioni");
-// }
-// void HomePage::btnProfile(wxCommandEvent& event) {
-//     wxLogMessage("Profilo");
-// }
-// void HomePage::btnViewGame(wxCommandEvent& event) {
-//     wxLogMessage("Vedi un game concluso");
-// }
-// void HomePage::btnClose(wxCommandEvent& event) {
-//     Close(true);
-// }

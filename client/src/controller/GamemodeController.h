@@ -7,29 +7,42 @@
 class GamemodeController
 {
     public:
-        GamemodeController(wxFrame*);
+        GamemodeController(HomePage*);
         ~GamemodeController();
 
     private:
         GameMode* panel;
         LoginPanel* prova;
         ProfilePanel* prova1;
+        wxPanel* backPanel;
+
         void addButtonEvents();
+
+        void BackPanel(wxCommandEvent&);
 };
 
 // Constructor
-GamemodeController::GamemodeController(wxFrame* parent)
+GamemodeController::GamemodeController(HomePage* parent)
 {
     // istanzia frame con l'HomePage
-//    panel = new GameMode(parent);
-//    panel->Show(true);
+   panel = new GameMode(parent);
+   panel->Show(true);
+   backPanel = parent->GetHomePanel(); 
 //    prova = new LoginPanel(parent);
 //    prova->Show(true);
-    prova1 = new ProfilePanel(parent);
-    prova1->Show(true);
+    // prova1 = new ProfilePanel(parent);
+    // prova1->Show(true);
+
+    addButtonEvents();
 }
 
 void GamemodeController::addButtonEvents() {
+    panel->GetBtnBack()->Bind(wxEVT_BUTTON, &GamemodeController::BackPanel, this);
+}
+
+void GamemodeController::BackPanel(wxCommandEvent& event) {
+    backPanel->Show();
+    panel->Hide();
 }
 
 GamemodeController::~GamemodeController()

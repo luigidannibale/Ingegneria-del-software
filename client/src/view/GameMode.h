@@ -1,14 +1,6 @@
 #include <wx/wx.h>
 #include "MatchmakingPanel.h"
 
-enum {
-    ID_btnMultiplayer = 1,
-    ID_btnComputer,
-    ID_btnFriend,
-    ID_btnBack
-};
-
-
 class GameMode : public wxPanel {
 public:
     GameMode(wxWindow* parent);
@@ -47,10 +39,10 @@ GameMode::GameMode(wxWindow* parent): wxPanel(parent) {
     SetSize(parent->GetSize());
     SetBackgroundColour(wxColour(118,150,86));
     
-    btnMultiplayer = new wxButton(this, ID_btnMultiplayer, "Gioca una partita multigiocatore",wxPoint(10,50));
-    btnComputer = new wxButton(this, ID_btnComputer, "Gioca una partita contro il computer",wxPoint(10,100));
-    btnFriend = new wxButton(this, ID_btnFriend, "Sfida un amico",wxPoint(10,150));
-    btnBack = new wxButton(this, ID_btnBack, "<-",wxPoint(10,200));
+    btnMultiplayer = new wxButton(this, wxID_ANY, "Gioca una partita multigiocatore",wxPoint(10,50));
+    btnComputer = new wxButton(this, wxID_ANY, "Gioca una partita contro il computer",wxPoint(10,100));
+    btnFriend = new wxButton(this, wxID_ANY, "Sfida un amico",wxPoint(10,150));
+    btnBack = new wxButton(this, wxID_ANY, "<-",wxPoint(10,200));
 
     // Bind(wxEVT_BUTTON, &GameMode::btnMultiplayer, this, ID_btnMultiplayer);
     // Bind(wxEVT_BUTTON, &GameMode::btnComputer, this, ID_btnComputer);

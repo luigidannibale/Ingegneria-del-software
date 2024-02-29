@@ -13,6 +13,10 @@ class HomeController
         HomePage* frame;
 
         void addButtonEvents();
+
+        void showGamemode(wxCommandEvent&);
+        void showSettings(wxCommandEvent&);
+        void showProfile(wxCommandEvent&);
 };
 
 // Constructor
@@ -26,27 +30,34 @@ HomeController::HomeController(/* args */)
 }
 
 void HomeController::addButtonEvents() {
-    frame->Bind(wxEVT_BUTTON, [=](wxCommandEvent&){
-        // wxLogMessage("Play");
-        GamemodeController* game = new GamemodeController(frame);
-        frame->HidePanel();
-    }, ID_btnPlay);
+    frame->GetBtnPlay()->Bind(wxEVT_BUTTON, &HomeController::showGamemode, this);
 
-    frame->Bind(wxEVT_BUTTON, [=](wxCommandEvent&){
-        wxLogMessage("Settings");
-    }, ID_btnSettings);
+    frame->GetBtnSettings()->Bind(wxEVT_BUTTON, &HomeController::showSettings, this);
 
-    frame->Bind(wxEVT_BUTTON, [=](wxCommandEvent&){
-        wxLogMessage("Profile");
-    }, ID_btnProfile);
+    frame->GetBtnProfile()->Bind(wxEVT_BUTTON, &HomeController::showProfile, this);
 
-    frame->Bind(wxEVT_BUTTON, [=](wxCommandEvent&){
-        wxLogMessage("ViewGame");
-    }, ID_btnViewGame);
+    // frame->Bind(wxEVT_BUTTON, [=](wxCommandEvent&){
+    //     wxLogMessage("ViewGame");
+    // }, ID_btnViewGame);
 
-    frame->Bind(wxEVT_BUTTON, [=](wxCommandEvent&){
-        wxLogMessage("Exit");
-    }, ID_btnClose);
+    // frame->Bind(wxEVT_BUTTON, [=](wxCommandEvent&){
+    //     wxLogMessage("Exit");
+    // }, ID_btnClose);
+}
+
+void HomeController::showGamemode(wxCommandEvent& event){
+    GamemodeController* game = new GamemodeController(frame);
+    frame->HidePanel();
+}
+
+void HomeController::showSettings(wxCommandEvent& event){
+    // GamemodeController* game = new GamemodeController(frame);
+    // frame->HidePanel();
+}
+
+void HomeController::showProfile(wxCommandEvent& event){
+    // GamemodeController* game = new GamemodeController(frame);
+    // frame->HidePanel();
 }
 
 HomeController::~HomeController()
