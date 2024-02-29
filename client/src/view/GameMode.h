@@ -11,7 +11,7 @@ enum {
 
 class GameMode : public wxPanel {
 public:
-    GameMode(wxWindow* parent, wxPanel* backPanel); 
+    GameMode(wxWindow* parent);
     
     wxButton* GetBtnMultiplayer()    { return btnMultiplayer; }
     wxButton* GetBtnComputer()       { return btnComputer; }
@@ -42,8 +42,8 @@ private:
 // wxEND_EVENT_TABLE()
 
 
-GameMode::GameMode(wxWindow* parent, wxPanel* panel): wxPanel(parent) { 
-    backPanel = panel;
+GameMode::GameMode(wxWindow* parent): wxPanel(parent) {
+
     SetSize(parent->GetSize());
     SetBackgroundColour(wxColour(118,150,86));
     
@@ -51,7 +51,7 @@ GameMode::GameMode(wxWindow* parent, wxPanel* panel): wxPanel(parent) {
     btnComputer = new wxButton(this, ID_btnComputer, "Gioca una partita contro il computer",wxPoint(10,100));
     btnFriend = new wxButton(this, ID_btnFriend, "Sfida un amico",wxPoint(10,150));
     btnBack = new wxButton(this, ID_btnBack, "<-",wxPoint(10,200));
-    
+
     // Bind(wxEVT_BUTTON, &GameMode::btnMultiplayer, this, ID_btnMultiplayer);
     // Bind(wxEVT_BUTTON, &GameMode::btnComputer, this, ID_btnComputer);
     // Bind(wxEVT_BUTTON, &GameMode::btnFriend, this, ID_btnFriend);

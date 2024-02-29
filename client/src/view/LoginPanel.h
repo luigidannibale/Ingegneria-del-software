@@ -1,14 +1,40 @@
-//
-// Created by luigi on 29/02/24.
-//
+#include "wx/wx.h"
 
-#ifndef INGEGNERIA_DEL_SOFTWARE_LOGINPANEL_H
-#define INGEGNERIA_DEL_SOFTWARE_LOGINPANEL_H
+class LoginPanel : public wxPanel{
+public:
+    LoginPanel(wxWindow* parent);
+    wxString GetUsername() { return txtUsername->GetValue(); }
+    //passwd wxString GetPassword() { return txtPassword->GetValue(); }
 
-
-class LoginPanel {
+private:
+    wxTextCtrl* txtUsername;
+    //passwd wxTextCtrl* txtPassword;
+    wxButton* btnLogin;
+    wxButton* btnBack;
 
 };
 
+LoginPanel::LoginPanel(wxWindow* parent): wxPanel(parent)
+{
+    SetSize(parent->GetSize());
+    SetBackgroundColour(wxColour(118,150,86));
 
-#endif //INGEGNERIA_DEL_SOFTWARE_LOGINPANEL_H
+    wxStaticText* usernameLabel = new wxStaticText(this, wxID_ANY, wxT("Username:"));
+    txtUsername = new wxTextCtrl(this, wxID_ANY, wxT(""));
+
+    //passwd wxStaticText* passwordLabel = new wxStaticText(this, wxID_ANY, wxT("Password:"));
+    //passwd txtPassword = new wxTextCtrl(this, wxID_ANY, wxT(""), wxPoint(-1, -1), wxDefaultSize, wxTE_PASSWORD);
+
+    btnLogin = new wxButton(this, wxID_ANY, wxT("Login"));
+    btnBack = new wxButton(this, wxID_ANY, wxT("Back"));
+
+    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(usernameLabel, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(txtUsername, 0, wxALL | wxEXPAND, 5);
+    //passwd sizer->Add(passwordLabel, 0, wxALL | wxEXPAND, 5);
+    //passwd sizer->Add(txtPassword, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(btnLogin, 0, wxALL | wxALIGN_CENTER, 5);
+    sizer->Add(btnBack, 0, wxALL | wxALIGN_CENTER, 5);
+    SetSizerAndFit(sizer);
+}
+

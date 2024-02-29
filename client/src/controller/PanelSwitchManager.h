@@ -6,8 +6,6 @@ class PanelSwitcher{
     public:
     PanelSwitcher(HomePage hp, GameMode gm, MatchmakingPanel mm);
 
-    
-
     private:
     HomePage hp;
     GameMode gm;

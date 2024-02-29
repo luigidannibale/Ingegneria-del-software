@@ -1,21 +1,22 @@
 #include <stdio.h>
-#include <wx/wx.h>
+// #include <wx/wx.h>
 #include "../view/HomePage.h"
+#include "GamemodeController.h"
 
-class Controller
+class HomeController
 {
     public:
-        Controller(/* args */);
-        ~Controller();
+        HomeController(/* args */);
+        ~HomeController();
 
     private:
-        wxFrame* frame;
+        HomePage* frame;
 
         void addButtonEvents();
 };
 
 // Constructor
-Controller::Controller(/* args */)
+HomeController::HomeController(/* args */)
 {
     // istanzia frame con l'HomePage
     frame = new HomePage("Gioco degli scacchi",wxPoint(10,20),wxSize(800,600));
@@ -24,9 +25,11 @@ Controller::Controller(/* args */)
     addButtonEvents();
 }
 
-void Controller::addButtonEvents() {
+void HomeController::addButtonEvents() {
     frame->Bind(wxEVT_BUTTON, [=](wxCommandEvent&){
-        wxLogMessage("Play");
+        // wxLogMessage("Play");
+        GamemodeController* game = new GamemodeController(frame);
+        frame->HidePanel();
     }, ID_btnPlay);
 
     frame->Bind(wxEVT_BUTTON, [=](wxCommandEvent&){
@@ -46,8 +49,7 @@ void Controller::addButtonEvents() {
     }, ID_btnClose);
 }
 
-// Destructor (Called when the object goes out of scope)
-Controller::~Controller()
+HomeController::~HomeController()
 {
 }
 

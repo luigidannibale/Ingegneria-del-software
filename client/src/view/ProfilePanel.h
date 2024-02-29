@@ -1,14 +1,51 @@
-//
-// Created by luigi on 29/02/24.
-//
+#include "wx/wx.h"
 
-#ifndef INGEGNERIA_DEL_SOFTWARE_PROFILEPANEL_H
-#define INGEGNERIA_DEL_SOFTWARE_PROFILEPANEL_H
+class ProfilePanel : public wxPanel{
+public:
+    ProfilePanel(wxWindow* parent);
 
 
-class ProfilePanel {
+
+private:
+    wxTextCtrl* txtUsername;
+    wxTextCtrl* txtName;
+    wxTextCtrl* txtSurname;
+    wxStaticText* lblEloPoints = new wxStaticText(this, wxID_ANY, wxT("Elo points : "));;
+    //passwd wxTextCtrl* txtPassword;
+
+    wxButton* btnUpdateMode;
+    wxButton* btnSave;
+    wxButton* btnBack;
 
 };
 
+ProfilePanel::ProfilePanel(wxWindow* parent): wxPanel(parent)
+{
+    SetSize(parent->GetSize());
+    SetBackgroundColour(wxColour(118,150,86));
 
-#endif //INGEGNERIA_DEL_SOFTWARE_PROFILEPANEL_H
+
+    txtUsername = new wxTextCtrl(this, wxID_ANY, wxT("Some value"));
+    txtName = new wxTextCtrl(this, wxID_ANY, wxT("Some value"));
+    txtSurname = new wxTextCtrl(this, wxID_ANY, wxT("Some value"));
+
+    //passwd wxStaticText* passwordLabel = new wxStaticText(this, wxID_ANY, wxT("Password:"));
+    //passwd txtPassword = new wxTextCtrl(this, wxID_ANY, wxT(""), wxPoint(-1, -1), wxDefaultSize, wxTE_PASSWORD);
+
+    btnUpdateMode = new wxButton(this, wxID_ANY, wxT("Update profile"));
+    btnSave = new wxButton(this, wxID_ANY, wxT("Save"));
+    btnBack = new wxButton(this, wxID_ANY, wxT("Back"));
+
+    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(txtUsername, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(txtName, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(txtSurname, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(lblEloPoints, 0, wxALL | wxEXPAND, 5);
+    //passwd sizer->Add(passwordLabel, 0, wxALL | wxEXPAND, 5);
+    //passwd sizer->Add(txtPassword, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(btnSave, 0, wxALL | wxALIGN_CENTER, 5);
+    sizer->Add(btnUpdateMode, 0, wxALL | wxALIGN_CENTER, 5);
+    sizer->Add(btnBack, 0, wxALL | wxALIGN_CENTER, 5);
+    SetSizerAndFit(sizer);
+}
+

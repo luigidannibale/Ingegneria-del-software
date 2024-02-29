@@ -21,6 +21,7 @@ public:
     wxButton* GetBtnProfile() const { return btnProfile; }
     wxButton* GetBtnViewGame() const { return btnViewGame; }
     wxButton* GetBtnExit() const { return btnExit; }
+    void HidePanel() const { homePanel->Hide(); }
 
 private:
     // void btnPlay(wxCommandEvent& event);
@@ -79,6 +80,8 @@ HomePage::HomePage(const wxString& title, const wxPoint& pos, const wxSize& size
 
     homePanel->Show();
 }
+
+
 
 
 

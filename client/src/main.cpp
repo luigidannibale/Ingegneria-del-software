@@ -6,12 +6,7 @@ public:
 };
 
 bool ChessClient::OnInit() {
-    Controller* c = new Controller();
-
-    // HomePage *frame = new HomePage("Gioco degli scacchi",wxPoint(10,20),wxSize(800,600));
-    // frame->SetSize(800,600);
-    // frame->Center();
-    // frame->Show(true);
+    HomeController* c = new HomeController();
     
     return true;
 }
