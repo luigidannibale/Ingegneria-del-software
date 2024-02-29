@@ -1,0 +1,14 @@
+//
+// Created by luigi on 29/02/24.
+//
+
+#ifndef INGEGNERIA_DEL_SOFTWARE_LOGINPANEL_H
+#define INGEGNERIA_DEL_SOFTWARE_LOGINPANEL_H
+
+
+class LoginPanel {
+
+};
+
+
+#endif //INGEGNERIA_DEL_SOFTWARE_LOGINPANEL_H
