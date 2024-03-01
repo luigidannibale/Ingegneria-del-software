@@ -4,16 +4,14 @@
 #include "../view/LoginPanel.h"
 #include "../view/ProfilePanel.h"
 
-class GamemodeController
+class ProfileController
 {
     public:
-        GamemodeController(HomePage*);
-        ~GamemodeController();
+        ProfileController(HomePage*);
+        ~ProfileController();
 
     private:
-        GameMode* panel;
-        LoginPanel* prova;
-        ProfilePanel* prova1;
+        ProfilePanel* panel;
         wxPanel* backPanel;
 
         void addButtonEvents();
@@ -22,12 +20,12 @@ class GamemodeController
 };
 
 // Constructor
-GamemodeController::GamemodeController(wxPanel* parent)
+ProfileController::ProfileController(wxPanel* parent)
 {
     // istanzia frame con l'HomePage
    panel = new GameMode(parent);
    panel->Show(true);
-   backPanel = parent;
+   backPanel = parent; 
 //    prova = new LoginPanel(parent);
 //    prova->Show(true);
     // prova1 = new ProfilePanel(parent);
@@ -36,16 +34,16 @@ GamemodeController::GamemodeController(wxPanel* parent)
     addButtonEvents();
 }
 
-void GamemodeController::addButtonEvents() {
-    panel->GetBtnBack()->Bind(wxEVT_BUTTON, &GamemodeController::BackPanel, this);
+void ProfileController::addButtonEvents() {
+    panel->GetBtnBack()->Bind(wxEVT_BUTTON, &ProfileController::BackPanel, this);
 }
 
-void GamemodeController::BackPanel(wxCommandEvent& event) {
+void ProfileController::BackPanel(wxCommandEvent& event) {
     backPanel->Show();
     panel->Hide();
 }
 
-GamemodeController::~GamemodeController()
+ProfileController::~ProfileController()
 {
 }
 

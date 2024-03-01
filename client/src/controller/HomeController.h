@@ -2,6 +2,7 @@
 // #include <wx/wx.h>
 #include "../view/HomePage.h"
 #include "GamemodeController.h"
+#include "ProfileController.h"
 
 class HomeController
 {
@@ -46,7 +47,7 @@ void HomeController::addButtonEvents() {
 }
 
 void HomeController::showGamemode(wxCommandEvent& event){
-    GamemodeController* game = new GamemodeController(frame);
+    GamemodeController* game = new GamemodeController(frame->GetHomePanel());
     frame->HidePanel();
 }
 
@@ -58,6 +59,9 @@ void HomeController::showSettings(wxCommandEvent& event){
 void HomeController::showProfile(wxCommandEvent& event){
     // GamemodeController* game = new GamemodeController(frame);
     // frame->HidePanel();
+    ProfileController* profile = new ProfileController(frame->GetHomePanel());
+    frame->HidePanel();
+    
 }
 
 HomeController::~HomeController()
