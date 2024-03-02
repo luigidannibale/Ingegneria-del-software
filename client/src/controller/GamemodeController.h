@@ -2,18 +2,17 @@
 // #include <wx/wx.h>
 #include "../view/GameMode.h"
 #include "../view/LoginPanel.h"
-#include "../view/ProfilePanel.h"
 
 class GamemodeController
 {
     public:
-        GamemodeController(HomePage*);
+        GamemodeController(wxPanel*);
         ~GamemodeController();
 
     private:
         GameMode* panel;
         LoginPanel* prova;
-        ProfilePanel* prova1;
+        // ProfilePanel* prova1;
         wxPanel* backPanel;
 
         void addButtonEvents();
@@ -25,7 +24,7 @@ class GamemodeController
 GamemodeController::GamemodeController(wxPanel* parent)
 {
     // istanzia frame con l'HomePage
-   panel = new GameMode(parent);
+   panel = new GameMode(parent->GetParent());
    panel->Show(true);
    backPanel = parent;
 //    prova = new LoginPanel(parent);

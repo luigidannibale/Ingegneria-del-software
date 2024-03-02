@@ -1,13 +1,11 @@
 #include <stdio.h>
 // #include <wx/wx.h>
-#include "../view/GameMode.h"
-#include "../view/LoginPanel.h"
 #include "../view/ProfilePanel.h"
 
 class ProfileController
 {
     public:
-        ProfileController(HomePage*);
+        ProfileController(wxPanel*);
         ~ProfileController();
 
     private:
@@ -23,7 +21,7 @@ class ProfileController
 ProfileController::ProfileController(wxPanel* parent)
 {
     // istanzia frame con l'HomePage
-   panel = new GameMode(parent);
+   panel = new ProfilePanel(parent->GetParent());
    panel->Show(true);
    backPanel = parent; 
 //    prova = new LoginPanel(parent);
@@ -35,7 +33,7 @@ ProfileController::ProfileController(wxPanel* parent)
 }
 
 void ProfileController::addButtonEvents() {
-    panel->GetBtnBack()->Bind(wxEVT_BUTTON, &ProfileController::BackPanel, this);
+    //panel->GetBtnBack()->Bind(wxEVT_BUTTON, &ProfileController::BackPanel, this);
 }
 
 void ProfileController::BackPanel(wxCommandEvent& event) {
