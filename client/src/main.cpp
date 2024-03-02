@@ -1,5 +1,6 @@
 #include "main.h"
 
+
 class ChessClient : public wxApp {
 public:
     virtual bool OnInit();
@@ -7,7 +8,7 @@ public:
 
 bool ChessClient::OnInit() {
     HomeController* c = new HomeController();
-    
+
     return true;
 }
 
