@@ -15,6 +15,7 @@ class ProfileController
         wxPanel* backPanel;
         void addButtonEvents();
         void BackPanel(wxCommandEvent&);
+        void SaveUser(wxCommandEvent&);
 };
 
 

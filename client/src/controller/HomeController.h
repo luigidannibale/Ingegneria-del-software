@@ -6,6 +6,7 @@
 #include "../view/HomePage.h"
 #include "GamemodeController.h"
 #include "ProfileController.h"
+#include "SettingsController.h"
 
 class HomeController
 {
@@ -21,6 +22,7 @@ class HomeController
         void showGamemode(wxCommandEvent&);
         void showSettings(wxCommandEvent&);
         void showProfile(wxCommandEvent&);
+        void Exit(wxCommandEvent&);
 };
 
 #endif // HOMECONTROLLER_H

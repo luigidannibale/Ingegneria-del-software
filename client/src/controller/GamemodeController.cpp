@@ -1,6 +1,7 @@
 #include "GamemodeController.h"
 GamemodeController::GamemodeController(wxPanel* parent)
 {
+    printf("GAMEMODE INSTANZIATO\n");
     panel = new GameMode(parent->GetParent());
     panel->Show(true);
     backPanel = parent;
@@ -18,4 +19,5 @@ void GamemodeController::BackPanel(wxCommandEvent& event) {
 
 GamemodeController::~GamemodeController()
 {
+
 }

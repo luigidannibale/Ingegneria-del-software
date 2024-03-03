@@ -2,23 +2,40 @@
 #define  PROFILEPANEL_H
 
 #include <wx-3.0/wx/wx.h>
+#include "../model/User.h"
 
 class ProfilePanel : public wxPanel{
 public:
-    ProfilePanel(wxWindow* parent);
-
+    ProfilePanel(wxWindow*, User*);
     wxButton* GetBtnBack();
+    wxButton* GetBtnCancel();
+    wxButton* GetBtnUpdate();
+    wxButton* GetBtnSave();
+    wxTextCtrl* GetTxtUsername();
+    wxTextCtrl* GetTxtName();
+    wxTextCtrl* GetTxtSurname();
+    void UpdateUserDatas(User*);
+    void ShowUpdate(wxCommandEvent&);
+    void ShowDefault(wxCommandEvent&);
 
 private:
+    wxPanel* defaultPanel;
+    wxStaticText* lblUsername;
+    wxStaticText* lblName;
+    wxStaticText* lblSurname;
+    wxButton* btnUpdateMode;
+    wxStaticText* lblEloPointsD;
+    wxButton* btnBack;
+
+    wxPanel* updatePanel;
     wxTextCtrl* txtUsername;
     wxTextCtrl* txtName;
     wxTextCtrl* txtSurname;
-    wxStaticText* lblEloPoints = new wxStaticText(this, wxID_ANY, wxT("Elo points : "));;
-    //passwd wxTextCtrl* txtPassword;
-
-    wxButton* btnUpdateMode;
     wxButton* btnSave;
-    wxButton* btnBack;
+    wxStaticText* lblEloPointsU;
+    wxButton* btnCancel;
+
+    //passwd wxTextCtrl* txtPassword;
 
 };
 
