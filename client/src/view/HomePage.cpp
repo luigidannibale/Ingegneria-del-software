@@ -1,5 +1,6 @@
 #include "HomePage.h"
 
+
 HomePage::HomePage(const wxString& title,const wxPoint& pos,const wxSize& size): wxFrame(NULL, wxID_ANY, title, pos, size) {
     SetSize(800,600);
     Center();

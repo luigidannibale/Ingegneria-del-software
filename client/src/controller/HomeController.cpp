@@ -10,6 +10,7 @@ HomeController::HomeController(/* args */)
 //    frame->SetIcon(icona);
     frame->Show(true);
 
+    wxInitAllImageHandlers();
     addButtonEvents();
 }
 
