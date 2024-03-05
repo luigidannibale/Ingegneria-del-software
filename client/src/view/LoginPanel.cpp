@@ -15,12 +15,12 @@ LoginPanel::LoginPanel(wxWindow* parent): wxPanel(parent)
     btnBack = new wxButton(this, wxID_ANY, wxT("Back"));
 
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-    sizer->Add(usernameLabel, 0, wxALL | wxEXPAND, 5);
-    sizer->Add(txtUsername, 0, wxALL | wxEXPAND, 5);
+    sizer->Add(usernameLabel, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    sizer->Add(txtUsername, wxSizerFlags(0).Expand().Border(wxALL, 5));
     //passwd sizer->Add(passwordLabel, 0, wxALL | wxEXPAND, 5);
     //passwd sizer->Add(txtPassword, 0, wxALL | wxEXPAND, 5);
-    sizer->Add(btnLogin, 0, wxALL | wxALIGN_CENTER, 5);
-    sizer->Add(btnBack, 0, wxALL | wxALIGN_CENTER, 5);
+    sizer->Add(btnLogin, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    sizer->Add(btnBack, wxSizerFlags(0).Expand().Border(wxALL, 5));
     SetSizerAndFit(sizer);
 }
 

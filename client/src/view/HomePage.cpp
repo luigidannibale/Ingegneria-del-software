@@ -15,11 +15,11 @@ HomePage::HomePage(const wxString& title,const wxPoint& pos,const wxSize& size):
     btnViewGame = new wxButton(homePanel, wxID_ANY, "View a game");
     btnExit = new wxButton(homePanel, wxID_ANY, "Exit");
 
-    vbox->Add(btnPlay, 1, wxEXPAND | wxALL, 10);      // 1 indicates proportion
-    vbox->Add(btnSettings, 1, wxEXPAND | wxALL, 10);
-    vbox->Add(btnViewGame, 1, wxEXPAND | wxALL, 10);
-    vbox->Add(btnProfile, 1, wxEXPAND | wxALL, 10);
-    vbox->Add(btnExit, 1, wxEXPAND | wxALL, 10);
+    vbox->Add(btnPlay, wxSizerFlags(1).Expand().Border(wxALL, 10));      // 1 indicates proportion
+    vbox->Add(btnSettings, wxSizerFlags(1).Expand().Border(wxALL, 10));
+    vbox->Add(btnViewGame, wxSizerFlags(1).Expand().Border(wxALL, 10));
+    vbox->Add(btnProfile, wxSizerFlags(1).Expand().Border(wxALL, 10));
+    vbox->Add(btnExit, wxSizerFlags(1).Expand().Border(wxALL, 10));
 
     homePanel->SetSizerAndFit(vbox);
 

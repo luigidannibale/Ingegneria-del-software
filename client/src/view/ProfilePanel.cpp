@@ -27,22 +27,22 @@ ProfilePanel::ProfilePanel(wxWindow* parent,User* user): wxPanel(parent)
     btnCancel->Bind(wxEVT_BUTTON, &ProfilePanel::ShowDefault, this);
 
     wxBoxSizer* defaultPanelSizer = new wxBoxSizer(wxVERTICAL);
-    defaultPanelSizer->Add(lblUsername, 0, wxALL | wxEXPAND, 5);
-    defaultPanelSizer->Add(lblName, 0, wxALL | wxEXPAND, 5);
-    defaultPanelSizer->Add(lblSurname, 0, wxALL | wxEXPAND, 5);
-    defaultPanelSizer->Add(lblEloPointsD, 0, wxALL | wxEXPAND, 5);
-    defaultPanelSizer->Add(btnUpdateMode, 0, wxALL | wxALIGN_CENTER, 5);
-    defaultPanelSizer->Add(btnBack, 0, wxALL | wxALIGN_CENTER, 5);
+    defaultPanelSizer->Add(lblUsername, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    defaultPanelSizer->Add(lblName, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    defaultPanelSizer->Add(lblSurname, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    defaultPanelSizer->Add(lblEloPointsD, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    defaultPanelSizer->Add(btnUpdateMode, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    defaultPanelSizer->Add(btnBack, wxSizerFlags(0).Expand().Border(wxALL, 5));
     defaultPanel->SetSizerAndFit(defaultPanelSizer);
     defaultPanel->Show();
 
     wxBoxSizer* updatePanelSizer = new wxBoxSizer(wxVERTICAL);
-    updatePanelSizer->Add(txtUsername, 0, wxALL | wxEXPAND, 5);
-    updatePanelSizer->Add(txtName, 0, wxALL | wxEXPAND, 5);
-    updatePanelSizer->Add(txtSurname, 0, wxALL | wxEXPAND, 5);
-    updatePanelSizer->Add(lblEloPointsU, 0, wxALL | wxEXPAND, 5);
-    updatePanelSizer->Add(btnSave, 0, wxALL | wxALIGN_CENTER, 5);
-    updatePanelSizer->Add(btnCancel, 0, wxALL | wxALIGN_CENTER, 5);
+    updatePanelSizer->Add(txtUsername, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    updatePanelSizer->Add(txtName, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    updatePanelSizer->Add(txtSurname, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    updatePanelSizer->Add(lblEloPointsU, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    updatePanelSizer->Add(btnSave, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    updatePanelSizer->Add(btnCancel, wxSizerFlags(0).Expand().Border(wxALL, 5));
     updatePanel->SetSizerAndFit(updatePanelSizer);
     updatePanel->Hide();
 
