@@ -3,13 +3,17 @@
 SettingsController::SettingsController(wxPanel* parent)
 {
     panel = new SettingsPanel(parent->GetParent());
-    panel->Show();
+    panel->Hide();
     backPanel = parent;
     addButtonEvents();
 }
 
 void SettingsController::addButtonEvents() {
     panel->GetBtnBack()->Bind(wxEVT_BUTTON, &SettingsController::BackPanel, this);
+}
+
+void SettingsController::ShowPanel() {
+    panel->Show();
 }
 
 void SettingsController::BackPanel(wxCommandEvent& event) {

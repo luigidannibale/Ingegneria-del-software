@@ -5,54 +5,91 @@
 SettingsPanel::SettingsPanel(wxWindow* parent): wxPanel(parent) {
     SetSize(parent->GetSize());
     SetBackgroundColour(wxColour(118,150,86));
+    
+    chessboard1 = img::GetImageAndScale(IMGPATH + "chessboard-brown.png", 0.1);
+    chessboard1Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(chessboard1));
+    chessboard1Bitmap->Move(100, 10);
 
-    std::string imgpath = "../resources/img/";
+    chessboard2 = img::GetImageAndScale(IMGPATH + "chessboard-blue.png", 0.1);
+    chessboard2Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(chessboard2));
+    chessboard2Bitmap->Move(200, 10);
 
-    //usiamo questa come cornice e gliela spostiamo intorno
-    wxImage blackSquare = img::GetImageAndScale(imgpath + "black_square.png", 1.6);
-    wxStaticBitmap* blackSquareBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(blackSquare));
-    blackSquareBitmap->Move(90, 5);
+    chessboard3 = img::GetImageAndScale(IMGPATH + "chessboard-black.png", 0.1);
+    chessboard3Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(chessboard3));
+    chessboard3Bitmap->Move(300, 10);
 
-    wxImage chessboardBrown = img::GetImageAndScale(imgpath + "chessboard-brown.png", 0.1);
-    wxStaticBitmap* chessboardBrownBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(chessboardBrown));
-    chessboardBrownBitmap->Move(100, 10);
+    chessboard1Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Chessboard1Click, this);
+    chessboard2Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Chessboard2Click, this);
+    chessboard3Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Chessboard3Click, this);
 
-    wxImage chessboardBlue = img::GetImageAndScale(imgpath + "chessboard-blue.png", 0.1);
-    wxStaticBitmap* chessboardBlueBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(chessboardBlue));
-    chessboardBlueBitmap->Move(200, 10);
-
-    wxImage chessboardBlack = img::GetImageAndScale(imgpath + "chessboard-black.png", 0.1);
-    wxStaticBitmap* chessboardBlackBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(chessboardBlack));
-    chessboardBlackBitmap->Move(300, 10);
-
-    chessboardBrownBitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::BrownClick, this);
-    chessboardBlueBitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::BlueClick, this);
-    chessboardBlackBitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::BlackClick, this);
-
-    wxImage pieces1 = img::GetImageAndScale(imgpath + "icons/black_horse.png", 1.8);
-    wxStaticBitmap* pieces1Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(pieces1));
+    pieces1 = img::GetImageAndScale(IMGPATH + "icons/black_horse.png", 1.8);
+    pieces1Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(pieces1));
     pieces1Bitmap->Move(100, 150);
 
-    wxImage pieces2 = img::GetImageAndScale(imgpath + "icons/white_horse.png", 1.8);
-    wxStaticBitmap* pieces2Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(pieces2));
+    pieces2 = img::GetImageAndScale(IMGPATH + "icons/white_horse.png", 1.8);
+    pieces2Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(pieces2));
     pieces2Bitmap->Move(200, 150);
 
-    wxImage pieces3 = img::GetImageAndScale(imgpath + "icons/black_horse.png", 1.8);
-    wxStaticBitmap* pieces3Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(pieces3));
+    pieces3 = img::GetImageAndScale(IMGPATH + "icons/black_horse.png", 1.8);
+    pieces3Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(pieces3));
     pieces3Bitmap->Move(300, 150);
+
+    pieces1Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Pieces1Click, this);
+    pieces2Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Pieces2Click, this);
+    pieces3Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Pieces3Click, this);
 
     btnBack = new wxButton(this, wxID_ANY, "<-",wxPoint(100,500));
     btnSave = new wxButton(this, wxID_ANY, "Save",wxPoint(200,500));
+
+    wxStaticText* staticText = new wxStaticText(this, wxID_ANY, "Configurazione attuale (quella sotto)", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+    staticText->SetPosition(wxPoint(150, 250)); // Imposta la posizione
+
+    selectedChessboard = chessboard3;
+    chessboardSelectedBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(selectedChessboard));
+    chessboardSelectedBitmap->Move(300, 300);
+
+    selectedPieces = pieces1;
+    selectedPiecesBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(selectedPieces));
+    selectedPiecesBitmap->Move(150, 300);
+
+    // TODO: Scacchiera di riferimento per vedere la configurazione con tutti i pezzi della scacchiera
 }
 
-void SettingsPanel::BrownClick(wxMouseEvent& event) {
-    wxLogMessage("YOU CLICKED BROWN!!!");
+void SettingsPanel::Chessboard1Click(wxMouseEvent&) {
+    setSelectedChessboardBitmap(chessboard1,chessboard1Bitmap);
 }
-void SettingsPanel::BlueClick(wxMouseEvent& event) {
-    wxLogMessage("YOU CLICKED BLUE!!!");
+void SettingsPanel::Chessboard2Click(wxMouseEvent&) {
+    setSelectedChessboardBitmap(chessboard2, chessboard2Bitmap);
 }
-void SettingsPanel::BlackClick(wxMouseEvent& event) {
-    wxLogMessage("YOU CLICKED BLACK!!!");
+void SettingsPanel::Chessboard3Click(wxMouseEvent&) {
+    setSelectedChessboardBitmap(chessboard3, chessboard3Bitmap);
 }
+
+void SettingsPanel::setSelectedChessboardBitmap(wxImage image, wxStaticBitmap* bitmap){
+    selectedChessboard = image;
+    chessboardSelectedBitmap->SetBitmap(bitmap->GetBitmap());
+}
+
+void SettingsPanel::setSelectedPiecesBitmap(wxImage image, wxStaticBitmap* bitmap){
+    selectedPieces = image;
+    selectedPiecesBitmap->SetBitmap(bitmap->GetBitmap());
+}
+
+void SettingsPanel::Pieces1Click(wxMouseEvent& event) {
+    setSelectedPiecesBitmap(pieces1, pieces1Bitmap);
+}
+
+void SettingsPanel::Pieces2Click(wxMouseEvent& event) {
+    setSelectedPiecesBitmap(pieces2, pieces2Bitmap);
+}
+
+void SettingsPanel::Pieces3Click(wxMouseEvent& event) {
+    setSelectedPiecesBitmap(pieces3, pieces3Bitmap);
+}
+
 wxButton* SettingsPanel::GetBtnBack() { return btnBack; }
 wxButton* SettingsPanel::GetBtnSave() { return btnSave; }
+
+//  TODO
+//   void SettingsPanel::SetSettingsConfig(SettingsConfig conf);
+//   SettingsConfig SettingsPanel::GetSettingsConfig();

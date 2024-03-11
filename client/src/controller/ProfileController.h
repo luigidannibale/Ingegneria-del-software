@@ -10,6 +10,8 @@ class ProfileController
         ProfileController(wxPanel*);
         ~ProfileController();
 
+        void ShowPanel();
+
     private:
         ProfilePanel* panel;
         wxPanel* backPanel;

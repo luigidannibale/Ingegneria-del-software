@@ -12,6 +12,10 @@ HomeController::HomeController(/* args */)
 
     wxInitAllImageHandlers();
     addButtonEvents();
+
+    gamemodeController = new GamemodeController(frame->GetHomePanel());
+    settingsController = new SettingsController(frame->GetHomePanel());
+    profileController = new ProfileController(frame->GetHomePanel());
 }
 
 void HomeController::addButtonEvents() {
@@ -33,17 +37,20 @@ void HomeController::addButtonEvents() {
 }
 
 void HomeController::showGamemode(wxCommandEvent& event){
-    GamemodeController* game = new GamemodeController(frame->GetHomePanel());
+    // GamemodeController* game = new GamemodeController(frame->GetHomePanel());
+    gamemodeController->ShowPanel();
     frame->HidePanel();
 }
 
 void HomeController::showSettings(wxCommandEvent& event){
-     SettingsController* settings = new SettingsController(frame->GetHomePanel());
+     // SettingsController* settings = new SettingsController(frame->GetHomePanel());
+     settingsController->ShowPanel();
      frame->HidePanel();
 }
 
 void HomeController::showProfile(wxCommandEvent& event){
-    ProfileController* profile = new ProfileController(frame->GetHomePanel());
+    // ProfileController* profile = new ProfileController(frame->GetHomePanel());
+    profileController->ShowPanel();
     frame->HidePanel();
 }
 

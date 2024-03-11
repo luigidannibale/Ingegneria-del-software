@@ -5,7 +5,7 @@ ProfileController::ProfileController(wxPanel* parent)
 {
     User* user = new User("gigi","Luigi","D'annibale",1300);
     panel = new ProfilePanel(parent->GetParent(),user);
-    panel->Show(true);
+    panel->Hide();
     backPanel = parent;
 
     addButtonEvents();
@@ -14,6 +14,10 @@ ProfileController::ProfileController(wxPanel* parent)
 void ProfileController::addButtonEvents() {
     panel->GetBtnBack()->Bind(wxEVT_BUTTON, &ProfileController::BackPanel, this);
     panel->GetBtnSave()->Bind(wxEVT_BUTTON, &ProfileController::SaveUser, this);
+}
+
+void ProfileController::ShowPanel(){
+    panel->Show();
 }
 
 void ProfileController::BackPanel(wxCommandEvent& event) {

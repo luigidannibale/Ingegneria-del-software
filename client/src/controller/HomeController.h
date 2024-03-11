@@ -17,6 +17,10 @@ class HomeController
     private:
         HomePage* frame;
 
+        GamemodeController* gamemodeController;
+        SettingsController* settingsController;
+        ProfileController* profileController;
+
         void addButtonEvents();
 
         void showGamemode(wxCommandEvent&);

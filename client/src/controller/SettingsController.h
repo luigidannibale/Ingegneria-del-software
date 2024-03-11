@@ -10,6 +10,8 @@ public:
     SettingsController(wxPanel*);
     ~SettingsController();
 
+    void ShowPanel();
+
 private:
     SettingsPanel* panel;
     wxPanel* backPanel;

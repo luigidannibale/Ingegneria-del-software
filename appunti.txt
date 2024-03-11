@@ -1,3 +1,6 @@
+-----------------------------------------------------Note di design
+-Settings panel : nello spazio a destra inserire un anteprima della scacchiera con le pedine.
+
 -----------------------------------------------------Definizioni
 Cadenza di gioco:
 	Sia il tempo iniziale : x e il tempo incrementale : y,
