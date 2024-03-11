@@ -1,14 +1,27 @@
-//
-// Created by luigi on 11/03/24.
-//
+#ifndef SETTINGSCONFIGURATION_H
+#define SETTINGSCONFIGURATION_H
 
-#ifndef INGEGNERIA_DEL_SOFTWARE_SETTINGSCONFIGURATION_H
-#define INGEGNERIA_DEL_SOFTWARE_SETTINGSCONFIGURATION_H
-
+enum class Chessboard {
+    Black,
+    Blue,
+    Brown
+};
+enum class Pieces {
+    p1,
+    p2,
+    p3
+};
 
 class SettingsConfiguration {
-
+public:
+    void SetChessboard(Chessboard);
+    void SetPieces(Pieces);
+    Chessboard GetChessboard();
+    Pieces GetPieces();
+private:
+    Chessboard chessboard;
+    Pieces pieces;
 };
 
 
-#endif //INGEGNERIA_DEL_SOFTWARE_SETTINGSCONFIGURATION_H
+#endif //SETTINGSCONFIGURATION_H
