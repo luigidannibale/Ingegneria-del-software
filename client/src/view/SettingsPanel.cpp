@@ -2,7 +2,7 @@
 #include "SettingsPanel.h"
 
 
-SettingsPanel::SettingsPanel(wxWindow* parent): wxPanel(parent) {
+SettingsPanel::SettingsPanel(wxWindow* parent, SettingsConfiguration* configuration): wxPanel(parent) {
     SetSize(parent->GetSize());
     SetBackgroundColour(wxColour(118,150,86));
     
@@ -38,23 +38,50 @@ SettingsPanel::SettingsPanel(wxWindow* parent): wxPanel(parent) {
     pieces2Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Pieces2Click, this);
     pieces3Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Pieces3Click, this);
 
-    btnBack = new wxButton(this, wxID_ANY, "<-",wxPoint(100,500));
+    btnBack = new wxButton(this, wxID_ANY, "Back",wxPoint(100,500));
     btnSave = new wxButton(this, wxID_ANY, "Save",wxPoint(200,500));
 
     wxStaticText* staticText = new wxStaticText(this, wxID_ANY, "Configurazione attuale (quella sotto)", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
     staticText->SetPosition(wxPoint(150, 250)); // Imposta la posizione
-
-    selectedChessboard = chessboard3;
-    chessboardSelectedBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(selectedChessboard));
+    //----------Zucchero sintattico
+    // selectedChessboard = chessboard3;
+    chessboardSelectedBitmap = new wxStaticBitmap(this, wxID_ANY, wxNullBitmap);
     chessboardSelectedBitmap->Move(300, 300);
-
-    selectedPieces = pieces1;
-    selectedPiecesBitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(selectedPieces));
+    // selectedPieces = pieces1;
+    selectedPiecesBitmap = new wxStaticBitmap(this, wxID_ANY, wxNullBitmap);
     selectedPiecesBitmap->Move(150, 300);
+    //-----------------------
+    SetSettingsConfig(configuration);
 
     // TODO: Scacchiera di riferimento per vedere la configurazione con tutti i pezzi della scacchiera
 }
 
+void SettingsPanel::SetSettingsConfig(SettingsConfiguration* configuration) {
+    this->configuration= configuration;
+    switch (configuration->GetChessboard()) {
+        case Chessboard::Black:
+            setSelectedChessboardBitmap(chessboard3,chessboard3Bitmap);
+            break;
+        case Chessboard::Blue:
+            setSelectedChessboardBitmap(chessboard2,chessboard2Bitmap);
+            break;
+        case Chessboard::Brown:
+            setSelectedChessboardBitmap(chessboard1,chessboard1Bitmap);
+            break;
+    }
+    switch (configuration->GetPieces()) {
+        case Pieces::p1:
+            setSelectedPiecesBitmap(pieces1, pieces1Bitmap);
+            break;
+        case Pieces::p2:
+            setSelectedPiecesBitmap(pieces2, pieces2Bitmap);
+            break;
+        case Pieces::p3:
+            setSelectedPiecesBitmap(pieces3, pieces3Bitmap);
+            break;
+    }
+}
+SettingsConfiguration* SettingsPanel::GetSettingsConfig() {return configuration;}
 void SettingsPanel::Chessboard1Click(wxMouseEvent&) {
     setSelectedChessboardBitmap(chessboard1,chessboard1Bitmap);
 }

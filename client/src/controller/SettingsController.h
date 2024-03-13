@@ -18,6 +18,7 @@ private:
 
     void addButtonEvents();
     void BackPanel(wxCommandEvent&);
+
 };
 
 

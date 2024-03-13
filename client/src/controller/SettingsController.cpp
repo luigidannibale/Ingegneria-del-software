@@ -1,8 +1,10 @@
 #include "SettingsController.h"
+#include "../model/SettingsConfiguration.h"
 
 SettingsController::SettingsController(wxPanel* parent)
 {
-    panel = new SettingsPanel(parent->GetParent());
+    SettingsConfiguration* configuration = new SettingsConfiguration(Chessboard::Brown,Pieces::p1);
+    panel = new SettingsPanel(parent->GetParent(), configuration);
     panel->Hide();
     backPanel = parent;
     addButtonEvents();

@@ -14,6 +14,7 @@ enum class Pieces {
 
 class SettingsConfiguration {
 public:
+    SettingsConfiguration(Chessboard,Pieces);
     void SetChessboard(Chessboard);
     void SetPieces(Pieces);
     Chessboard GetChessboard();

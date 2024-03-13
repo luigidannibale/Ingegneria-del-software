@@ -3,18 +3,21 @@
 
 #include <wx-3.0/wx/wx.h>
 #include "ImageFuncions.h"
+#include "../model/SettingsConfiguration.h"
 
 class SettingsPanel : public wxPanel{
 public:
-    SettingsPanel(wxWindow*);
+    SettingsPanel(wxWindow*, SettingsConfiguration*);
 
     wxButton* GetBtnBack();
     wxButton* GetBtnSave();
-    // TODO
-    //  void SetSettingsConfig(SettingsConfig conf);
-    //  SettingsConfig GetSettingsConfig();
+    void SetSettingsConfig(SettingsConfiguration* configuration);
+    SettingsConfiguration* GetSettingsConfig();
 
 private:
+
+    SettingsConfiguration* configuration;
+
     wxButton* btnBack;
     wxButton* btnSave;
 
