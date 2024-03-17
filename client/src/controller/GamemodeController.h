@@ -12,14 +12,19 @@ class GamemodeController
         GamemodeController(wxPanel*);
         ~GamemodeController();
 
+
         void ShowPanel();
+
 
     private:
         GameMode* panel;
         wxPanel* backPanel;
 
+
         void addButtonEvents();
+        void StartGame(wxCommandEvent& event);
         void BackPanel(wxCommandEvent&);
+        void ChangePanel(wxPanel* show, wxPanel* hide);
 };
 
 
