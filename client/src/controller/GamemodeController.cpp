@@ -1,4 +1,6 @@
 #include "GamemodeController.h"
+
+
 GamemodeController::GamemodeController(wxPanel* parent)
 {
     panel = new GameMode(parent->GetParent());
@@ -20,13 +22,23 @@ void GamemodeController::addButtonEvents() {
     panel->GetBtnStartComputer()->Bind(wxEVT_BUTTON, &GamemodeController::StartGame, this);
 }
 
+void SearchOpponent(wxCommandEvent& event) {
+
+}
+
 void GamemodeController::StartGame(wxCommandEvent& event){
     GameOptions* options = panel->GetGameOptions();
-    printf("Against human is %d \n",options->GetAgaintsHuman());
-    printf("Gametime is %d|%d \n",options->GetGameDurationInSeconds(),options->GetGameIncrement());
-    printf("Computer elo is %d \n",options->GetComputerElo());
-    printf("You start with %d \n",options->GetStartSide());
-    printf("---------------------------------------------------\n");
+//    printf("Against human is %d \n",options->GetAgaintsHuman());
+//    printf("Gametime is %d|%d \n",options->GetGameDurationInSeconds(),options->GetGameIncrement());
+//    printf("Computer elo is %d \n",options->GetComputerElo());
+//    printf("You start with %d \n",options->GetStartSide());
+//    printf("---------------------------------------------------\n");
+    if (gameplayController == nullptr) {
+        gameplayController = new GameplayController();
+    }
+    else {
+        // gameplayController.startaGame ?
+    }
 }
 
 

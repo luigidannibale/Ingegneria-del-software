@@ -22,15 +22,15 @@ SettingsPanel::SettingsPanel(wxWindow* parent, SettingsConfiguration* configurat
     chessboard2Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Chessboard2Click, this);
     chessboard3Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Chessboard3Click, this);
 
-    pieces1 = img::GetImageAndScale(IMGPATH + "icons/black_horse.png", 1.8);
+    pieces1 = img::GetImageAndScale(IMGPATH + "icons/blackKnight.png", 1.44);
     pieces1Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(pieces1));
     pieces1Bitmap->Move(100, 150);
 
-    pieces2 = img::GetImageAndScale(IMGPATH + "icons/white_horse.png", 1.8);
+    pieces2 = img::GetImageAndScale(IMGPATH + "icons/whiteKnight.png", 1.44);
     pieces2Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(pieces2));
     pieces2Bitmap->Move(200, 150);
 
-    pieces3 = img::GetImageAndScale(IMGPATH + "icons/black_horse.png", 1.8);
+    pieces3 = img::GetImageAndScale(IMGPATH + "icons2/black_horse.png", 1.8);
     pieces3Bitmap = new wxStaticBitmap(this, wxID_ANY, wxBitmap(pieces3));
     pieces3Bitmap->Move(300, 150);
 
@@ -43,7 +43,6 @@ SettingsPanel::SettingsPanel(wxWindow* parent, SettingsConfiguration* configurat
 
     wxStaticText* staticText = new wxStaticText(this, wxID_ANY, "Configurazione attuale (quella sotto)", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
     staticText->SetPosition(wxPoint(150, 250)); // Imposta la posizione
-    //----------Zucchero sintattico
     // selectedChessboard = chessboard3;
     chessboardSelectedBitmap = new wxStaticBitmap(this, wxID_ANY, wxNullBitmap);
     chessboardSelectedBitmap->Move(300, 300);

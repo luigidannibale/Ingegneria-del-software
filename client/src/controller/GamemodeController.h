@@ -5,6 +5,7 @@
 #include <wx-3.0/wx/wx.h>
 #include "../view/GameMode.h"
 #include "../view/LoginPanel.h"
+#include "GameplayController.h"
 
 class GamemodeController
 {
@@ -20,11 +21,14 @@ class GamemodeController
         GameMode* panel;
         wxPanel* backPanel;
 
+        GameplayController* gameplayController;
+
 
         void addButtonEvents();
-        void StartGame(wxCommandEvent& event);
+        void SearchOpponent(wxCommandEvent&);
+        void StartGame(wxCommandEvent&);
         void BackPanel(wxCommandEvent&);
-        void ChangePanel(wxPanel* show, wxPanel* hide);
+        void ChangePanel(wxPanel*, wxPanel*);
 };
 
 
