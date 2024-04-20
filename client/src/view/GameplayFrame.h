@@ -13,6 +13,7 @@ public:
 
     void StartGame();
     wxStaticBitmap* GetBoard();
+    ChessboardView* GetChessboard();
 
 
 private:

@@ -16,6 +16,7 @@ enum class Piece{
     Empty
 };
 
+
 class Cell{
 public:
     Cell(wxStaticBitmap* bitmap, Piece piece) {
@@ -54,8 +55,6 @@ private:
     wxImage rookImgs[2];
 
     Cell* boardCellsBitmap[8][8];
-
-    void ClickBoard(wxMouseEvent&);
     void CreatePieces(Cell**, int, int);
 };
 

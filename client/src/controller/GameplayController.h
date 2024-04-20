@@ -6,10 +6,12 @@
 
 class GameplayController {
 public:
-    GameplayController();
+    GameplayController(GameOptions*);
     ~GameplayController();
 private:
+    bool isWhite;
 
+    CellCoordinates* clickedCoord = nullptr;
     GameplayFrame* frame;
 
     void ClickBoard(wxMouseEvent&);

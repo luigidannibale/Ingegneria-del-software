@@ -36,35 +36,19 @@ ChessboardView::ChessboardView(wxStaticBitmap* chessboard, std::string iconsDir,
         boardCellsBitmap[6][i] = new Cell(new wxStaticBitmap(boardBitmap->GetParent(), wxID_ANY, wxBitmap(pawnImgs[white ? 0 : 1])), Piece::Pawn);
         boardCellsBitmap[6][i]->Move(80*(i) + moveX, 80*6+moveY);
     }
-    CreatePieces(boardCellsBitmap[7],white ? 0 : 1,7);
 
-    //wxImage emptyImg = img::GetImageAndScale(IMGPATH + "step64.png", 1.25);
-    for (int i = 2; i < 6; ++i) {
+    CreatePieces(boardCellsBitmap[7],index,7);
+for (int i = 2; i < 6; ++i) {
         for (int j = 0; j < 8; ++j) {
             boardCellsBitmap[i][j] = new Cell(new wxStaticBitmap(boardBitmap->GetParent(), wxID_ANY, wxNullBitmap), Piece::Empty);
-            boardCellsBitmap[i][j]->Move(moveX+j*80, moveY+i*80);
+            boardCellsBitmap[i][j]->Move(moveX+j*cellDimension, moveY+i*cellDimension);
         }
     }
 
     boardBitmap->Bind(wxEVT_LEFT_DOWN, &ChessboardView::ClickBoard, this);
 }
 
-void ChessboardView::ClickBoard(wxMouseEvent& event) {
-    wxPoint pos = event.GetPosition();
-    // wxLogMessage("Mouse coordinates: (%d, %d)", pos.x, pos.y);
 
-    int riga = pos.y / 80;
-    int colonna = pos.x / 80;
-    const char* y[] = {"12345678","87654321"};
-    const char* x[] = {"abcdefgh","hgfedcba"};
-
-    printf("Coordinate %c-%d, punto (%d,%d)\n",x[white ? 1 : 0][colonna],y[white ? 1 : 0][riga]-'0',colonna,riga);
-
-    // piece not clicked -> piece clicked -> (If your turn) move -> Piece not clicked
-    // Check if piece already clicked -> move
-
-    // If not, set piece clicked
-}
 
 void ChessboardView::CreatePieces(Cell* rowToFill[], int index, int rpieces) {
     for (int i = 0; i < 8; i++) {

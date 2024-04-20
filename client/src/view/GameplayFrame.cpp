@@ -23,3 +23,4 @@ void GameplayFrame::StartGame() {
 }
 
 wxStaticBitmap* GameplayFrame::GetBoard() { return chessboard->GetBoard(); }
+ChessboardView* GameplayFrame::GetChessboard() {return chessboard;}
