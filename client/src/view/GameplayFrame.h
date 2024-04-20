@@ -7,9 +7,10 @@
 #include "ImageFuncions.h"
 #include "ChessboardView.h"
 
+
 class GameplayFrame : public wxFrame{
 public:
-    GameplayFrame();
+    GameplayFrame(bool);
 
     void StartGame();
     wxStaticBitmap* GetBoard();
@@ -19,6 +20,7 @@ public:
 private:
     const int chessX = 50;
     const int chessY = 50;
+
     std::string const IMGPATH = "../resources/img/";
 
     ChessboardView* chessboard;

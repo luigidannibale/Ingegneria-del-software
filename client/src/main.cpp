@@ -6,6 +6,8 @@ public:
 };
 
 bool ChessClient::OnInit() {
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
     HomeController* c = new HomeController();
 
     return true;

@@ -3,6 +3,20 @@
 
 #include <wx-3.0/wx/wx.h>
 #include "../view/GameplayFrame.h"
+#include "../model/GameOptions.h"
+
+struct CellCoordinates{
+public:
+    CellCoordinates(int row, int col, char coordinates[3]) {
+        this->row = row;
+        this->col = col;
+        this->coordinates = coordinates;
+    }
+
+    int row;
+    int col;
+    char* coordinates;
+};
 
 class GameplayController {
 public:

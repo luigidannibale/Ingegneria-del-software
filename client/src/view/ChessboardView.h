@@ -34,18 +34,21 @@ public:
 
 class ChessboardView {
 public:
-    ChessboardView(wxStaticBitmap*, std::string, int, int);
+    ChessboardView(wxStaticBitmap*, std::string, int, int, bool);
     wxStaticBitmap* GetBoard();
+    Cell* GetCell(int, int);
+    void MovePiece(int, int, int, int);
 private:
     std::string const IMGPATH = "../resources/img/";
     bool white = true;
     int moveX;
     int moveY;
 
+    const int cellDimension = 80;
+
 
     wxImage boardImg;
     wxStaticBitmap* boardBitmap;
-    wxStaticBitmap* emptyBitmap;
 
     wxImage pawnImgs[2];
     wxImage kingImgs[2];

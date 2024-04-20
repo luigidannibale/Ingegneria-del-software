@@ -33,12 +33,14 @@ void GamemodeController::StartGame(wxCommandEvent& event){
 //    printf("Computer elo is %d \n",options->GetComputerElo());
 //    printf("You start with %d \n",options->GetStartSide());
 //    printf("---------------------------------------------------\n");
-    if (gameplayController == nullptr) {
-        gameplayController = new GameplayController();
-    }
-    else {
-        // gameplayController.startaGame ?
-    }
+    gameplayController = new GameplayController(options);
+
+//    if (gameplayController == nullptr) {
+//        gameplayController = new GameplayController(options);
+//    }
+//    else {
+//        // gameplayController.startaGame ?
+//    }
 }
 
 

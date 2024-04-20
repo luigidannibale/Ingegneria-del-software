@@ -1,10 +1,11 @@
 #include "ChessboardView.h"
 
 
-ChessboardView::ChessboardView(wxStaticBitmap* chessboard, std::string iconsDir, int moveX, int moveY) {
+ChessboardView::ChessboardView(wxStaticBitmap* chessboard, std::string iconsDir, int moveX, int moveY, bool isWhite) {
     this->boardBitmap = chessboard;
     this->moveX = moveX;
     this->moveY = moveY;
+    this->white = isWhite;
     boardBitmap->Move(moveX, moveY);
 
     pawnImgs[0] = img::GetImage(IMGPATH + iconsDir + "/whitePawn.png");
@@ -25,16 +26,16 @@ ChessboardView::ChessboardView(wxStaticBitmap* chessboard, std::string iconsDir,
     knightImgs[0] = img::GetImage(IMGPATH + iconsDir + "/whiteKnight.png");
     knightImgs[1] = img::GetImage(IMGPATH + iconsDir + "/blackKnight.png");
 
-    emptyBitmap = new wxStaticBitmap(boardBitmap->GetParent(), wxID_ANY, wxNullBitmap);
-
+    int index = white ? 1 : 0;
     for (int i = 0; i < 8; ++i) {
-        boardCellsBitmap[1][i] = new Cell(new wxStaticBitmap(boardBitmap->GetParent(), wxID_ANY, wxBitmap(pawnImgs[white ? 1 : 0])), Piece::Pawn);
-        boardCellsBitmap[1][i]->Move(80*(i) + moveX,80+moveY);
+        boardCellsBitmap[1][i] = new Cell(new wxStaticBitmap(boardBitmap->GetParent(), wxID_ANY, wxBitmap(pawnImgs[index])), Piece::Pawn);
+        boardCellsBitmap[1][i]->Move(cellDimension*(i) + moveX,cellDimension+moveY);
     }
-    CreatePieces(boardCellsBitmap[0],white ? 1 : 0,0);
+    CreatePieces(boardCellsBitmap[0],index,0);
+    index = (index + 1) % 2;
     for (int i = 0; i < 8; ++i) {
-        boardCellsBitmap[6][i] = new Cell(new wxStaticBitmap(boardBitmap->GetParent(), wxID_ANY, wxBitmap(pawnImgs[white ? 0 : 1])), Piece::Pawn);
-        boardCellsBitmap[6][i]->Move(80*(i) + moveX, 80*6+moveY);
+        boardCellsBitmap[6][i] = new Cell(new wxStaticBitmap(boardBitmap->GetParent(), wxID_ANY, wxBitmap(pawnImgs[index])), Piece::Pawn);
+        boardCellsBitmap[6][i]->Move(cellDimension*(i) + moveX, cellDimension*6+moveY);
     }
 
     CreatePieces(boardCellsBitmap[7],index,7);
@@ -45,14 +46,13 @@ for (int i = 2; i < 6; ++i) {
         }
     }
 
-    boardBitmap->Bind(wxEVT_LEFT_DOWN, &ChessboardView::ClickBoard, this);
 }
 
 
 
 void ChessboardView::CreatePieces(Cell* rowToFill[], int index, int rpieces) {
     for (int i = 0; i < 8; i++) {
-        int r = 80*(rpieces) + moveY, c = 80*(i) + moveX;
+        int r = cellDimension*(rpieces) + moveY, c = cellDimension*(i) + moveX;
         switch (i) {
             case 0: case 7:
                 rowToFill[i] = new Cell(new wxStaticBitmap(boardBitmap->GetParent(), wxID_ANY, wxBitmap(rookImgs[index])),Piece::Rook);
@@ -81,3 +81,18 @@ void ChessboardView::CreatePieces(Cell* rowToFill[], int index, int rpieces) {
 }
 
 wxStaticBitmap* ChessboardView::GetBoard() { return boardBitmap; }
+
+Cell* ChessboardView::GetCell(int row, int col) { return boardCellsBitmap[row][col]; }
+
+void ChessboardView::MovePiece(int prerow, int precolumn, int row, int column) {
+    
+    // Moving the piece forward
+    boardCellsBitmap[row][column]->bitmap->SetBitmap(boardCellsBitmap[prerow][precolumn]->bitmap->GetBitmap());
+    boardCellsBitmap[row][column]->Move(column*cellDimension + moveX,row*cellDimension + moveY);
+    boardCellsBitmap[row][column]->piece = boardCellsBitmap[prerow][precolumn]->piece;
+    // Freeing the original outpost
+    boardCellsBitmap[prerow][precolumn]->bitmap->SetBitmap(wxBitmap(1,1));
+    boardCellsBitmap[prerow][precolumn]->piece = Piece::Empty;
+
+
+}

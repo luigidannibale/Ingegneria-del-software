@@ -11,7 +11,7 @@ GameplayController::GameplayController(GameOptions* options) {
 
     frame = new GameplayFrame(isWhite);
 
-    // frame->GetBoard()->Bind(wxEVT_LEFT_DOWN, &GameplayController::ClickBoard, this);
+    frame->GetBoard()->Bind(wxEVT_LEFT_DOWN, &GameplayController::ClickBoard, this);
 }
 
 
