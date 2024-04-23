@@ -2,6 +2,7 @@
 
 
 ChessboardView::ChessboardView(wxStaticBitmap* chessboard, std::string iconsDir, int moveX, int moveY, bool isWhite) {
+
     this->boardBitmap = chessboard;
     this->moveX = moveX;
     this->moveY = moveY;
@@ -26,6 +27,9 @@ ChessboardView::ChessboardView(wxStaticBitmap* chessboard, std::string iconsDir,
     knightImgs[0] = img::GetImage(IMGPATH + iconsDir + "/whiteKnight.png");
     knightImgs[1] = img::GetImage(IMGPATH + iconsDir + "/blackKnight.png");
 
+
+
+// asdc
     int index = white ? 1 : 0;
     for (int i = 0; i < 8; ++i) {
         boardCellsBitmap[1][i] = new Cell(new wxStaticBitmap(boardBitmap->GetParent(), wxID_ANY, wxBitmap(pawnImgs[index])), Piece::Pawn);

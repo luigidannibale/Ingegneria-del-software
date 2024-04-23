@@ -1,7 +1,8 @@
 #ifndef LOGINPANEL_H
 #define  LOGINPANEL_H
 
-#include <wx-3.0/wx/wx.h>
+#include "../lib.h"
+
 
 class LoginPanel : public wxPanel{
 public:

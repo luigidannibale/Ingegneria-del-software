@@ -1,7 +1,7 @@
 #ifndef GAMEMODE_H
 #define GAMEMODE_H
 
-#include <wx-3.0/wx/wx.h>
+#include "../lib.h"
 #include "../model/GameOptions.h"
 
 class GameMode : public wxPanel {

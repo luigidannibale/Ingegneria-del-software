@@ -1,7 +1,7 @@
 #ifndef PROFILEPANEL_H
 #define  PROFILEPANEL_H
 
-#include <wx-3.0/wx/wx.h>
+#include "../lib.h"
 #include "../model/User.h"
 
 class ProfilePanel : public wxPanel{

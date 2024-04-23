@@ -1,7 +1,7 @@
 #ifndef SETTINGSPANEL_H
 #define  SETTINGSPANEL_H
 
-#include <wx-3.0/wx/wx.h>
+#include "../lib.h"
 #include "ImageFuncions.h"
 #include "../model/SettingsConfiguration.h"
 

@@ -1,6 +1,3 @@
-//
-// Created by luigi on 04/03/24.
-//
 
 #include "ImageFuncions.h"
 

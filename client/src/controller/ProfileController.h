@@ -1,7 +1,7 @@
 #ifndef PROFILECONTROLLER_H
 #define PROFILECONTROLLER_H
 
-#include <wx-3.0/wx/wx.h>
+#include "../lib.h"
 #include "../view/ProfilePanel.h"
 
 class ProfileController

@@ -1,9 +1,9 @@
 #ifndef HOMEPAGE_H
 #define  HOMEPAGE_H
 
-#include <wx-3.0/wx/wx.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "../lib.h"
 
 class HomePage : public wxFrame {
 public:

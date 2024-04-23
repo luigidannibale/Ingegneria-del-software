@@ -1,7 +1,7 @@
 #ifndef SETTINGSCONTROLLER_H
 #define SETTINGSCONTROLLER_H
 
-#include <wx-3.0/wx/wx.h>
+#include "../lib.h"
 #include "../view/SettingsPanel.h"
 
 class SettingsController

@@ -1,4 +1,3 @@
-#include <wx-3.0/wx/wx.h>
 #include "SettingsPanel.h"
 
 

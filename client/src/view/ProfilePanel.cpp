@@ -1,4 +1,3 @@
-#include <wx-3.0/wx/wx.h>
 #include "ProfilePanel.h"
 
 ProfilePanel::ProfilePanel(wxWindow* parent,User* user): wxPanel(parent)

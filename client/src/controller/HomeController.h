@@ -2,7 +2,7 @@
 #define HOMECONTROLLER_H
 
 #include <stdio.h>
-#include <wx-3.0/wx/wx.h>
+#include "../lib.h"
 #include "../view/HomePage.h"
 #include "GamemodeController.h"
 #include "ProfileController.h"

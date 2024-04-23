@@ -1,10 +1,9 @@
 #ifndef IMAGEFUNCIONS_H
 #define IMAGEFUNCIONS_H
 
-#include <wx-3.0/wx/wx.h>
+#include "../lib.h"
 
 namespace img{
-
     wxImage GetImage(std::string);
     wxImage GetImageAndScale(std::string, float);
 }

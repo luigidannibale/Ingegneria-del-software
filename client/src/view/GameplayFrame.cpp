@@ -1,15 +1,17 @@
 
 #include "GameplayFrame.h"
 
-GameplayFrame::GameplayFrame(bool isWhite): wxFrame(NULL, wxID_ANY, wxString("Gioca la partita vinci la fatica"), wxPoint(0,0), wxSize(0,0), wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER) {
-    SetSize(1200,800);
+GameplayFrame::GameplayFrame(bool isWhite, int gameDurationsInSeconds): wxFrame(NULL, wxID_ANY, wxString("Gioca la partita vinci la fatica"), wxPoint(0,0), wxSize(0,0), wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER) {
+    SetSize(1100,650);
     Center();
     Show();
     SetBackgroundColour(wxColour(118,150,86));
 
-    wxImage boardImg = img::GetImage(IMGPATH + "chessboard-blue.png");
-    chessboard = new ChessboardView(new wxStaticBitmap(this, wxID_ANY, wxBitmap(boardImg)),
-                                    "icons/", chessX, chessY, isWhite);
+    // wxImage boardImg = img::GetImage(IMGPATH + "chessboard-blue.png");
+
+    float scal = 1;
+    wxImage boardImg = img::GetImageAndScale(IMGPATH + "chessboard-blue.png",scal);
+    chessboard = new ChessboardView(new wxStaticBitmap(this, wxID_ANY, wxBitmap(boardImg)),"icons/", chessX, chessY, isWhite);
 
     opponentText = new wxStaticText(this, wxID_ANY,wxString("Avversario cattivo"));
     opponentText->Move(1000,50);
@@ -38,6 +40,65 @@ GameplayFrame::GameplayFrame(bool isWhite): wxFrame(NULL, wxID_ANY, wxString("Gi
     }
 }
 
+GameplayFrame::~GameplayFrame() {
+    if (checkTimerRunning(whiteTimer)) {
+        whiteTimer->Stop();
+    }
+    if (checkTimerRunning(blackTimer)) {
+        blackTimer->Stop();
+    }
+    delete whiteTimer;
+    delete blackTimer;
+}
+
+std::string GameplayFrame::secondsToString(int seconds) {
+    if (seconds < 0) {
+        return "Invalid input";
+    }
+    int minutes = seconds / 60;
+    int remainingSecondsFinal = seconds % 60;
+    // Construct the formatted string
+    char buffer[100]; // Buffer to hold the formatted string
+    snprintf(buffer, sizeof(buffer), "%02d:%02d", minutes, remainingSecondsFinal);
+    return std::string(buffer);
+}
+
+void GameplayFrame::UpdateTime(wxTimerEvent& event) {
+    wxTimer* timer = &(event.GetTimer());
+    if (!timer)
+        return; // Safety check
+
+    // Get the ID of the timer that triggered the event
+    int timerId = timer->GetId();
+    // std::cout << "Id del timer di turno: " << timerId << " Id whiteTimer: " << whiteTimer->GetId() << " Id blackTimer: " << blackTimer->GetId() << std::endl;
+    if (timerId == whiteTimer->GetId()) {
+        whiteSeconds--;
+        whiteTimerText->SetLabel(secondsToString(whiteSeconds));
+    } else if (timerId == blackTimer->GetId()) {
+        blackSeconds--;
+        blackTimerText->SetLabel(secondsToString(blackSeconds));
+    }
+}
+
+void GameplayFrame::StopUpdateTimer() {
+    if (checkTimerRunning(whiteTimer)) {
+        whiteTimer->Stop();
+    }
+    if (checkTimerRunning(blackTimer)) {
+        blackTimer->Stop();
+    }
+}
+
+void GameplayFrame::ChangeTimer() {
+    if (checkTimerRunning(whiteTimer)) {
+        whiteTimer->Stop();
+        blackTimer->Start(1000);
+    }
+    else if (checkTimerRunning(blackTimer)) {
+        blackTimer->Stop();
+        whiteTimer->Start(1000);
+    }
+}
 
 
 void GameplayFrame::StartGame() {

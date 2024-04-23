@@ -2,8 +2,9 @@
 #ifndef GAMEPLAYFRAME_H
 #define GAMEPLAYFRAME_H
 
-#include <wx-3.0/wx/wx.h>
 #include <string>
+#include <atomic>
+#include "../lib.h"
 #include "ImageFuncions.h"
 #include "ChessboardView.h"
 
