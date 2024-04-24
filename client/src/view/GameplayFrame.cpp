@@ -1,11 +1,16 @@
 
 #include "GameplayFrame.h"
+#include <thread>
+#include <chrono>
 
 GameplayFrame::GameplayFrame(bool isWhite, int gameDurationsInSeconds): wxFrame(NULL, wxID_ANY, wxString("Gioca la partita vinci la fatica"), wxPoint(0,0), wxSize(0,0), wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER) {
     SetSize(1100,650);
     Center();
     Show();
     SetBackgroundColour(wxColour(118,150,86));
+
+    this->whiteSeconds = gameDurationsInSeconds;
+    this->blackSeconds = gameDurationsInSeconds;
 
     // wxImage boardImg = img::GetImage(IMGPATH + "chessboard-blue.png");
 
@@ -28,16 +33,37 @@ GameplayFrame::GameplayFrame(bool isWhite, int gameDurationsInSeconds): wxFrame(
     int index = isWhite?0:1;
     for (int i = 0; i < 8; i ++) {
         wxStaticText* label = new wxStaticText(this, wxID_ANY, wxString(labelY[index][i]));
-        label->SetFont(font);
+        // label->SetFont(font);
         label->SetForegroundColour(wxColour(0, 0, 0)); // Black color
         label->Move(chessboard->GetBoard()->GetSize().GetWidth() + chessX+5, chessY + i * 80 + (40 + fontSize.GetHeight()) / 2);
     }
     for (int i = 0; i < 8; i ++) {
         wxStaticText* label = new wxStaticText(this, wxID_ANY, wxString(labelX[index][i]));
-        label-SetFont(font);
+        // label-SetFont(font);
         label->SetForegroundColour(wxColour(0, 0, 0)); // Black color
         label->Move(chessX+ i*80, 25);
     }
+
+        /*wxDisplay display;
+        // Get the geometry of the primary display (screen)
+        wxRect screenRect = display.GetClientArea();
+        // Retrieve the screen width
+        int screenWidth = screenRect.GetWidth();*/
+
+    std::string time = secondsToString(gameDurationsInSeconds);
+    whiteTimerText = new wxStaticText(this, wxID_ANY, wxString(time));
+    blackTimerText = new wxStaticText(this, wxID_ANY, wxString(time));
+    whiteTimerText->Move(1000, 100);
+    blackTimerText->Move(1000, 500);
+
+    whiteTimer = new wxTimer(this, wxID_ANY);
+    blackTimer = new wxTimer(this, wxID_ANY);
+    Bind(wxEVT_TIMER, &GameplayFrame::UpdateTime, this);
+    whiteTimer->Start(1000);
+}
+
+bool checkTimerRunning(wxTimer* timer) {
+    return timer != nullptr && timer->IsRunning();
 }
 
 GameplayFrame::~GameplayFrame() {

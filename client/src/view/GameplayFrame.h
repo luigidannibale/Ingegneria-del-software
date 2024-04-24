@@ -11,9 +11,12 @@
 
 class GameplayFrame : public wxFrame{
 public:
-    GameplayFrame(bool);
+    GameplayFrame(bool, int);
+    ~GameplayFrame();
 
     void StartGame();
+    void StopUpdateTimer();
+    void ChangeTimer();
     wxStaticBitmap* GetBoard();
     ChessboardView* GetChessboard();
 
@@ -23,14 +26,27 @@ private:
     const int chessY = 50;
 
     std::string const IMGPATH = "../resources/img/";
+    std::atomic_int whiteSeconds;
+    std::atomic_int blackSeconds;
+
+    wxTimer* whiteTimer;
+    wxTimer* blackTimer;
+    bool runningUpdate = false;
 
     ChessboardView* chessboard;
 
 
     wxStaticText* opponentText;
     wxStaticText* userText;
+    wxStaticText* whiteTimerText;
+    wxStaticText* blackTimerText;
 
     void createPieces(wxStaticBitmap**, int, int, int);
+
+    void UpdateTime(wxTimerEvent& event);
+    void UpdateWhiteTimer(wxTimerEvent& event);
+    void UpdateBlackTimer(wxTimerEvent& event);
+    std::string secondsToString(int seconds);
 };
 
 
