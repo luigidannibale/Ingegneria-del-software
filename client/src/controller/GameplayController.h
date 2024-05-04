@@ -6,6 +6,7 @@
 #include "../model/GameOptions.h"
 #include "../model/chess_pachage/chess.hpp"
 #include <map>
+#include <cmath>
 
 struct CellCoordinates{
 public:
@@ -31,6 +32,9 @@ private:
     chess::Board board;
     chess::Movelist moves;
     std::map<chess::Square,chess::Move> playableMoves;
+    void markFeasible(chess::Move);
+    void unmarkFeasibles();
+    void UpdateChessboard();
     void ClickBoard(wxMouseEvent&);
 };
 

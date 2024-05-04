@@ -4,7 +4,7 @@
 #include <chrono>
 
 GameplayFrame::GameplayFrame(bool isWhite, int gameDurationsInSeconds): wxFrame(NULL, wxID_ANY, wxString("Gioca la partita vinci la fatica"), wxPoint(0,0), wxSize(0,0), wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER) {
-    SetSize(1100,650);
+    SetSize(1100,750);
     Center();
     Show();
     SetBackgroundColour(wxColour(118,150,86));
