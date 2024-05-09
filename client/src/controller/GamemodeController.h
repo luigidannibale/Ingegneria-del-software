@@ -20,7 +20,8 @@ class GamemodeController
     private:
         GameMode* panel;
         wxPanel* backPanel;
-        
+
+
         GameplayController* gameplayController;
 
 

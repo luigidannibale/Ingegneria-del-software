@@ -7,6 +7,7 @@
 #include "../model/chess_pachage/chess.hpp"
 #include <map>
 #include <cmath>
+#include <string_view>
 
 struct CellCoordinates{
 public:

@@ -23,10 +23,10 @@ enum class Piece{
 
 class Cell{
 public:
-    Cell(wxStaticBitmap* bitmap, chess::PieceType piece) {
+    Cell(wxStaticBitmap* bitmap, chess::PieceType piece,float scal) {
         this->bitmap = bitmap;
         this->piece = piece;
-        feasible = new wxStaticBitmap(bitmap->GetParent(), wxID_ANY, img::GetImage("../resources/img/step64_3.png"));
+        feasible = new wxStaticBitmap(bitmap->GetParent(), wxID_ANY, img::GetImageAndScale("../resources/img/step64_3.png",scal));
         bitmap->Show(false);
         feasible->Show(false);
         bitmap->Show(true);
@@ -44,19 +44,20 @@ public:
 
 class ChessboardView {
 public:
-    ChessboardView(wxStaticBitmap*, std::string, int, int, bool);
+    ChessboardView(wxStaticBitmap*, std::string, float, float, bool,float);
     wxStaticBitmap* GetBoard();
     Cell* GetCell(int, int);
+    float GetCellDimension(){return cellDimension;}
     void MovePiece(int, int, int, int);
     void SetPreFEN(std::string);
     void update(std::string);
 private:
     std::string const IMGPATH = "../resources/img/";
     bool white = true;
-    int moveX;
-    int moveY;
+    float moveX;
+    float moveY;
 
-    const int cellDimension = 80;
+    float cellDimension = 80;
 
     std::string preFEN;
     std::string postFEN;
@@ -72,7 +73,7 @@ private:
     wxImage rookImgs[2];
 
     Cell* boardCellsBitmap[8][8];
-    void CreatePieces(Cell**, int, int);
+    void CreatePieces(Cell**, int, int,float);
     // wxStaticBitmap* FenToBitmap(std::string);
 
 };

@@ -14,9 +14,9 @@ GameMode::GameMode(wxWindow* parent): wxPanel(parent) {
     // Cadenza di gioco
     wxArrayString gameTime;
     gameTime.Add("3|2");
-    gameTime.Add("10|1");
+    gameTime.Add("10|5");
     gameTime.Add("15|10");
-    gameTime.Add("Infinite");
+    gameTime.Add("90|30");
     multiplayerTimeBox = new wxRadioBox(multiplayerPanel, wxID_ANY, "Choose the time duration \n(the number after the | is the increments in seconds)", wxDefaultPosition, wxDefaultSize, gameTime, 1, wxRA_SPECIFY_COLS | wxNO_BORDER);
     multiplayerTimeBox->SetPosition(wxPoint(20,20));
     multiplayerTimeBox->SetSelection(1);
@@ -67,15 +67,15 @@ GameTime* GameMode::GetGameTime() {
             break;
         case 1:
             duration = 10 * 60;
-            increment = 0;
+            increment = 5;
             break;
         case 2:
             duration = 15 * 60;
             increment = 10;
             break;
         case 3:
-            duration = 180*60;
-            increment = 20;
+            duration = 90*60;
+            increment = 30;
             break;
     };
 

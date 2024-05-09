@@ -1,10 +1,8 @@
 #include "GameplayController.h"
-#include <string_view>
-#include <map>
+
 const char* FILES[] = {"87654321","12345678"};
 const char* ROWS[] =  {"abcdefgh","hgfedcba"};
 const bool MARK_CELLS = true;
-
 
 GameplayController::GameplayController(GameOptions* options) {
 
@@ -14,8 +12,8 @@ GameplayController::GameplayController(GameOptions* options) {
     }
     else
         isWhite = options->GetStartSide() == StartSide::White;
+    frame = new GameplayFrame(isWhite, options);
 
-    frame = new GameplayFrame(isWhite, options->GetGameDurationInSeconds());
     frame->GetBoard()->Bind(wxEVT_LEFT_DOWN, &GameplayController::ClickBoard, this);
     board = chess::Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
@@ -26,9 +24,9 @@ GameplayController::~GameplayController(){
 
 }
 
-CellCoordinates* GetPosition(wxPoint pointClicked, bool isWhite){
+CellCoordinates* GetPosition(wxPoint pointClicked, bool isWhite, float cellDim){
     /*
-    ----------------------------------------------
+    ----------------------------------------------1
     |riga 0 colonna 0    ----    riga 0 colonna 7
     |
     |
@@ -39,8 +37,8 @@ CellCoordinates* GetPosition(wxPoint pointClicked, bool isWhite){
     |riga 7 colonna 0    ----    riga 7 colonna 7
     ----------------------------------------------
     */
-    int riga = pointClicked.y / 80;
-    int colonna = pointClicked.x / 80;
+    int riga = pointClicked.y / cellDim;
+    int colonna = pointClicked.x / cellDim;
 
     std::string coordinates   = "a1";
     coordinates[0] = ROWS[isWhite? 0 : 1][colonna];
@@ -96,7 +94,7 @@ void GameplayController::UpdateChessboard() {
 }
 
 void GameplayController::ClickBoard(wxMouseEvent& event) {
-    CellCoordinates* coordinates = GetPosition(event.GetPosition(),isWhite);
+    CellCoordinates* coordinates = GetPosition(event.GetPosition(),isWhite,frame->GetChessboard()->GetCellDimension());
     ChessboardView* chessboard = frame->GetChessboard();
 
     // TODO: aggiungere controllo turno

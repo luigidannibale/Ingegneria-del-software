@@ -7,11 +7,12 @@
 #include "../lib.h"
 #include "ImageFuncions.h"
 #include "ChessboardView.h"
+#include "../model/GameOptions.h"
 
 
 class GameplayFrame : public wxFrame{
 public:
-    GameplayFrame(bool, int);
+    GameplayFrame(bool, GameOptions*);
     ~GameplayFrame();
 
     void StartGame();
@@ -22,13 +23,14 @@ public:
 
 
 private:
-    const int chessX = 50;
-    const int chessY = 50;
+    float chessX = 50;
+    float chessY = 90;
 
     std::string const IMGPATH = "../resources/img/";
     std::atomic_int whiteSeconds;
     std::atomic_int blackSeconds;
 
+    int increment;
     wxTimer* whiteTimer;
     wxTimer* blackTimer;
     bool runningUpdate = false;
@@ -38,6 +40,8 @@ private:
 
     wxStaticText* opponentText;
     wxStaticText* userText;
+    wxStaticText* whiteStatText;
+    wxStaticText* blackStatText;
     wxStaticText* whiteTimerText;
     wxStaticText* blackTimerText;
 
