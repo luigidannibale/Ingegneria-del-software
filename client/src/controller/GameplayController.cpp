@@ -77,10 +77,6 @@ void printMove(chess::Move move){
     //TOdo stampare la mossa in un pannello accanto la scacchiera
 }
 
-/*void GameplayController::UpdateChessboard() {
-    std::string fen = board.getFen();
-}*/
-
 void GameplayController::makeMove(std::string_view to) {
     chess::Move move = playableMoves.at(chess::Square(to));
     chess::Board c = gameManager->GetBoard();
@@ -92,9 +88,13 @@ void GameplayController::makeMove(std::string_view to) {
     frame->ChangeTimer();
     unmarkFeasibles();
     playableMoves.clear();
+    gameManager->swapTurn();
+    
 }
 
 void GameplayController::ClickBoard(wxMouseEvent& event) {
+    /*if (!gameManager->playerCanPlay())
+        return;*/
     CellCoordinates* coordinates = GetPosition(event.GetPosition(),gameManager->isWhite(),frame->GetChessboard()->GetCellDimension());
     ChessboardView* chessboard = frame->GetChessboard();
     chess::Board board = gameManager->GetBoard();
@@ -133,8 +133,16 @@ void GameplayController::ClickBoard(wxMouseEvent& event) {
             std::cout << coordinates->coordinates << std::endl;
             unmarkFeasibles();
             playableMoves.clear();
+
+            chess::movegen::legalmoves(moves, board);
+
+            for (const auto &move : moves) {
+                std::cout << chess::uci::moveToUci(move) <<" "<< perft(board,1);<<" " <<std::endl;
+
+            }
             chess::movegen::legalmoves(moves, board, TypeToGenType(clicked->piece));
             for (const auto &move : moves) {
+                //std::cout<< move.to().file().operator std::string() << move.to().rank().operator std::string() << " from " << move.from().file().operator std::string()<<move.from().rank().operator std::string()<< " - "<<move.score()<<std::endl;
                 if(move.from().operator==(chess::Square(s))) {
                     playableMoves.emplace(move.to(), move);
                     markFeasible(move);

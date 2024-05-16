@@ -15,7 +15,9 @@ public:
     chess::Board GetBoard();
     bool isWhite();
     Turn getTurn();
+    bool playerCanPlay();
     void makeMove();
+    void swapTurn();
 private:
     chess::Board board;
     bool playerIsWhite;
