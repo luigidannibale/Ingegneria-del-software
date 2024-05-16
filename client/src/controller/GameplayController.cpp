@@ -5,19 +5,11 @@ const char* ROWS[] =  {"abcdefgh","hgfedcba"};
 const bool MARK_CELLS = true;
 
 GameplayController::GameplayController(GameOptions* options) {
-
-    if (options->GetStartSide() == StartSide::Casual) {
-        int randomInt = std::rand() % 2;
-        isWhite = static_cast<bool>(randomInt);
-    }
-    else
-        isWhite = options->GetStartSide() == StartSide::White;
-    frame = new GameplayFrame(isWhite, options);
-
+    gameManager = new GameManager(options);
+    frame = new GameplayFrame(gameManager->isWhite(), options);
     frame->GetBoard()->Bind(wxEVT_LEFT_DOWN, &GameplayController::ClickBoard, this);
-    board = chess::Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-
 }
+
 
 
 GameplayController::~GameplayController(){
@@ -55,9 +47,6 @@ chess::PieceGenType TypeToGenType(chess::PieceType piece){
     return static_cast<chess::PieceGenType>(std::pow(2, static_cast<int>(piece)));
 }
 
-//chess::PieceType GenTypeToType(chess::PieceGenType piece){
-//    return static_cast<chess::PieceType>(static_cast<int>(piece));
-//}
 
 void GameplayController::markFeasible(chess::Move move){
     if (!MARK_CELLS)
@@ -65,11 +54,11 @@ void GameplayController::markFeasible(chess::Move move){
     ChessboardView* chessboard = frame->GetChessboard();
     int f = static_cast<int>(move.to().file());
     int r = static_cast<int>(move.to().rank());
-    f = FILES[isWhite? 1 : 0][f]-'1';
-    r = FILES[isWhite? 0 : 1][r]-'1';
-
+    f = FILES[gameManager->isWhite()? 1 : 0][f]-'1';
+    r = FILES[gameManager->isWhite()? 0 : 1][r]-'1';
     chessboard->GetCell(r, f)->feasible->Show(true);
 }
+
 void GameplayController::unmarkFeasibles(){
     if (!MARK_CELLS)
         return;
@@ -77,8 +66,8 @@ void GameplayController::unmarkFeasibles(){
     for (const auto& move: playableMoves) {
         int f = static_cast<int>(move.second.to().file());
         int r = static_cast<int>(move.second.to().rank());
-        f = FILES[isWhite? 1 : 0][f]-'1';
-        r = FILES[isWhite? 0 : 1][r]-'1';
+        f = FILES[gameManager->isWhite()? 1 : 0][f]-'1';
+        r = FILES[gameManager->isWhite()? 0 : 1][r]-'1';
         chessboard->GetCell(r, f)->feasible->Show(false);
     }
 }
@@ -88,15 +77,27 @@ void printMove(chess::Move move){
     //TOdo stampare la mossa in un pannello accanto la scacchiera
 }
 
-void GameplayController::UpdateChessboard() {
+/*void GameplayController::UpdateChessboard() {
     std::string fen = board.getFen();
+}*/
 
+void GameplayController::makeMove(std::string_view to) {
+    chess::Move move = playableMoves.at(chess::Square(to));
+    chess::Board c = gameManager->GetBoard();
+    c.makeMove(move);
+    gameManager->updateBoard(c);
+    frame->GetChessboard()->update(gameManager->GetBoard().getFen());
+    // chessboard->MovePiece(preC->row, preC->col, coordinates->row, coordinates->col);
+    printMove(move);
+    frame->ChangeTimer();
+    unmarkFeasibles();
+    playableMoves.clear();
 }
 
 void GameplayController::ClickBoard(wxMouseEvent& event) {
-    CellCoordinates* coordinates = GetPosition(event.GetPosition(),isWhite,frame->GetChessboard()->GetCellDimension());
+    CellCoordinates* coordinates = GetPosition(event.GetPosition(),gameManager->isWhite(),frame->GetChessboard()->GetCellDimension());
     ChessboardView* chessboard = frame->GetChessboard();
-
+    chess::Board board = gameManager->GetBoard();
     // TODO: aggiungere controllo turno
     //Provando a fare il click di mossa (assumendo quindi ci sia stato un preclick di selezione di un pezzo da muovere)
     if (clickedCoord != nullptr){
@@ -111,14 +112,7 @@ void GameplayController::ClickBoard(wxMouseEvent& event) {
         //Performando la mossa
 
         if(playableMoves.count(chess::Square(to))>0){
-            chess::Move move = playableMoves.at(chess::Square(to));
-            board.makeMove(move);
-            chessboard->update(board.getFen());
-            // chessboard->MovePiece(preC->row, preC->col, coordinates->row, coordinates->col);
-            printMove(move);
-            frame->ChangeTimer();
-            unmarkFeasibles();
-            playableMoves.clear();
+            makeMove(to);
             return;
         }
         else { // Se la cella cliccata non è nelle mosse possibili
