@@ -37,6 +37,7 @@ private:
     void makeMove(std::string_view);
     void markFeasible(chess::Move);
     void unmarkFeasibles();
+
     void UpdateChessboard();
     void ClickBoard(wxMouseEvent&);
 };

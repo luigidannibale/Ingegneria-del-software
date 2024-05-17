@@ -15,6 +15,18 @@ include_directories(${wxWidgets_INCLUDE_DIRS})
 set(SOURCES
         client/src/main.cpp
 )
+#*******************************************
+#[[# Add the Stockfish source files
+file(GLOB STOCKFISH_SOURCES
+        "src/stockfish/*.cpp"
+        "include/src/stockfish/*.h"
+)
+# Include directories
+include_directories(include/stockfish)
+# Add the executable
+add_executable(MyProject main.cpp ${STOCKFISH_SOURCES})]]
+#*******************************************
+
 
 # Add an executable target
 add_executable(MyExecutable ${SOURCES})
