@@ -7,7 +7,7 @@
 #include "../model/GameOptions.h"
 #include "../model/chess_pachage/chess.hpp"
 #include <map>
-#include <cmath>
+
 #include <string_view>
 
 struct CellCoordinates{
@@ -38,9 +38,12 @@ private:
     void markFeasible(chess::Move);
     void unmarkFeasibles();
 
+
     void UpdateChessboard();
+    void OnClose(wxCloseEvent&);
     void ClickBoard(wxMouseEvent&);
 };
+
 
 
 #endif //GAMEPLAYCONTROLLER_H

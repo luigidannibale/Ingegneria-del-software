@@ -1,7 +1,11 @@
-#ifndef INGEGERIA_DEGLI_SCACCHI_GAMEMANAGER_H
-#define INGEGERIA_DEGLI_SCACCHI_GAMEMANAGER_H
+#ifndef GAMEMANAGER_H
+#define GAMEMANAGER_H
 #include "../model/chess_pachage/chess.hpp"
 #include "../model/GameOptions.h"
+#include "StockfishManager.h"
+#include <cmath>
+// #include "GameplayController.h"
+
 enum Turn{
     White = true,
     Black = false
@@ -16,14 +20,16 @@ public:
     bool isWhite();
     Turn getTurn();
     bool playerCanPlay();
-    void makeMove();
+    void makeComputerMove();
     void swapTurn();
 private:
+    StockfishManager* stockfishManager;
     chess::Board board;
     bool playerIsWhite;
     Turn turn;
 
+    chess::Move prova();
 };
 
-
-#endif //INGEGERIA_DEGLI_SCACCHI_GAMEMANAGER_H
+chess::PieceGenType TypeToGenType(chess::PieceType piece);
+#endif //GAMEMANAGER_H
