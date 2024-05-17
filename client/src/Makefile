@@ -30,5 +30,5 @@ $(BDIR)/$(TARGET_EXEC): $(OBJS2)
 .PHONY: clean
 
 clean:
-	rm -f $(BDIR)/*
+	rm -f $(BDIR)/chess
 	find $(ODIR) -type f -name "*.o" -delete

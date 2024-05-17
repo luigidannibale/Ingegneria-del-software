@@ -3,6 +3,7 @@
 const char* FILES[] = {"87654321","12345678"};
 const char* ROWS[] =  {"abcdefgh","hgfedcba"};
 const bool MARK_CELLS = true;
+bool Stock_init = false;
 
 GameplayController::GameplayController(GameOptions* options) {
     gameManager = new GameManager(options);
@@ -86,6 +87,11 @@ void printMove(chess::Move move){
 #include <stdexcept>
 #include <array>
 #include <fcntl.h>
+#include <iostream>
+#include <cstdio>
+#include <stdexcept>
+#include <string>
+#include <array>
 
 // Function to communicate with Stockfish and get the evaluation score
 std::string run_stockfish(const std::vector<std::string>& commands) {
@@ -127,11 +133,13 @@ std::string run_stockfish(const std::vector<std::string>& commands) {
     // Read output from Stockfish
     std::string result;
     char buffer[128];
+    //std::array<char, 128> buffer;
     ssize_t count;
     while ((count = read(out_pipe[0], buffer, sizeof(buffer) - 1)) > 0) {
         buffer[count] = '\0';
         result += buffer;
     }
+
     close(out_pipe[0]); // Close read end after reading all output
 
     // Wait for child process to finish
@@ -213,43 +221,107 @@ void initialize_stockfish(const std::string& stockfish_path, int &write_fd, int 
     }
 }
 
+// Funzione per leggere la risposta di Stockfish
+std::string read_response(int read_fd) {
+    std::string result;
+    std::array<char, 128> buffer;
+    ssize_t count;
+
+    fd_set set;
+    struct timeval timeout;
+
+    // Inizializza il set di file descriptor
+    FD_ZERO(&set);
+    FD_SET(read_fd, &set);
+
+    // Timeout di 2 secondi
+    timeout.tv_sec = 2;
+    timeout.tv_usec = 0;
+
+    while (true) {
+        // Controlla se ci sono dati disponibili per la lettura
+        int rv = select(read_fd + 1, &set, NULL, NULL, &timeout);
+        if (rv == -1) {
+            throw std::runtime_error("select() failed");
+        } else if (rv == 0) {
+            // Timeout raggiunto
+            break;
+        } else {
+            // Dati disponibili per la lettura
+            count = read(read_fd, buffer.data(), buffer.size() - 1);
+            if (count > 0) {
+                buffer[count] = '\0';
+                result += buffer.data();
+                /*// Controlla se abbiamo ricevuto il comando 'bestmove'
+                if (result.find("bestmove") != std::string::npos) {
+                    break;
+                }*/
+            }
+            else
+                break;
+        }
+    }
+
+    return result;
+}
+
+// Funzione per inviare un comando a Stockfish
+void send_command(int write_fd, const std::string& command) {
+    write(write_fd, command.c_str(), command.size());
+    write(write_fd, "\n", 1);
+}
 // Funzione per ottenere una valutazione dalla posizione
-std::string get_evaluation(const std::string& fen) {
+std::string get_bestmove(const std::string& fen, int write_fd, int read_fd) {
     std::vector<std::string> commands = {
             "position fen " + fen,
             "go depth 10"
     };
-    return run_stockfish(commands);
+
+    for (const auto& command : commands) {
+        send_command(write_fd, command);
+    }
+    std::string result = read_response(read_fd);
+    int t = result.find("bestmove ");
+    size_t start = t + 9; // "bestmove " is 9 characters long
+    size_t end = result.find(" ponder", start);
+    std::string move = result.substr(start, end - start);
+    return move;
 }
 
 
-void evalBoard(chess::Board board){
-
+chess::Move evalBoard(chess::Board board){
     // Percorso all'eseguibile di Stockfish
     std::string stockfish_path = "./stockfish";
     int write_fd, read_fd;
-    try {
-        initialize_stockfish(stockfish_path, write_fd, read_fd);
-        // Esempio di posizione FEN
-        std::string fen = board.getFen();
-        std::string output = get_evaluation(fen);
 
-        std::cout << "Stockfish output:\n" << output << std::endl;
+    initialize_stockfish(stockfish_path, write_fd, read_fd);
 
-        // Parse the output to find the evaluation score
-        /*size_t score_pos = output.find("score cp");
-        if (score_pos != std::string::npos) {
-            size_t start = score_pos + 9; // "score cp " is 9 characters long
-            size_t end = output.find(" ", start);
-            std::string score_str = output.substr(start, end - start);
-            int score = std::stoi(score_str);
-            std::cout << "Evaluation score: " << score << std::endl;
-        } else {
-            std::cerr << "Failed to parse Stockfish output" << std::endl;
-        }*/
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+    std::string fen = board.getFen();
+    std::string bestmove = get_bestmove(fen, write_fd, read_fd);
+    std::cout<< " Move to play now is" <<bestmove <<std::endl;
+
+    std::string_view f = bestmove.substr(0,2);
+    std::string_view t = bestmove.substr(2,2);
+
+    chess::Square from = chess::Square(f);
+    chess::Square to = chess::Square(t);
+    chess::PieceType pt = board.at(from).type();
+
+    chess::Movelist moves;
+    //board.makeNullMove();
+
+    chess::movegen::legalmoves(moves, board, pt);
+
+    for (const auto &move : moves) {
+        std::cout<< "PT is "<< pt << " F is "<< f <<" T is "<< t << " Move is" <<chess::uci::moveToUci(move) <<std::endl;
+        if(move.from().operator==(from) && move.to().operator==(to)) {
+            std::cout<< "--- PT is "<< pt << " F is "<< f <<" T is "<< t << " Move is" <<chess::uci::moveToUci(move) <<std::endl;
+            return move;
+        }
     }
+    //board.unmakeNullMove();
+
+    return chess::Move();
 }
 
 
@@ -265,7 +337,8 @@ void GameplayController::makeMove(std::string_view to) {
     unmarkFeasibles();
     playableMoves.clear();
     gameManager->swapTurn();
-    evalBoard(c);
+
+    move = evalBoard(c);
 }
 
 void GameplayController::ClickBoard(wxMouseEvent& event) {
@@ -310,15 +383,8 @@ void GameplayController::ClickBoard(wxMouseEvent& event) {
             unmarkFeasibles();
             playableMoves.clear();
 
-            chess::movegen::legalmoves(moves, board);
-
-            /*for (const auto &move : moves) {
-                std::cout << chess::uci::moveToUci(move) <<" "<< perft(board,1);<<" " <<std::endl;
-
-            }*/
             chess::movegen::legalmoves(moves, board, TypeToGenType(clicked->piece));
             for (const auto &move : moves) {
-                //std::cout<< move.to().file().operator std::string() << move.to().rank().operator std::string() << " from " << move.from().file().operator std::string()<<move.from().rank().operator std::string()<< " - "<<move.score()<<std::endl;
                 if(move.from().operator==(chess::Square(s))) {
                     playableMoves.emplace(move.to(), move);
                     markFeasible(move);

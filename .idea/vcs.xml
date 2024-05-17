@@ -3,6 +3,5 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/client/bin/Stockfish" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/stockfish" vcs="Git" />
   </component>
 </project>
