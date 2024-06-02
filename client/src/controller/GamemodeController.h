@@ -24,7 +24,6 @@ class GamemodeController
 
         GameplayController* gameplayController;
 
-
         void addButtonEvents();
         void SearchOpponent(wxCommandEvent&);
         void StartGame(wxCommandEvent&);
