@@ -4,8 +4,11 @@
 #include <cstring>
 #include <vector>
 #include <signal.h>
+#include <unordered_map>
 
 std::vector<std::string> connected_clients;
+std::unordered_map<std::string, std::vector<std::string>> client_map;
+
 bool stop_server = false;
 
 void subscribe(redisContext *c) {
@@ -32,23 +35,33 @@ void unsubscribe(redisContext *c) {
 
 void handle_client(redisContext *c, const std::string& client_id) {
     // Add client to waiting list
-    connected_clients.push_back(client_id);
-    std::cout << "Client " << client_id << " joined waiting list" << std::endl;
+    std::string delimiter = ":";
+    size_t pos = client_id.find(delimiter);
+    std::string key = client_id.substr(pos + delimiter.length());
+    std::string value = client_id.substr(0, pos);
+    std::cout << "Value " << value << " Key: " << key << std::endl;
+    
+    client_map[key].push_back(value);
 
-    int waiting_players = connected_clients.size();
-    std::cout << "Waiting list: " << waiting_players << std::endl;
+    if (client_map[key].size() >= 2) { // join two players
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
-    if (waiting_players >= 2) { // Match two players
-        std::string player1 = connected_clients.back();
-        connected_clients.pop_back();
-        std::string player2 = connected_clients.back();
-        connected_clients.pop_back();
+        std::string player1 = client_map[key].back();
+        client_map[key].pop_back();
+        std::string player2 = client_map[key].back();
+        client_map[key].pop_back();
 
         unsubscribe(c);
 
+        // Choose who to start the game
+        int random = rand() % 2;
+
+        std::string reply1 = player1 + ":" + player2 + ":" + std::to_string(random);
+        std::string reply2 = player2 + ":" + player1 + ":" + std::to_string(!random);
+
         // Notify players that they have been matched
-        std::cout << "Prima del comando 1" << std::endl;
-        redisReply *reply = (redisReply*)redisCommand(c, "PUBLISH %s %s", player1.c_str(), "You have been matched with an opponent!");
+        // std::cout << "Prima del comando 1" << std::endl;
+        redisReply *reply = (redisReply*)redisCommand(c, "PUBLISH %s %s", player1.c_str(), reply1.c_str());
         std::cout << "Dopo del comando 1" << std::endl;
         if (reply == NULL || reply->type != REDIS_REPLY_INTEGER) {
             if (reply != NULL && reply->str != NULL) {
@@ -62,8 +75,8 @@ void handle_client(redisContext *c, const std::string& client_id) {
         }
         freeReplyObject(reply);
 
-        std::cout << "Prima del comando 2" << std::endl;
-        reply = (redisReply*)redisCommand(c, "PUBLISH %s %s", player2.c_str(), "You have been matched with an opponent!");
+        // std::cout << "Prima del comando 2" << std::endl;
+        reply = (redisReply*)redisCommand(c, "PUBLISH %s %s", player2.c_str(), reply2.c_str());
         std::cout << "Dopo del comando 2" << std::endl;
         if (reply == NULL || reply->type != REDIS_REPLY_INTEGER) {
             if (reply != NULL && reply->str != NULL) {

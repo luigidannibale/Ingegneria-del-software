@@ -21,6 +21,7 @@ class GamemodeController
         GameMode* panel;
         wxPanel* backPanel;
 
+        bool searching = false;
 
         GameplayController* gameplayController;
 
