@@ -12,6 +12,7 @@ GameplayController::GameplayController(GameOptions* options) {
 
         frame->CallAfter([this]() {
             frame->GetBoard()->Bind(wxEVT_LEFT_DOWN, &GameplayController::ClickBoard, this);
+            frame->HideTransparentPanel();
             frame->StartTimer();
             if (!gameManager->playerCanPlay()) {
                 AsyncComputerMove();
@@ -95,16 +96,18 @@ void GameplayController::AsyncComputerMove() {
         chess::Move move = gameManager->GetBestMove();
         chess::Board c = gameManager->GetBoard();
 
-        int random = std::rand() % MS_STOCKFISH_DELAY;
-        std::cout << "Sleeping for " << random << " milliseconds" << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(random));
+        std::cout << "Piece at " << move.from() << " is " << c.at(chess::Square(move.from())).type() << std::endl;
+        std::cout << "Piece at " << move.to() << " is " << c.at(chess::Square(move.to())).type() << std::endl;
 
         c.makeMove(move);
         gameManager->swapTurn();
         gameManager->updateBoard(c);
 
+        int random = std::rand() % MS_STOCKFISH_DELAY;
+        std::cout << "Sleeping for " << random << " milliseconds" << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(random));
+
         frame->CallAfter([this]() {
-            // This code will execute in the main GUI thread
             frame->GetChessboard()->update(gameManager->GetBoard().getFen());
             frame->ChangeTimer();
         });

@@ -20,6 +20,7 @@ public:
     void StopUpdateTimer();
     void ChangeTimer();
     void StartTimer();
+    void HideTransparentPanel();
     wxStaticBitmap* GetBoard();
     ChessboardView* GetChessboard();
 
@@ -48,6 +49,7 @@ private:
     wxStaticText* blackTimerText;
 
     wxListView* movesPlayedList;
+    wxPanel* transparentPanel;
 
     void createPieces(wxStaticBitmap**, int, int, int);
 

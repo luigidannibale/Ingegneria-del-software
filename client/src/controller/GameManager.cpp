@@ -10,6 +10,23 @@ GameManager::GameManager(GameOptions* options){
         playerIsWhite = options->GetStartSide() == StartSide::White;
     turn = White;
 
+    switch(options->GetComputerElo()) {
+        case ComputerElo::Beginner:
+            depthLevel = 2;
+            break;
+        case ComputerElo::Intermediate:
+            depthLevel = 5;
+            break;
+        case ComputerElo::Advanced:
+            depthLevel = 8;
+            break;
+        case ComputerElo::Master:
+            depthLevel = 10;
+            break;
+        default:    // Should never happen
+            depthLevel = 1;
+            break;
+    }
     // stockfishManager = new StockfishManager();
 }
 GameManager::~GameManager() {
@@ -22,7 +39,11 @@ void GameManager::StartStockfish() {
 
 chess::Move GameManager::GetBestMove() {
     std::string fen = board.getFen();
-    std::string bestmove = stockfishManager->get_bestmove(fen);
+
+    int random = std::rand() % 3;
+    random += depthLevel;
+
+    std::string bestmove = stockfishManager->get_bestmove(fen, random);
     stockfishManager->get_eval(fen);
     std::cout<< " Move to play now is " <<bestmove <<std::endl;
 
@@ -40,7 +61,8 @@ chess::Move GameManager::GetBestMove() {
             return move;
         }
     }
-    return chess::Move();
+    std::cout << "Errore in GetBestMove: mossa non trovata" << std::endl;
+    return chess::Move(chess::Move::CASTLING).make(from, to, pt);
 }
 
 void GameManager::makeComputerMove() {

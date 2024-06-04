@@ -29,7 +29,7 @@ private:
     chess::Board board;
     bool playerIsWhite;
     Turn turn;
-
+    int depthLevel;
 
 };
 
