@@ -6,8 +6,11 @@
 #include "../view/GameplayFrame.h"
 #include "../model/GameOptions.h"
 #include "../model/chess_pachage/chess.hpp"
-#include <map>
 
+#include <map>
+#include <wx/utils.h>
+#include <thread>
+#include <random>
 #include <string_view>
 
 struct CellCoordinates{
@@ -31,6 +34,9 @@ private:
     GameManager* gameManager;
     CellCoordinates* clickedCoord = nullptr;
     GameplayFrame* frame;
+
+    const int MS_STOCKFISH_DELAY = 2000;
+
     //chess::Board board;
     chess::Movelist moves;
     std::map<chess::Square,chess::Move> playableMoves;
@@ -38,6 +44,7 @@ private:
     void markFeasible(chess::Move);
     void unmarkFeasibles();
 
+    void AsyncComputerMove();
 
     void UpdateChessboard();
     void OnClose(wxCloseEvent&);

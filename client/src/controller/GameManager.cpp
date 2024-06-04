@@ -10,21 +10,17 @@ GameManager::GameManager(GameOptions* options){
         playerIsWhite = options->GetStartSide() == StartSide::White;
     turn = White;
 
-    stockfishManager = new StockfishManager();
+    // stockfishManager = new StockfishManager();
 }
 GameManager::~GameManager() {
     stockfishManager->close_stockfish();
 }
 
+void GameManager::StartStockfish() {
+    stockfishManager = new StockfishManager();
+}
 
-#include <iostream>
-#include <future>
-#include <thread>
-#include <chrono>
-#include <functional>
-
-
-chess::Move GameManager::prova() {
+chess::Move GameManager::GetBestMove() {
     std::string fen = board.getFen();
     std::string bestmove = stockfishManager->get_bestmove(fen);
     stockfishManager->get_eval(fen);
@@ -49,11 +45,11 @@ chess::Move GameManager::prova() {
 
 void GameManager::makeComputerMove() {
     std::cout << "starting prova" << std::endl;
-    std::future<chess::Move> result_future = std::async(std::launch::async, &GameManager::prova, this);
+    // std::future<chess::Move> result_future = std::async(std::launch::async, &GameManager::GetBestMove, this);
     // std::cout<< "--- I found the move: "<< chess::uci::moveToUci(result_future.get()) <<std::endl;
     std::cout << "after prova" << std::endl;
 
-    board.makeMove(result_future.get());
+    // board.makeMove(result_future.get());
     swapTurn();
 }
 

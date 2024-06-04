@@ -43,6 +43,12 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
         label->Move(chessX+ i*GetChessboard()->GetCellDimension() + GetChessboard()->GetCellDimension()/2 , chessY-fontSize.GetHeight()-5);
     }
 
+
+    movesPlayedList = new wxListView(this, wxID_ANY, wxPoint(800*scal, 200*scal), wxSize(300*scal, 200*scal), wxLC_REPORT);
+    movesPlayedList->InsertColumn(0, "Num.", wxLIST_FORMAT_LEFT, 50*scal);
+    movesPlayedList->InsertColumn(1, "Piece Moved", wxLIST_FORMAT_LEFT, 100*scal);
+    movesPlayedList->InsertColumn(2, "Destination Square", wxLIST_FORMAT_LEFT, 150*scal);
+
     this->whiteSeconds = options->GetGameDurationInSeconds();
     this->blackSeconds = options->GetGameDurationInSeconds();
     this->increment = options->GetGameIncrement();
@@ -59,8 +65,10 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
 
     whiteTimer = new wxTimer(this, wxID_ANY);
     blackTimer = new wxTimer(this, wxID_ANY);
+    
     Bind(wxEVT_TIMER, &GameplayFrame::UpdateTime, this);
-    whiteTimer->Start(1000);
+    
+    // whiteTimer->Start(1000);
 }
 
 bool checkTimerRunning(wxTimer* timer) {
@@ -129,9 +137,13 @@ void GameplayFrame::ChangeTimer() {
     else if (checkTimerRunning(blackTimer)) {
         blackTimer->Stop();
         blackSeconds+=increment;
-        blackTimerText->SetLabel(secondsToString(whiteSeconds));
+        blackTimerText->SetLabel(secondsToString(blackSeconds));
         whiteTimer->Start(1000);
     }
+}
+
+void GameplayFrame::StartTimer() {
+    whiteTimer->Start(1000);
 }
 
 void GameplayFrame::StartGame() {

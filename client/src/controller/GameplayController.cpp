@@ -7,8 +7,22 @@ bool Stock_init = false;
 
 GameplayController::GameplayController(GameOptions* options) {
     gameManager = new GameManager(options);
+    auto f = [this]() {
+        gameManager->StartStockfish();
+
+        frame->CallAfter([this]() {
+            frame->GetBoard()->Bind(wxEVT_LEFT_DOWN, &GameplayController::ClickBoard, this);
+            frame->StartTimer();
+            if (!gameManager->playerCanPlay()) {
+                AsyncComputerMove();
+            }
+        });
+    };
+
+    std::thread t(f);
+    t.detach();
+
     frame = new GameplayFrame(gameManager->isWhite(), options);
-    frame->GetBoard()->Bind(wxEVT_LEFT_DOWN, &GameplayController::ClickBoard, this);
     frame->GetBoard()->Bind(wxEVT_CLOSE_WINDOW, &GameplayController::OnClose, this);
 }
 
@@ -76,6 +90,30 @@ void printMove(chess::Move move){
     //TOdo stampare la mossa in un pannello accanto la scacchiera
 }
 
+void GameplayController::AsyncComputerMove() {
+    auto f = [this]() {
+        chess::Move move = gameManager->GetBestMove();
+        chess::Board c = gameManager->GetBoard();
+
+        int random = std::rand() % MS_STOCKFISH_DELAY;
+        std::cout << "Sleeping for " << random << " milliseconds" << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(random));
+
+        c.makeMove(move);
+        gameManager->swapTurn();
+        gameManager->updateBoard(c);
+
+        frame->CallAfter([this]() {
+            // This code will execute in the main GUI thread
+            frame->GetChessboard()->update(gameManager->GetBoard().getFen());
+            frame->ChangeTimer();
+        });
+    };
+
+    std::thread t(f);
+    t.detach();
+}
+
 
 void GameplayController::makeMove(std::string_view to) {
     chess::Move move = playableMoves.at(chess::Square(to));
@@ -90,9 +128,10 @@ void GameplayController::makeMove(std::string_view to) {
     playableMoves.clear();
     gameManager->swapTurn();
 
-    gameManager->makeComputerMove();
-    frame->ChangeTimer();
-    frame->GetChessboard()->update(gameManager->GetBoard().getFen());
+    AsyncComputerMove();
+    // gameManager->makeComputerMove();
+    // frame->ChangeTimer();
+    // frame->GetChessboard()->update(gameManager->GetBoard().getFen());
 }
 
 void GameplayController::ClickBoard(wxMouseEvent& event) {

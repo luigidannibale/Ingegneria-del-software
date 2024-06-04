@@ -8,6 +8,7 @@
 #include "ImageFuncions.h"
 #include "ChessboardView.h"
 #include "../model/GameOptions.h"
+#include <wx/listctrl.h>
 
 
 class GameplayFrame : public wxFrame{
@@ -18,6 +19,7 @@ public:
     void StartGame();
     void StopUpdateTimer();
     void ChangeTimer();
+    void StartTimer();
     wxStaticBitmap* GetBoard();
     ChessboardView* GetChessboard();
 
@@ -44,6 +46,8 @@ private:
     wxStaticText* blackStatText;
     wxStaticText* whiteTimerText;
     wxStaticText* blackTimerText;
+
+    wxListView* movesPlayedList;
 
     void createPieces(wxStaticBitmap**, int, int, int);
 

@@ -22,13 +22,15 @@ public:
     bool playerCanPlay();
     void makeComputerMove();
     void swapTurn();
+    void StartStockfish();
+    chess::Move GetBestMove();
 private:
     StockfishManager* stockfishManager;
     chess::Board board;
     bool playerIsWhite;
     Turn turn;
 
-    chess::Move prova();
+
 };
 
 chess::PieceGenType TypeToGenType(chess::PieceType piece);
