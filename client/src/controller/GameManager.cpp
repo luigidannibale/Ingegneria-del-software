@@ -45,10 +45,24 @@ chess::Move GameManager::GetBestMove() {
 
     std::string bestmove = stockfishManager->get_bestmove(fen, random);
     stockfishManager->get_eval(fen);
-    std::cout<< " Move to play now is " <<bestmove <<std::endl;
+    std::cout<< " Move to play now is " << bestmove <<std::endl;
 
     std::string_view f = bestmove.substr(0,2);
     std::string_view t = bestmove.substr(2,2);
+
+    // Fix Castling moves
+    if (f == "e8") {
+        if (t == "g8")
+            t = "h8";
+        else if (t == "c8")
+            t = "a8";
+    }
+    else if (f == "e1") {
+        if (t == "g1")
+            t = "h1";
+        else if (t == "c1")
+            t = "a1";
+    }
 
     chess::Square from = chess::Square(f);
     chess::Square to = chess::Square(t);
@@ -57,6 +71,7 @@ chess::Move GameManager::GetBestMove() {
     chess::Movelist moves;
     chess::movegen::legalmoves(moves, board, TypeToGenType(pt));
     for (const auto &move : moves) {
+        std::cout << "Available moves " << move << std::endl;  
         if(move.from().operator==(from) && move.to().operator==(to)) {
             return move;
         }
