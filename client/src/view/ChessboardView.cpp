@@ -139,10 +139,15 @@ void ChessboardView::update(std::string FEN){
     // "rnbqkbnr/pppepppp/3p4/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     // "rnbqkbnr/pppppppp/eeepeeee/eeeeeeee/eeeeeeee/eeeeeeee/PPPPPPPP/RNBQKBNR"
     postFEN = translateFEN(FEN);
+
     if (!white) {
-        std::reverse(preFEN.begin(), preFEN.end());
+        // std::reverse(preFEN.begin(), preFEN.end());
         std::reverse(postFEN.begin(), postFEN.end());
     }
+
+    // std::cout << "PreFEN: " << preFEN << std::endl;
+    // std::cout << "PostFEN: " << postFEN << std::endl;
+
     int length = postFEN.size();
     for (int i = 0; i < length; i++) {
         if (preFEN[i] == postFEN[i])
@@ -152,6 +157,9 @@ void ChessboardView::update(std::string FEN){
         int row = i / 8;
         int column = i % 8;
         int index = isupper(postFEN[i]) ? 0 : 1;
+        
+        // std::cout << "Quello che cambia è " << postFEN[i] << " con indice " << index << std::endl;
+
         chess::PieceType piece;
         wxBitmap bitmap;
         switch(char(std::tolower(postFEN[i]))) {
@@ -189,8 +197,12 @@ void ChessboardView::update(std::string FEN){
         boardCellsBitmap[row][column]->Move(column*cellDimension + moveX,row*cellDimension + moveY);
         boardCellsBitmap[row][column]->piece = piece;
     }
+    preFEN = postFEN;
 }
 
 void ChessboardView::SetPreFEN(std::string FEN) {
-    this->preFEN = translateFEN(FEN);
+    std::string fen = translateFEN(FEN);
+    if (!white)
+        std::reverse(fen.begin(), fen.end());
+    this->preFEN = fen;
 }

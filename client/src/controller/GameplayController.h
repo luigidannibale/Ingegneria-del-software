@@ -43,7 +43,7 @@ private:
     void makeMove(std::string_view);
     void markFeasible(chess::Move);
     void unmarkFeasibles();
-
+    bool CheckCheckmate();
     void AsyncComputerMove();
 
     void UpdateChessboard();

@@ -47,8 +47,8 @@ chess::Move GameManager::GetBestMove() {
     stockfishManager->get_eval(fen);
     std::cout<< " Move to play now is " << bestmove <<std::endl;
 
-    std::string_view f = bestmove.substr(0,2);
-    std::string_view t = bestmove.substr(2,2);
+    std::string f = bestmove.substr(0,2);
+    std::string t = bestmove.substr(2,2);
 
     // Fix Castling moves
     if (f == "e8") {
@@ -71,13 +71,12 @@ chess::Move GameManager::GetBestMove() {
     chess::Movelist moves;
     chess::movegen::legalmoves(moves, board, TypeToGenType(pt));
     for (const auto &move : moves) {
-        std::cout << "Available moves " << move << std::endl;  
         if(move.from().operator==(from) && move.to().operator==(to)) {
             return move;
         }
     }
     std::cout << "Errore in GetBestMove: mossa non trovata" << std::endl;
-    return chess::Move(chess::Move::CASTLING).make(from, to, pt);
+    return chess::Move();
 }
 
 void GameManager::makeComputerMove() {

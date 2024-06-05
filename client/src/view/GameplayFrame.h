@@ -20,7 +20,9 @@ public:
     void StopUpdateTimer();
     void ChangeTimer();
     void StartTimer();
+    void ShowTransparentPanel();
     void HideTransparentPanel();
+    void UpdateTransparentPanel(std::string);
     wxStaticBitmap* GetBoard();
     ChessboardView* GetChessboard();
 
@@ -50,6 +52,7 @@ private:
 
     wxListView* movesPlayedList;
     wxPanel* transparentPanel;
+    wxTextCtrl* loadingText;
 
     void createPieces(wxStaticBitmap**, int, int, int);
 

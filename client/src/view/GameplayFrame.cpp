@@ -70,7 +70,7 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
     
     transparentPanel = new wxPanel(this, wxID_ANY, wxPoint(0,0), wxSize(1440*scal,810*scal));
     transparentPanel->SetBackgroundColour(wxColour(128, 120,120,120));
-    wxTextCtrl* loadingText = new wxTextCtrl(transparentPanel, wxID_ANY, wxString("Loading..."), wxDefaultPosition, transparentPanel->GetSize(), wxTE_CENTER | wxBORDER_NONE);
+    loadingText = new wxTextCtrl(transparentPanel, wxID_ANY, wxString("Loading..."), wxDefaultPosition, transparentPanel->GetSize(), wxTE_CENTER | wxBORDER_NONE | wxTE_READONLY);  
     loadingText->SetForegroundColour(wxColour(0, 0, 0));
     loadingText->SetFont(wxFont(wxFontInfo(34*scal).Family(wxFONTFAMILY_MODERN)));
     wxBoxSizer* vSizer = new wxBoxSizer(wxVERTICAL);
@@ -96,9 +96,16 @@ GameplayFrame::~GameplayFrame() {
     delete blackTimer;
 }
 
+void GameplayFrame::ShowTransparentPanel() {
+    transparentPanel->Show();
+}
+
 void GameplayFrame::HideTransparentPanel() {
     transparentPanel->Hide();
-    transparentPanel->Destroy();
+}
+
+void GameplayFrame::UpdateTransparentPanel(std::string text) {
+    loadingText->SetValue(text);
 }
 
 std::string GameplayFrame::secondsToString(int seconds) {

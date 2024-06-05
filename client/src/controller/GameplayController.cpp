@@ -25,6 +25,7 @@ GameplayController::GameplayController(GameOptions* options) {
 
     frame = new GameplayFrame(gameManager->isWhite(), options);
     frame->GetBoard()->Bind(wxEVT_CLOSE_WINDOW, &GameplayController::OnClose, this);
+    frame->GetChessboard()->SetPreFEN(gameManager->GetBoard().getFen());
 }
 
 
@@ -91,13 +92,34 @@ void printMove(chess::Move move){
     //TOdo stampare la mossa in un pannello accanto la scacchiera
 }
 
+bool GameplayController::CheckCheckmate(){
+    std::pair<chess::GameResultReason, chess::GameResult> gameOver = gameManager->GetBoard().isGameOver();
+    chess::GameResult result = gameOver.second;
+    switch(result) {
+        case chess::GameResult::WIN:
+            frame->UpdateTransparentPanel("You Win!");
+            frame->ShowTransparentPanel();
+            return true;
+        case chess::GameResult::LOSE:
+            frame->UpdateTransparentPanel("You Lose!");
+            frame->ShowTransparentPanel();
+            return true;
+        case chess::GameResult::DRAW:
+            frame->UpdateTransparentPanel("Draw!");
+            frame->ShowTransparentPanel();
+            return true;
+        case chess::GameResult::NONE:
+            return false;
+    }
+}
+
 void GameplayController::AsyncComputerMove() {
     auto f = [this]() {
         chess::Move move = gameManager->GetBestMove();
         chess::Board c = gameManager->GetBoard();
 
-        std::cout << "Piece at " << move.from() << " is " << c.at(chess::Square(move.from())).type() << std::endl;
-        std::cout << "Piece at " << move.to() << " is " << c.at(chess::Square(move.to())).type() << std::endl;
+        // std::cout << "Piece at " << move.from() << " is " << c.at(chess::Square(move.from())).type() << std::endl;
+        // std::cout << "Piece at " << move.to() << " is " << c.at(chess::Square(move.to())).type() << std::endl;
 
         c.makeMove(move);
         gameManager->swapTurn();
@@ -109,6 +131,10 @@ void GameplayController::AsyncComputerMove() {
 
         frame->CallAfter([this]() {
             frame->GetChessboard()->update(gameManager->GetBoard().getFen());
+            if (CheckCheckmate()) {
+                frame->StopUpdateTimer();
+                return;
+            }
             frame->ChangeTimer();
         });
     };
@@ -129,8 +155,13 @@ void GameplayController::makeMove(std::string_view to) {
     frame->ChangeTimer();
     unmarkFeasibles();
     playableMoves.clear();
-    gameManager->swapTurn();
 
+    if (CheckCheckmate()) {
+        frame->StopUpdateTimer();
+        return;
+    }
+
+    gameManager->swapTurn();
     AsyncComputerMove();
     // gameManager->makeComputerMove();
     // frame->ChangeTimer();
@@ -185,7 +216,7 @@ void GameplayController::ClickBoard(wxMouseEvent& event) {
                     markFeasible(move);
                 }
             }
-            chessboard->SetPreFEN(board.getFen());
+            // chessboard->SetPreFEN(board.getFen());
             if (moves.empty())
                 printf("No moves available \n");
             return;
