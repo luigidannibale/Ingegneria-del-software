@@ -23,6 +23,7 @@ public:
     void ShowTransparentPanel();
     void HideTransparentPanel();
     void UpdateTransparentPanel(std::string);
+    void AddMoveToList(chess::Piece, chess::Move);
     wxStaticBitmap* GetBoard();
     ChessboardView* GetChessboard();
 
@@ -30,6 +31,7 @@ public:
 private:
     float chessX = 50;
     float chessY = 90;
+    bool whiteMove;
 
     std::string const IMGPATH = "../resources/img/";
     std::atomic_int whiteSeconds;

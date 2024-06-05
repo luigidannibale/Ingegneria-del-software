@@ -46,8 +46,8 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
 
     movesPlayedList = new wxListView(this, wxID_ANY, wxPoint(800*scal, 200*scal), wxSize(300*scal, 200*scal), wxLC_REPORT);
     movesPlayedList->InsertColumn(0, "Num.", wxLIST_FORMAT_LEFT, 50*scal);
-    movesPlayedList->InsertColumn(1, "Piece Moved", wxLIST_FORMAT_LEFT, 100*scal);
-    movesPlayedList->InsertColumn(2, "Destination Square", wxLIST_FORMAT_LEFT, 150*scal);
+    movesPlayedList->InsertColumn(1, "White Moves", wxLIST_FORMAT_LEFT, 100*scal);
+    movesPlayedList->InsertColumn(2, "Black Moves", wxLIST_FORMAT_LEFT, 150*scal);
 
     this->whiteSeconds = options->GetGameDurationInSeconds();
     this->blackSeconds = options->GetGameDurationInSeconds();
@@ -106,6 +106,24 @@ void GameplayFrame::HideTransparentPanel() {
 
 void GameplayFrame::UpdateTransparentPanel(std::string text) {
     loadingText->SetValue(text);
+}
+
+void GameplayFrame::AddMoveToList(chess::Piece piece, chess::Move move) {
+    long index = movesPlayedList->GetItemCount();
+    std::string item = std::string(piece) + std::string(move.to());
+
+    if (whiteMove) {
+        movesPlayedList->InsertItem(index, std::to_string(index+1));
+        movesPlayedList->SetItem(index, 1, item);
+        whiteMove = false;
+    }
+    else {
+        index--;
+        movesPlayedList->SetItem(index, 2, item);
+        whiteMove = true;
+    }
+
+    movesPlayedList->EnsureVisible(index);
 }
 
 std::string GameplayFrame::secondsToString(int seconds) {

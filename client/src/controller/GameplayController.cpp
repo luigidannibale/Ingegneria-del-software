@@ -117,7 +117,7 @@ void GameplayController::AsyncComputerMove() {
     auto f = [this]() {
         chess::Move move = gameManager->GetBestMove();
         chess::Board c = gameManager->GetBoard();
-
+        chess::Piece piece = c.at(chess::Square(move.from()));
         // std::cout << "Piece at " << move.from() << " is " << c.at(chess::Square(move.from())).type() << std::endl;
         // std::cout << "Piece at " << move.to() << " is " << c.at(chess::Square(move.to())).type() << std::endl;
 
@@ -128,9 +128,11 @@ void GameplayController::AsyncComputerMove() {
         int random = std::rand() % MS_STOCKFISH_DELAY;
         std::cout << "Sleeping for " << random << " milliseconds" << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(random));
-
-        frame->CallAfter([this]() {
+        
+        std::string string_move = chess::uci::moveToUci(move);
+        frame->CallAfter([this, piece, move]() {
             frame->GetChessboard()->update(gameManager->GetBoard().getFen());
+            frame->AddMoveToList(piece, move);
             if (CheckCheckmate()) {
                 frame->StopUpdateTimer();
                 return;
@@ -147,11 +149,14 @@ void GameplayController::AsyncComputerMove() {
 void GameplayController::makeMove(std::string_view to) {
     chess::Move move = playableMoves.at(chess::Square(to));
     chess::Board c = gameManager->GetBoard();
+    chess::Piece piece = c.at(chess::Square(move.from()));
     c.makeMove(move);
     gameManager->updateBoard(c);
     frame->GetChessboard()->update(gameManager->GetBoard().getFen());
     // chessboard->MovePiece(preC->row, preC->col, coordinates->row, coordinates->col);
     printMove(move);
+    std::string string_move = chess::uci::moveToUci(move);
+    frame->AddMoveToList(piece, move);
     frame->ChangeTimer();
     unmarkFeasibles();
     playableMoves.clear();
