@@ -56,8 +56,8 @@ void handle_client(redisContext *c, const std::string& client_id) {
         // Choose who to start the game
         int random = rand() % 2;
 
-        std::string reply1 = player1 + ":" + player2 + ":" + std::to_string(random);
-        std::string reply2 = player2 + ":" + player1 + ":" + std::to_string(!random);
+        std::string reply1 = player1 + ":" + std::to_string(random);
+        std::string reply2 = player1 + ":" + std::to_string(!random);
 
         // Notify players that they have been matched
         // std::cout << "Prima del comando 1" << std::endl;

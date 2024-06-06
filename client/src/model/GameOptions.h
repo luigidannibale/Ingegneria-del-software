@@ -39,6 +39,7 @@ public:
     int GetGameDurationInSeconds();
     int GetGameIncrement();
     bool GetAgaintsHuman();
+    void SetStartSide(int);
 private:
     bool againtsHuman;
     enum ComputerElo computerElo;

@@ -29,3 +29,7 @@ ComputerElo GameOptions::GetComputerElo() {return computerElo;}
 bool GameOptions::GetAgaintsHuman() {return againtsHuman;}
 int GameOptions::GetGameDurationInSeconds() {return gameTime->GetDurationInSeconds();}
 int GameOptions::GetGameIncrement() {return gameTime->GetIncrement();}
+
+void GameOptions::SetStartSide(int startSide) {
+    this->startSide = static_cast<StartSide>(startSide);
+}

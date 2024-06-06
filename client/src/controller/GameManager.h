@@ -20,11 +20,13 @@ public:
     bool isWhite();
     Turn getTurn();
     bool playerCanPlay();
+    bool isAgainstHuman();
     void makeComputerMove();
     void swapTurn();
     void StartStockfish();
     chess::Move GetBestMove();
 private:
+    bool againstHuman;
     StockfishManager* stockfishManager;
     chess::Board board;
     bool playerIsWhite;

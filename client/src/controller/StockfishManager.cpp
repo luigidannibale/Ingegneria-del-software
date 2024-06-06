@@ -1,6 +1,6 @@
 #include "StockfishManager.h"
 
-StockfishManager::StockfishManager(){
+StockfishManager::StockfishManager() : isCommandRunning(false){
     initialize_stockfish();
 }
 StockfishManager::~StockfishManager() {
@@ -8,8 +8,13 @@ StockfishManager::~StockfishManager() {
 }
 
 void StockfishManager::close_stockfish() {
+    while (isCommandRunning.load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
     std::cout << "Stockfish successfully closed" << std::endl;
     send_command("quit");
+    closed = true;
     close(write_fd);
     close(read_fd);
     waitpid(pid_stockfish, nullptr, 0);
@@ -19,11 +24,11 @@ void StockfishManager::close_stockfish() {
 
 // Function to communicate with Stockfish and get the evaluation score
 std::string StockfishManager::run_commands(const std::vector<std::string>& commands) {
+    isCommandRunning.store(true);
 
     // Write commands to Stockfish
     for (const auto& command : commands) {
         send_command(command);
-
     }
 
     // Read output from Stockfish
@@ -35,14 +40,20 @@ std::string StockfishManager::run_commands(const std::vector<std::string>& comma
         buffer[count] = '\0';
         result += buffer;
     }
+
+    isCommandRunning.store(false);
     // Wait for child process to finish
     return result;
 }
 
 // Funzione per inviare un comando a Stockfish
 void StockfishManager::send_command(const std::string command) {
+    isCommandRunning.store(true);
+
     write(write_fd, command.c_str(), command.size());
     write(write_fd, "\n", 1);
+
+    isCommandRunning.store(false);
 }
 // Funzione per inizializzare Stockfish con i comandi UCI e isready
 void StockfishManager::initialize_stockfish() {
@@ -75,19 +86,26 @@ void StockfishManager::initialize_stockfish() {
     write_fd = in_pipe[1];
     read_fd = out_pipe[0];
 
+    isCommandRunning.store(true);
+
     try {
         send_command("uci");
         std::string uci_response = read_response();
         if (uci_response.find("uciok") == std::string::npos) {
+            isCommandRunning.store(false);
             throw std::runtime_error("Failed to receive uciok from Stockfish");
         }
         send_command("isready");
         std::string isready_response = read_response();
         if (isready_response.find("readyok") == std::string::npos) {
+            isCommandRunning.store(false);
             throw std::runtime_error("Failed to receive readyok from Stockfish");
         }
         std::cout << "Stockfish initialized successfully." << std::endl;
+        
+        isCommandRunning.store(false);
     } catch (const std::exception& e) {
+        isCommandRunning.store(false);
         std::cerr << "Error in initializing stockfish : " << e.what() << std::endl;
         throw;
     }
@@ -95,6 +113,8 @@ void StockfishManager::initialize_stockfish() {
 
 // Funzione per leggere la risposta di Stockfish
 std::string StockfishManager::read_response() {
+    isCommandRunning.store(true);
+
     std::string result;
     std::array<char, 128> buffer;
     ssize_t count;
@@ -111,12 +131,16 @@ std::string StockfishManager::read_response() {
     timeout.tv_usec = 0;
 
     while (true) {
+        
         // Controlla se ci sono dati disponibili per la lettura
         int rv = select(read_fd + 1, &set, NULL, NULL, &timeout);
         if (rv == -1) {
-            throw std::runtime_error("select() failed");
+            isCommandRunning.store(false);
+            return "";
+            // throw std::runtime_error("select() failed");
         } else if (rv == 0) {
             // Timeout raggiunto
+
             break;
         } else {
             // Dati disponibili per la lettura
@@ -133,7 +157,7 @@ std::string StockfishManager::read_response() {
                 break;
         }
     }
-
+    isCommandRunning.store(false);
     return result;
 }
 
@@ -148,6 +172,9 @@ std::string StockfishManager::get_bestmove(const std::string fen, int depth) {
         send_command(command);
     }
     std::string result = read_response();
+    if (result == "") {
+        return "";
+    }
     int t = result.find("bestmove ");
     size_t start = t + 9; // "bestmove " is 9 characters long
     size_t end = result.find(" ponder", start);
@@ -165,9 +192,13 @@ float StockfishManager::get_eval(const std::string fen){
         send_command(command);
     }
     std::string result = read_response();
+    if (result == "") {
+        return 0;
+    }
     int t = result.find("Final evaluation       ");
     size_t start = t + 23; // "Final evaluation       " is 23 characters long
     size_t end = result.find(" (", start);
     std::string eva = result.substr(start, end - start);
     std::cout<<"Eval is "<<eva<<std::endl;
+    return 0.0f;
 }

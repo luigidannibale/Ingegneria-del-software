@@ -5,17 +5,34 @@ const char* ROWS[] =  {"abcdefgh","hgfedcba"};
 const bool MARK_CELLS = true;
 bool Stock_init = false;
 
-GameplayController::GameplayController(GameOptions* options) {
+GameplayController::GameplayController(GameOptions* options, RedisManager* redisManager, std::string channel) {
     gameManager = new GameManager(options);
+    this->redisManager = redisManager;
+    this->channel = channel;
+    std::cout << "Channel is " << channel << std::endl;
     auto f = [this]() {
-        gameManager->StartStockfish();
+        if (!gameManager->isAgainstHuman()) {
+            gameManager->StartStockfish();
+        } else {
+            if (!gameManager->playerCanPlay()) {
+                this->redisManager->SubscribeToChannel(this->channel.c_str());
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+        }
 
+        gameClosed = false;
         frame->CallAfter([this]() {
+            if (gameClosed)
+                return;
+
             frame->GetBoard()->Bind(wxEVT_LEFT_DOWN, &GameplayController::ClickBoard, this);
             frame->HideTransparentPanel();
             frame->StartTimer();
             if (!gameManager->playerCanPlay()) {
-                AsyncComputerMove();
+                if (!gameManager->isAgainstHuman())
+                    AsyncComputerMove();
+                else
+                    AsyncHumanMove();
             }
         });
     };
@@ -24,18 +41,28 @@ GameplayController::GameplayController(GameOptions* options) {
     t.detach();
 
     frame = new GameplayFrame(gameManager->isWhite(), options);
-    frame->GetBoard()->Bind(wxEVT_CLOSE_WINDOW, &GameplayController::OnClose, this);
+    frame->Bind(wxEVT_CLOSE_WINDOW, &GameplayController::OnClose, this);
     frame->GetChessboard()->SetPreFEN(gameManager->GetBoard().getFen());
+    frame->Bind(wxEVT_TIMER, &GameplayController::UpdateTime, this);
 }
 
 
 GameplayController::~GameplayController(){
 
 }
+
 void GameplayController::OnClose(wxCloseEvent& event){
     std::cout<<"Chiudo gamplaycontroller"<<std::endl;
-    frame->~GameplayFrame();
+    // frame->StopUpdateTimer();
+    // frame->UpdateTransparentPanel("Game Closed");
+    // frame->ShowTransparentPanel();
     gameManager->~GameManager();
+    gameClosed = true;
+    frame->~GameplayFrame();
+}
+
+void GameplayController::UpdateTime(wxTimerEvent& event) {
+    frame->UpdateTime(event);
 }
 
 CellCoordinates* GetPosition(wxPoint pointClicked, bool isWhite, float cellDim){
@@ -116,6 +143,10 @@ bool GameplayController::CheckCheckmate(){
 void GameplayController::AsyncComputerMove() {
     auto f = [this]() {
         chess::Move move = gameManager->GetBestMove();
+        if (move == chess::Move()) {
+            std::cout << "Nessuna mossa ritornata" << std::endl;
+            return;
+        }
         chess::Board c = gameManager->GetBoard();
         chess::Piece piece = c.at(chess::Square(move.from()));
         // std::cout << "Piece at " << move.from() << " is " << c.at(chess::Square(move.from())).type() << std::endl;
@@ -128,9 +159,13 @@ void GameplayController::AsyncComputerMove() {
         int random = std::rand() % MS_STOCKFISH_DELAY;
         std::cout << "Sleeping for " << random << " milliseconds" << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(random));
-        
+        if (gameClosed)
+            return;
+
         std::string string_move = chess::uci::moveToUci(move);
         frame->CallAfter([this, piece, move]() {
+            if (gameClosed)
+                return;
             frame->GetChessboard()->update(gameManager->GetBoard().getFen());
             frame->AddMoveToList(piece, move);
             if (CheckCheckmate()) {
@@ -145,6 +180,65 @@ void GameplayController::AsyncComputerMove() {
     t.detach();
 }
 
+void GameplayController::AsyncHumanMove() {
+    auto f = [this]() {
+        std::string response = redisManager->WaitResponse();
+        std::string delimiter = ":";
+        size_t pos = response.find(delimiter);
+        std::string opponent_move = response.substr(0, pos);
+        std::string fen = response.substr(pos + 1);
+        std::cout << "Received move " << opponent_move << " from opponent" << std::endl;
+
+        chess::Move move = chess::uci::uciToMove(gameManager->GetBoard(), opponent_move);
+        chess::Board c = gameManager->GetBoard();
+        chess::Piece piece = c.at(chess::Square(move.from()));
+        c.makeMove(move);
+        gameManager->swapTurn();
+        gameManager->updateBoard(c);
+        frame->CallAfter([this, piece, move]() {
+            if (gameClosed)
+                return;
+            frame->GetChessboard()->update(gameManager->GetBoard().getFen());
+            frame->AddMoveToList(piece, move);
+            if (CheckCheckmate()) {
+                frame->StopUpdateTimer();
+                return;
+            }
+            frame->ChangeTimer();
+        });
+    };
+
+    std::thread t(f);
+    t.detach();
+}
+
+void GameplayController::PublishHumanMove(std::string move) {
+    if (gameClosed)
+        return;
+
+    std::cout << "The channel is " << channel << std::endl;
+
+    if (redisManager->UnsubscribeFromChannel(channel.c_str())) {
+        std::cout << "Unsubscribed from channel " << channel << std::endl;
+    } else {
+        std::cerr << "Failed to unsubscribe from channel " << channel << std::endl;
+        return;
+    }
+
+    if (redisManager->PublishToChannel(channel.c_str(), move.c_str())) {
+        std::cout << "Published move " << move << " to channel " << channel << std::endl;
+    } else {
+        std::cerr << "Failed to publish move " << move << " to channel " << channel << std::endl;
+        return;
+    }
+
+    if (redisManager->SubscribeToChannel(channel.c_str())) {
+        std::cout << "Subscribed to channel " << channel << std::endl;
+    } else {
+        std::cerr << "Failed to subscribe to channel " << channel << std::endl;
+        return;
+    }
+}
 
 void GameplayController::makeMove(std::string_view to) {
     chess::Move move = playableMoves.at(chess::Square(to));
@@ -157,17 +251,26 @@ void GameplayController::makeMove(std::string_view to) {
     printMove(move);
     std::string string_move = chess::uci::moveToUci(move);
     frame->AddMoveToList(piece, move);
-    frame->ChangeTimer();
+
     unmarkFeasibles();
     playableMoves.clear();
+
+    if (gameManager->isAgainstHuman())
+        PublishHumanMove(string_move);
 
     if (CheckCheckmate()) {
         frame->StopUpdateTimer();
         return;
     }
 
+    if (!gameManager->isAgainstHuman())
+        AsyncComputerMove();
+    else
+        AsyncHumanMove();
+
     gameManager->swapTurn();
-    AsyncComputerMove();
+    frame->ChangeTimer();
+
     // gameManager->makeComputerMove();
     // frame->ChangeTimer();
     // frame->GetChessboard()->update(gameManager->GetBoard().getFen());

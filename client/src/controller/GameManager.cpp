@@ -10,6 +10,8 @@ GameManager::GameManager(GameOptions* options){
         playerIsWhite = options->GetStartSide() == StartSide::White;
     turn = White;
 
+    againstHuman = options->GetAgaintsHuman();
+
     switch(options->GetComputerElo()) {
         case ComputerElo::Beginner:
             depthLevel = 2;
@@ -30,7 +32,8 @@ GameManager::GameManager(GameOptions* options){
     // stockfishManager = new StockfishManager();
 }
 GameManager::~GameManager() {
-    stockfishManager->close_stockfish();
+    if (!againstHuman)
+        stockfishManager->close_stockfish();
 }
 
 void GameManager::StartStockfish() {
@@ -44,6 +47,11 @@ chess::Move GameManager::GetBestMove() {
     random += depthLevel;
 
     std::string bestmove = stockfishManager->get_bestmove(fen, random);
+    if (bestmove == "") {
+        std::cout << "No moves returned by stockfish" << std::endl;
+        return chess::Move();
+    }
+
     stockfishManager->get_eval(fen);
     std::cout<< " Move to play now is " << bestmove <<std::endl;
 
@@ -101,6 +109,7 @@ bool GameManager::playerCanPlay() {
     if ((playerIsWhite && turn == Turn::White) || (!playerIsWhite && turn == Turn::Black)) return true;
     return false;
 }
+bool GameManager::isAgainstHuman() {return againstHuman;}
 chess::PieceGenType TypeToGenType(chess::PieceType piece){
     if(piece == chess::PieceType::NONE){
         std::cout << "Errore in TypeToGenType: mi hai passato NONE" << std::endl;

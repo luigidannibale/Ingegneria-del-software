@@ -27,11 +27,13 @@ public:
     wxStaticBitmap* GetBoard();
     ChessboardView* GetChessboard();
 
+    void UpdateTime(wxTimerEvent& event);
+
 
 private:
     float chessX = 50;
     float chessY = 90;
-    bool whiteMove;
+    bool whiteMove = true;
 
     std::string const IMGPATH = "../resources/img/";
     std::atomic_int whiteSeconds;
@@ -58,7 +60,6 @@ private:
 
     void createPieces(wxStaticBitmap**, int, int, int);
 
-    void UpdateTime(wxTimerEvent& event);
     void UpdateWhiteTimer(wxTimerEvent& event);
     void UpdateBlackTimer(wxTimerEvent& event);
     std::string secondsToString(int seconds);

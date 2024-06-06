@@ -1,6 +1,5 @@
 #include "GamemodeController.h"
 
-
 #include <hiredis/hiredis.h>
 #include <unistd.h>
 #include <thread>
@@ -11,6 +10,8 @@ GamemodeController::GamemodeController(wxPanel* parent)
     panel->Hide();
     backPanel = parent;
     addButtonEvents();
+
+    red = new RedisManager();
 }
 
 void GamemodeController::addButtonEvents() {
@@ -27,23 +28,23 @@ void GamemodeController::addButtonEvents() {
 }
 
 void WaitResponse(redisContext *c) {
-    std::cout << "Waiting for response" << std::endl;
-    while (true) {
-        redisReply *reply = nullptr;
-        if (redisGetReply(c, (void**)&reply) == REDIS_OK && reply != nullptr) {
-            if (reply != NULL) {
-                std::cout << "Received type: " << reply->type << std::endl;
-                std::cout << "Received message: " << reply->element[2]->str << std::endl;
-            }
-            else {
-                std::cerr << "Failed to receive message" << std::endl;
-            }
-            freeReplyObject(reply);
-            break;
-        }
-        std::cout << "non entra nell'if" << std::endl;
-    }
-    std::cout << "Quitting" << std::endl;
+    // std::cout << "Waiting for response" << std::endl;
+    // while (true) {
+    //     redisReply *reply = nullptr;
+    //     if (redisGetReply(c, (void**)&reply) == REDIS_OK && reply != nullptr) {
+    //         if (reply != NULL) {
+    //             std::cout << "Received type: " << reply->type << std::endl;
+    //             std::cout << "Received message: " << reply->element[2]->str << std::endl;
+    //         }
+    //         else {
+    //             std::cerr << "Failed to receive message" << std::endl;
+    //         }
+    //         freeReplyObject(reply);
+    //         break;
+    //     }
+    //     std::cout << "non entra nell'if" << std::endl;
+    // }
+    // std::cout << "Quitting" << std::endl;
 }
 
 void GamemodeController::SearchOpponent(wxCommandEvent& event) {
@@ -58,29 +59,14 @@ void GamemodeController::SearchOpponent(wxCommandEvent& event) {
     std::string mode = std::to_string(seconds) + "+" + std::to_string(increment);
 
     // Connect to server and send game request
-    redisContext *c = redisConnect("127.0.0.1", 6379);
-    if (c == NULL || c->err) {
-        if (c) {
-            std::cerr << "Connection error: " << c->errstr << std::endl;
-        } else {
-            std::cerr << "Connection error: can't allocate redis context" << std::endl;
-        }
+    if (!red->Connect()) {
+        std::cerr << "Failed to connect to Redis server" << std::endl;
         return;
     }
 
-    // Check if someone is on the 'new_clients' channel
-    redisReply *reply = (redisReply*)redisCommand(c, "PUBSUB NUMSUB new_clients");
-    if (reply == NULL || reply->type != REDIS_REPLY_ARRAY || reply->elements != 2) {
+    const char* channel = "new_clients";
+    if (!red->CheckChannel(channel)) {
         std::cerr << "Failed to check new_clients channel" << std::endl;
-        freeReplyObject(reply);
-        return;
-    }
-
-    int numSubscribers = reply->element[1]->integer;
-    freeReplyObject(reply);;
-
-    if (numSubscribers < 0) {
-        std::cout << "No one is on the 'new_clients' channel" << std::endl;
         return;
     }
 
@@ -89,28 +75,44 @@ void GamemodeController::SearchOpponent(wxCommandEvent& event) {
     std::string message = client_id + ":" + mode;
 
     // Publish client ID to 'new_clients' channel
-    reply = (redisReply*)redisCommand(c, "PUBLISH new_clients %s", message.c_str());
-    if (reply == NULL || reply->type != REDIS_REPLY_INTEGER) {
-        std::cerr << "Failed to publish client ID" << std::endl;
-        std::cout << "Errore: " << reply->str << std::endl;
-        freeReplyObject(reply);
+    if (!red->PublishToChannel(channel, message.c_str())) {
+        std::cerr << "Failed to publish message to " << channel << " channel" << std::endl;
         return;
     }
 
     // Set this to true so that the user can't search for another opponent
     searching = true;
 
-    // wait asynchroneously for the server to find an opponent
-    reply = (redisReply*)redisCommand(c, "SUBSCRIBE %s", client_id.c_str());
-    if (reply == NULL || reply->type != REDIS_REPLY_ARRAY) {
-        std::cerr << "Failed to subscribe to new_clients channel" << std::endl;
-        freeReplyObject(reply);
+    // wait asynchronously for the server to find an opponent
+    if (!red->SubscribeToChannel(client_id.c_str())) {
+        std::cerr << "Failed to subscribe to " << client_id << " channel" << std::endl;
         return;
     }
-    std::cout << "Subscribed to " << client_id.c_str() << " channel" << std::endl;
-    freeReplyObject(reply);
 
-    std::thread t(WaitResponse, c);
+    auto f = [this, client_id]() {
+        std::string response = red->WaitResponse();
+        searching = false;
+
+        // Parse the response
+        std::string delimiter = ":";
+        size_t pos = response.find(delimiter);
+        std::string opponent_id = response.substr(0, pos);
+        int side = std::stoi(response.substr(pos + 1)) + 1;
+        std::cout << "Found opponent: " << opponent_id << " with side " << side << std::endl;
+
+        if (!red->UnsubscribeFromChannel(client_id.c_str())) {
+            return;
+        }
+        
+        panel->CallAfter([this, opponent_id, side]() {
+            GameOptions* options = panel->GetGameOptions();
+            options->SetStartSide(side);
+            std::cout << "Passing to gameplay controller " << opponent_id << std::endl;
+            gameplayController = new GameplayController(options, red, opponent_id);
+        });
+    };
+
+    std::thread t(f);
     t.detach();
 }
 

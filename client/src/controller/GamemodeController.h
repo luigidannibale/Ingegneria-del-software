@@ -6,6 +6,7 @@
 #include "../view/GameMode.h"
 #include "../view/LoginPanel.h"
 #include "GameplayController.h"
+#include "RedisManager.h"
 
 class GamemodeController
 {
@@ -24,6 +25,7 @@ class GamemodeController
         bool searching = false;
 
         GameplayController* gameplayController;
+        RedisManager* red;
 
         void addButtonEvents();
         void SearchOpponent(wxCommandEvent&);

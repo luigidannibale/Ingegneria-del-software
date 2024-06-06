@@ -2,6 +2,7 @@
 #define GAMEPLAYCONTROLLER_H
 
 #include "GameManager.h"
+#include "RedisManager.h"
 #include "../lib.h"
 #include "../view/GameplayFrame.h"
 #include "../model/GameOptions.h"
@@ -27,11 +28,16 @@ public:
 
 class GameplayController {
 public:
-    GameplayController(GameOptions*);
+    GameplayController(GameOptions*, RedisManager* = nullptr, std::string channel = "");
     ~GameplayController();
+
 private:
     //bool isWhite;
+    bool gameClosed = false;
+
     GameManager* gameManager;
+    RedisManager* redisManager;
+    std::string channel;
     CellCoordinates* clickedCoord = nullptr;
     GameplayFrame* frame;
 
@@ -45,10 +51,13 @@ private:
     void unmarkFeasibles();
     bool CheckCheckmate();
     void AsyncComputerMove();
+    void PublishHumanMove(std::string);
+    void AsyncHumanMove();
 
     void UpdateChessboard();
     void OnClose(wxCloseEvent&);
     void ClickBoard(wxMouseEvent&);
+    void UpdateTime(wxTimerEvent&);
 };
 
 

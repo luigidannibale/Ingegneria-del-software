@@ -14,6 +14,8 @@
 #include <stdexcept>
 #include <string>
 #include <array>
+#include <atomic>
+#include <thread>
 
 
 class StockfishManager {
@@ -36,7 +38,9 @@ private:
     int read_fd;
     int write_fd;
     pid_t pid_stockfish;
-};
 
+    bool closed = false;
+    std::atomic<bool> isCommandRunning;
+};
 
 #endif //STOCKFISHMANAGER_H

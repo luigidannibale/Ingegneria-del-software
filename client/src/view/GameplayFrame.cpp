@@ -66,8 +66,6 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
     whiteTimer = new wxTimer(this, wxID_ANY);
     blackTimer = new wxTimer(this, wxID_ANY);
     
-    Bind(wxEVT_TIMER, &GameplayFrame::UpdateTime, this);
-    
     transparentPanel = new wxPanel(this, wxID_ANY, wxPoint(0,0), wxSize(1440*scal,810*scal));
     transparentPanel->SetBackgroundColour(wxColour(128, 120,120,120));
     loadingText = new wxTextCtrl(transparentPanel, wxID_ANY, wxString("Loading..."), wxDefaultPosition, transparentPanel->GetSize(), wxTE_CENTER | wxBORDER_NONE | wxTE_READONLY);  
@@ -79,6 +77,7 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
     vSizer->AddStretchSpacer();
     transparentPanel->SetSizer(vSizer);
     transparentPanel->Show();
+    
 }
 
 bool checkTimerRunning(wxTimer* timer) {
