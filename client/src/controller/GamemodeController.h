@@ -29,6 +29,7 @@ class GamemodeController
 
         void addButtonEvents();
         void SearchOpponent(wxCommandEvent&);
+        void StopSearchOpponent(wxCommandEvent&);
         void StartGame(wxCommandEvent&);
         void BackPanel(wxCommandEvent&);
         void ChangePanel(wxPanel*, wxPanel*);

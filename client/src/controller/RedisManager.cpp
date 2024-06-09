@@ -25,6 +25,12 @@ bool RedisManager::Connect() {
     return true;
 }
 
+void RedisManager::Disconnect() {
+    isCommandRunning.store(true);
+    redisFree(c);
+    isCommandRunning.store(false);
+}
+
 bool RedisManager::CheckChannel(const char* channel) {
     isCommandRunning.store(true);
     redisReply *reply = (redisReply*)redisCommand(c, "PUBSUB NUMSUB %s", channel);
@@ -78,7 +84,11 @@ bool RedisManager::SubscribeToChannel(const char* channel) {
 
 bool RedisManager::UnsubscribeFromChannel(const char* channel) {
     isCommandRunning.store(true);
-    redisReply *reply = (redisReply*)redisCommand(c, "UNSUBSCRIBE %s", channel);
+    redisReply *reply = nullptr;
+    if (channel == nullptr) 
+        reply = (redisReply*)redisCommand(c, "UNSUBSCRIBE");
+    else 
+        reply = (redisReply*)redisCommand(c, "UNSUBSCRIBE %s", channel);
     if (reply == NULL || reply->type != REDIS_REPLY_ARRAY) {
         std::cerr << "Failed to unsubscribe from new_clients channel" << std::endl;
         freeReplyObject(reply);

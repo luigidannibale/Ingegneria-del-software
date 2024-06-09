@@ -14,11 +14,11 @@ public:
     ~RedisManager();
 
     bool Connect();
-
+    void Disconnect();
     bool CheckChannel(const char* channel);
     bool PublishToChannel(const char* channel, const char* message);
     bool SubscribeToChannel(const char* channel);
-    bool UnsubscribeFromChannel(const char* channel);
+    bool UnsubscribeFromChannel(const char* channel = nullptr);
 
     std::string WaitResponse();
     void StopWaitingResponse();

@@ -13,6 +13,7 @@ public:
     wxButton* GetBtnBack();
     wxButton* GetBtnStartMultiplayer();
     wxButton* GetBtnStartComputer();
+    wxButton* GetBtnQuitMultiplayer();
     wxPanel* GetMultiplayerPanel();
     wxPanel* GetComputerPanel();
     GameOptions* GetGameOptions();
@@ -24,6 +25,7 @@ private:
 
     wxButton* btnStartComputer;
     wxButton* btnStartMultiplayer;
+    wxButton* btnQuitMultiplayer;
 
     wxPanel* multiplayerPanel;
     wxPanel* computerPanel;

@@ -122,6 +122,11 @@ void printMove(chess::Move move){
 bool GameplayController::CheckCheckmate(){
     std::pair<chess::GameResultReason, chess::GameResult> gameOver = gameManager->GetBoard().isGameOver();
     chess::GameResult result = gameOver.second;
+    chess::Color sideToMove = gameManager->GetBoard().sideToMove();
+    if (result != chess::GameResult::NONE && (
+        (sideToMove == chess::Color::BLACK && gameManager->isWhite()) || 
+        (sideToMove == chess::Color::WHITE && !gameManager->isWhite())))
+        result = chess::GameResult::WIN;
     switch(result) {
         case chess::GameResult::WIN:
             frame->UpdateTransparentPanel("You Win!");

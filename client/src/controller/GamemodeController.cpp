@@ -25,26 +25,7 @@ void GamemodeController::addButtonEvents() {
     });
     panel->GetBtnStartMultiplayer()->Bind(wxEVT_BUTTON, &GamemodeController::SearchOpponent, this);
     panel->GetBtnStartComputer()->Bind(wxEVT_BUTTON, &GamemodeController::StartGame, this);
-}
-
-void WaitResponse(redisContext *c) {
-    // std::cout << "Waiting for response" << std::endl;
-    // while (true) {
-    //     redisReply *reply = nullptr;
-    //     if (redisGetReply(c, (void**)&reply) == REDIS_OK && reply != nullptr) {
-    //         if (reply != NULL) {
-    //             std::cout << "Received type: " << reply->type << std::endl;
-    //             std::cout << "Received message: " << reply->element[2]->str << std::endl;
-    //         }
-    //         else {
-    //             std::cerr << "Failed to receive message" << std::endl;
-    //         }
-    //         freeReplyObject(reply);
-    //         break;
-    //     }
-    //     std::cout << "non entra nell'if" << std::endl;
-    // }
-    // std::cout << "Quitting" << std::endl;
+    panel->GetBtnQuitMultiplayer()->Bind(wxEVT_BUTTON, &GamemodeController::StopSearchOpponent, this);
 }
 
 void GamemodeController::SearchOpponent(wxCommandEvent& event) {
@@ -82,6 +63,7 @@ void GamemodeController::SearchOpponent(wxCommandEvent& event) {
 
     // Set this to true so that the user can't search for another opponent
     searching = true;
+    panel->GetBtnQuitMultiplayer()->Show();
 
     // wait asynchronously for the server to find an opponent
     if (!red->SubscribeToChannel(client_id.c_str())) {
@@ -105,6 +87,7 @@ void GamemodeController::SearchOpponent(wxCommandEvent& event) {
         }
         
         panel->CallAfter([this, opponent_id, side]() {
+            panel->GetBtnQuitMultiplayer()->Hide();
             GameOptions* options = panel->GetGameOptions();
             options->SetStartSide(side);
             std::cout << "Passing to gameplay controller " << opponent_id << std::endl;
@@ -115,6 +98,25 @@ void GamemodeController::SearchOpponent(wxCommandEvent& event) {
     std::thread t(f);
     t.detach();
 }
+
+void GamemodeController::StopSearchOpponent(wxCommandEvent& event){
+    std::cout << "Quit search multiplayer" << std::endl;
+
+    if (!red->UnsubscribeFromChannel()) {
+        std::cerr << "Failed to unsubscribe from channel" << std::endl;
+        return;
+    }
+
+    if (!red->PublishToChannel("new_clients", "quit")) {
+        std::cerr << "Failed to publish message to new_clients channel" << std::endl;
+        return;
+    }
+
+    red->Disconnect();
+    searching = false;
+    panel->GetBtnQuitMultiplayer()->Hide();
+}
+
 
 void GamemodeController::StartGame(wxCommandEvent& event){
     GameOptions* options = panel->GetGameOptions();

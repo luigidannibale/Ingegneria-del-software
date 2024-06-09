@@ -14,7 +14,7 @@ GameManager::GameManager(GameOptions* options){
 
     switch(options->GetComputerElo()) {
         case ComputerElo::Beginner:
-            depthLevel = 2;
+            depthLevel = 1;
             break;
         case ComputerElo::Intermediate:
             depthLevel = 5;

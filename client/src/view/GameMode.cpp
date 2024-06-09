@@ -23,6 +23,8 @@ GameMode::GameMode(wxWindow* parent): wxPanel(parent) {
 
     btnStartMultiplayer = new wxButton(multiplayerPanel, wxID_ANY, "Start", wxPoint(295, 450));
     // btnStartMultiplayer->Bind(wxEVT_BUTTON, &GameMode::StartMultiplayerGame, this);
+    btnQuitMultiplayer = new wxButton(multiplayerPanel, wxID_ANY, "Quit", wxPoint(150, 450));
+    btnQuitMultiplayer->Hide();
 
     computerPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_DOUBLE);
     initPanel(computerPanel);
@@ -108,5 +110,6 @@ wxButton* GameMode::GetBtnComputer()        { return btnComputer; }
 wxButton* GameMode::GetBtnBack()            { return btnBack; }
 wxButton* GameMode::GetBtnStartMultiplayer(){ return btnStartMultiplayer; }
 wxButton* GameMode::GetBtnStartComputer()   { return btnStartComputer; }
+wxButton* GameMode::GetBtnQuitMultiplayer() { return btnQuitMultiplayer; }
 wxPanel* GameMode::GetMultiplayerPanel()    { return multiplayerPanel; }
 wxPanel* GameMode::GetComputerPanel()       { return computerPanel; }
