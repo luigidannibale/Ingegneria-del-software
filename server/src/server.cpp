@@ -40,6 +40,21 @@ void handle_client(redisContext *c, const std::string& client_id) {
     std::string key = client_id.substr(pos + delimiter.length());
     std::string value = client_id.substr(0, pos);
     std::cout << "Value " << value << " Key: " << key << std::endl;
+
+    if (value == "quit") {
+        pos = key.find(delimiter);
+        value = key.substr(0, pos);
+        key = key.substr(pos + delimiter.length());
+
+        auto it = std::find(client_map[key].begin(), client_map[key].end(), value);
+        if (it != client_map[key].end()) {
+            client_map[key].erase(it);
+            std::cout << "Client successfully removed from waiting list" << std::endl;
+            return;
+        }
+        std::cout << "Client not found in waiting list" << std::endl;
+        return;
+    }
     
     client_map[key].push_back(value);
 

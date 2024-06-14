@@ -53,6 +53,22 @@ GameplayController::~GameplayController(){
 
 void GameplayController::OnClose(wxCloseEvent& event){
     std::cout<<"Chiudo gamplaycontroller"<<std::endl;
+
+    // if (!gameEnded && gameManager->isAgainstHuman()) {
+    //     std::string message = "quit";
+    //     if (redisManager->PublishToChannel(channel.c_str(), message.c_str())) {
+    //         std::cout << "Published message " << message << " to channel " << channel << std::endl;
+    //     } else {
+    //         std::cerr << "Failed to publish message " << message << " to channel " << channel << std::endl;
+    //     }
+
+    //     if (redisManager->UnsubscribeFromChannel(channel.c_str())) {
+    //         std::cout << "Unsubscribed from channel " << channel << std::endl;
+    //     } else {
+    //         std::cerr << "Failed to unsubscribe from channel " << channel << std::endl;
+    //     }
+    // }
+
     // frame->StopUpdateTimer();
     // frame->UpdateTransparentPanel("Game Closed");
     // frame->ShowTransparentPanel();
@@ -62,7 +78,27 @@ void GameplayController::OnClose(wxCloseEvent& event){
 }
 
 void GameplayController::UpdateTime(wxTimerEvent& event) {
-    frame->UpdateTime(event);
+    int res = frame->UpdateTime(event);
+    if (res != 0) { // A timer ended
+        if (gameManager->isWhite()) {
+            if (res == 1) { // White timer ended
+                frame->UpdateTransparentPanel("You Lose!");
+                frame->ShowTransparentPanel();
+            } else if (res == 2) { // Black timer ended
+                frame->UpdateTransparentPanel("You Win!");
+                frame->ShowTransparentPanel();
+            }
+        } else {
+            if (res == 1) {
+                frame->UpdateTransparentPanel("You Win!");
+                frame->ShowTransparentPanel();
+            } else if (res == 2) {
+                frame->UpdateTransparentPanel("You Lose!");
+                frame->ShowTransparentPanel();
+            }
+        
+        }
+    }
 }
 
 CellCoordinates* GetPosition(wxPoint pointClicked, bool isWhite, float cellDim){
@@ -131,18 +167,23 @@ bool GameplayController::CheckCheckmate(){
         case chess::GameResult::WIN:
             frame->UpdateTransparentPanel("You Win!");
             frame->ShowTransparentPanel();
-            return true;
+            gameEnded = true;
+            break;
         case chess::GameResult::LOSE:
             frame->UpdateTransparentPanel("You Lose!");
             frame->ShowTransparentPanel();
-            return true;
+            gameEnded = true;
+            break;
         case chess::GameResult::DRAW:
             frame->UpdateTransparentPanel("Draw!");
             frame->ShowTransparentPanel();
-            return true;
+            gameEnded = true;
+            break;
         case chess::GameResult::NONE:
-            return false;
+            gameEnded = false;
+            break;
     }
+    return gameEnded;
 }
 
 void GameplayController::AsyncComputerMove() {

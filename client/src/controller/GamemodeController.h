@@ -23,7 +23,7 @@ class GamemodeController
         wxPanel* backPanel;
 
         bool searching = false;
-
+        std::string message;
         GameplayController* gameplayController;
         RedisManager* red;
 

@@ -4,12 +4,17 @@ GameMode::GameMode(wxWindow* parent): wxPanel(parent) {
     SetSize(parent->GetSize());
     SetBackgroundColour(wxColour(118,150,86));
 
-    btnMultiplayer = new wxButton(this, wxID_ANY, "Play online",wxPoint(10,50));
-    btnComputer = new wxButton(this, wxID_ANY, "Play against computer",wxPoint(10,100));
-    btnBack = new wxButton(this, wxID_ANY, "Back",wxPoint(10,200));
+    wxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
-    multiplayerPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_DOUBLE);
-    initPanel(multiplayerPanel);
+    wxPanel *leftPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    wxPanel *rightPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_DOUBLE);
+
+    btnMultiplayer = new wxButton(leftPanel, wxID_ANY, "Play online",wxPoint(10,50));
+    btnComputer = new wxButton(leftPanel, wxID_ANY, "Play against computer",wxPoint(10,100));
+    btnBack = new wxButton(leftPanel, wxID_ANY, "Back",wxPoint(10,200));
+
+    multiplayerPanel = new wxPanel(rightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_DOUBLE);
+    initPanel(multiplayerPanel);    
 
     // Cadenza di gioco
     wxArrayString gameTime;
@@ -26,7 +31,7 @@ GameMode::GameMode(wxWindow* parent): wxPanel(parent) {
     btnQuitMultiplayer = new wxButton(multiplayerPanel, wxID_ANY, "Quit", wxPoint(150, 450));
     btnQuitMultiplayer->Hide();
 
-    computerPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_DOUBLE);
+    computerPanel = new wxPanel(rightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_DOUBLE);
     initPanel(computerPanel);
 
     // Cadenza di gioco
@@ -55,6 +60,14 @@ GameMode::GameMode(wxWindow* parent): wxPanel(parent) {
     startSideBox = new wxRadioBox(computerPanel, wxID_ANY, "Choose your pieces", wxDefaultPosition, wxDefaultSize, startSide, 1, wxRA_SPECIFY_COLS | wxNO_BORDER);
     startSideBox->SetPosition(wxPoint(20,250));
 
+    mainSizer->Add(leftPanel, wxSizerFlags(0).Expand());
+    mainSizer->Add(rightPanel, wxSizerFlags(1).Expand().Border(wxALL, 10));
+    
+    this->SetSizer(mainSizer);
+    this->Layout();
+
+    computerPanel->SetSize(rightPanel->GetSize());
+    multiplayerPanel->SetSize(rightPanel->GetSize());
 
     multiplayerPanel->Hide();
     computerPanel->Hide();
@@ -101,7 +114,7 @@ GameOptions* GameMode::GetGameOptions() {
 void GameMode::initPanel(wxPanel* panel){
     panel->SetBackgroundColour(wxColour(118,150,86));
     panel->SetSize(400,500);
-    panel->SetPosition(wxPoint(350,50));
+    // panel->SetPosition(wxPoint(350,50));
 }
 
 

@@ -27,7 +27,7 @@ public:
     wxStaticBitmap* GetBoard();
     ChessboardView* GetChessboard();
 
-    void UpdateTime(wxTimerEvent& event);
+    int UpdateTime(wxTimerEvent& event);
 
 
 private:

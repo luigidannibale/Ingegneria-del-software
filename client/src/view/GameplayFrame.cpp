@@ -140,10 +140,11 @@ std::string GameplayFrame::secondsToString(int seconds) {
     return std::string(buffer);
 }
 
-void GameplayFrame::UpdateTime(wxTimerEvent& event) {
+// returns 1 if white timer is over, 2 if black timer is over, 0 otherwise
+int GameplayFrame::UpdateTime(wxTimerEvent& event) {
     wxTimer* timer = &(event.GetTimer());
     if (!timer)
-        return; // Safety check
+        return 0; // Safety check
 
     // Get the ID of the timer that triggered the event
     int timerId = timer->GetId();
@@ -151,10 +152,19 @@ void GameplayFrame::UpdateTime(wxTimerEvent& event) {
     if (timerId == whiteTimer->GetId()) {
         whiteSeconds--;
         whiteTimerText->SetLabel(secondsToString(whiteSeconds));
+        if (whiteSeconds == 0) {
+            whiteTimer->Stop();
+            return 1;
+        }
     } else if (timerId == blackTimer->GetId()) {
         blackSeconds--;
         blackTimerText->SetLabel(secondsToString(blackSeconds));
+        if (blackSeconds == 0) {
+            blackTimer->Stop();
+            return 2;
+        }
     }
+    return 0;
 }
 
 void GameplayFrame::StopUpdateTimer() {
@@ -171,13 +181,15 @@ void GameplayFrame::ChangeTimer() {
         whiteTimer->Stop();
         whiteSeconds+=increment;
         whiteTimerText->SetLabel(secondsToString(whiteSeconds));
-        blackTimer->Start(1000);
+        if (blackSeconds > 0)
+            blackTimer->Start(1000);
     }
     else if (checkTimerRunning(blackTimer)) {
         blackTimer->Stop();
         blackSeconds+=increment;
         blackTimerText->SetLabel(secondsToString(blackSeconds));
-        whiteTimer->Start(1000);
+        if (whiteSeconds > 0)
+            whiteTimer->Start(1000);
     }
 }
 

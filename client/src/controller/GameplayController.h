@@ -34,7 +34,7 @@ public:
 private:
     //bool isWhite;
     bool gameClosed = false;
-
+    bool gameEnded = false;
     GameManager* gameManager;
     RedisManager* redisManager;
     std::string channel;

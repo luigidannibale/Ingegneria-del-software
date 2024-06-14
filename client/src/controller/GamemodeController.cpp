@@ -53,7 +53,7 @@ void GamemodeController::SearchOpponent(wxCommandEvent& event) {
 
     // Generate a unique client ID (replace this with your own logic)
     std::string client_id = "client_" + std::to_string(getpid());
-    std::string message = client_id + ":" + mode;
+    message = client_id + ":" + mode;
 
     // Publish client ID to 'new_clients' channel
     if (!red->PublishToChannel(channel, message.c_str())) {
@@ -107,7 +107,8 @@ void GamemodeController::StopSearchOpponent(wxCommandEvent& event){
         return;
     }
 
-    if (!red->PublishToChannel("new_clients", "quit")) {
+    message = "quit:" + message;
+    if (!red->PublishToChannel("new_clients", message.c_str())) {
         std::cerr << "Failed to publish message to new_clients channel" << std::endl;
         return;
     }
