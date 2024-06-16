@@ -13,38 +13,42 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
     Show();
     SetBackgroundColour(wxColour(118,150,86));
 
-    wxImage boardImg = img::GetImageAndScale(IMGPATH + "chessboard-blue.png",scal);
-    chessboard = new ChessboardView(new wxStaticBitmap(this, wxID_ANY, wxBitmap(boardImg)),"icons/", chessX, chessY, isWhite,scal);
+    wxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
+    wxPanel *leftPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    wxPanel *rightPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
-    opponentText = new wxStaticText(this, wxID_ANY,wxString("Opponent name"));
-    opponentText->Move(100*scal,20*scal);
-    userText = new wxStaticText(this, wxID_ANY,wxString("Io"));
-    userText->Move(100*scal,750*scal);
+    wxImage boardImg = img::GetImageAndScale(IMGPATH + "chessboard-blue.png",scal);
+    chessboard = new ChessboardView(new wxStaticBitmap(leftPanel, wxID_ANY, wxBitmap(boardImg)),"icons/", chessX, chessY, isWhite,scal);
+
+    opponentText = new wxStaticText(rightPanel, wxID_ANY,wxString("Opponent name"));
+    opponentText->Move(100*scal,60*scal);
+    userText = new wxStaticText(rightPanel, wxID_ANY,wxString("Io"));
+    userText->Move(100*scal,460*scal);
 
 
     const char* labelY[] = {"87654321","12345678"};
     const char* labelX[] =  {"ABCDEFGH","HGFEDCBA"};
 
     wxFont font(wxFontInfo(14).Family(wxFONTFAMILY_MODERN));
-    wxStaticText* prova = new wxStaticText(this, wxID_ANY, wxString(""));
+    wxStaticText* prova = new wxStaticText(leftPanel, wxID_ANY, wxString(""));
     wxSize fontSize = prova->GetFont().GetPixelSize();
 
     int index = isWhite?0:1;
     for (int i = 0; i < 8; i ++) {
-        wxStaticText* label = new wxStaticText(this, wxID_ANY, wxString(labelY[index][i]));
+        wxStaticText* label = new wxStaticText(leftPanel, wxID_ANY, wxString(labelY[index][i]));
         // label->SetFont(font);
         label->SetForegroundColour(wxColour(0, 0, 0)); // Black color
         label->Move(chessboard->GetBoard()->GetSize().GetWidth() + chessX+5, (chessY + i * GetChessboard()->GetCellDimension() + (GetChessboard()->GetCellDimension()/2 + fontSize.GetHeight()) / 2));
     }
     for (int i = 0; i < 8; i ++) {
-        wxStaticText* label = new wxStaticText(this, wxID_ANY, wxString(labelX[index][i]));
+        wxStaticText* label = new wxStaticText(leftPanel, wxID_ANY, wxString(labelX[index][i]));
         // label-SetFont(font);
         label->SetForegroundColour(wxColour(0, 0, 0)); // Black color
         label->Move(chessX+ i*GetChessboard()->GetCellDimension() + GetChessboard()->GetCellDimension()/2 , chessY-fontSize.GetHeight()-5);
     }
 
 
-    movesPlayedList = new wxListView(this, wxID_ANY, wxPoint(800*scal, 200*scal), wxSize(300*scal, 200*scal), wxLC_REPORT);
+    movesPlayedList = new wxListView(rightPanel, wxID_ANY, wxPoint(80*scal, 200*scal), wxSize(300*scal, 200*scal), wxLC_REPORT);
     movesPlayedList->InsertColumn(0, "Num.", wxLIST_FORMAT_LEFT, 50*scal);
     movesPlayedList->InsertColumn(1, "White Moves", wxLIST_FORMAT_LEFT, 100*scal);
     movesPlayedList->InsertColumn(2, "Black Moves", wxLIST_FORMAT_LEFT, 150*scal);
@@ -52,21 +56,29 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
     this->whiteSeconds = options->GetGameDurationInSeconds();
     this->blackSeconds = options->GetGameDurationInSeconds();
     this->increment = options->GetGameIncrement();
-    whiteStatText = new wxStaticText(this, wxID_ANY,wxString("White timer"));
-    whiteStatText->Move(1000*scal,60*scal);
-    blackStatText = new wxStaticText(this, wxID_ANY,wxString("Black timer"));
-    blackStatText->Move(1000*scal,460*scal);
+    // whiteStatText = new wxStaticText(rightPanel, wxID_ANY,wxString("White timer"));
+    // whiteStatText->Move(100*scal,60*scal);
+    // blackStatText = new wxStaticText(rightPanel, wxID_ANY,wxString("Black timer"));
+    // blackStatText->Move(100*scal,460*scal);
 
     std::string time = secondsToString(options->GetGameDurationInSeconds());
-    whiteTimerText = new wxStaticText(this, wxID_ANY, wxString(time));
-    blackTimerText = new wxStaticText(this, wxID_ANY, wxString(time));
-    whiteTimerText->Move(1000*scal, 100*scal);
-    blackTimerText->Move(1000*scal, 500*scal);
+    whiteTimerText = new wxStaticText(rightPanel, wxID_ANY, wxString(time));
+    blackTimerText = new wxStaticText(rightPanel, wxID_ANY, wxString(time));
+    int whiteY = isWhite ? 500 : 100;
+    int blackY = isWhite ? 100 : 500;
+    whiteTimerText->Move(100*scal, whiteY*scal);
+    blackTimerText->Move(100*scal, blackY*scal);
 
     whiteTimer = new wxTimer(this, wxID_ANY);
     blackTimer = new wxTimer(this, wxID_ANY);
+
+    mainSizer->Add(leftPanel, wxSizerFlags(1).Expand());
+    mainSizer->Add(rightPanel, wxSizerFlags(1).Expand());
+
+    SetSizerAndFit(mainSizer);
+    Layout();
     
-    transparentPanel = new wxPanel(this, wxID_ANY, wxPoint(0,0), wxSize(1440*scal,810*scal));
+    transparentPanel = new wxPanel(this, wxID_ANY, wxPoint(0,0), this->GetSize());
     transparentPanel->SetBackgroundColour(wxColour(128, 120,120,120));
     loadingText = new wxTextCtrl(transparentPanel, wxID_ANY, wxString("Loading..."), wxDefaultPosition, transparentPanel->GetSize(), wxTE_CENTER | wxBORDER_NONE | wxTE_READONLY);  
     loadingText->SetForegroundColour(wxColour(0, 0, 0));
@@ -77,7 +89,6 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
     vSizer->AddStretchSpacer();
     transparentPanel->SetSizer(vSizer);
     transparentPanel->Show();
-    
 }
 
 bool checkTimerRunning(wxTimer* timer) {
@@ -151,7 +162,7 @@ int GameplayFrame::UpdateTime(wxTimerEvent& event) {
     // std::cout << "Id del timer di turno: " << timerId << " Id whiteTimer: " << whiteTimer->GetId() << " Id blackTimer: " << blackTimer->GetId() << std::endl;
     if (timerId == whiteTimer->GetId()) {
         whiteSeconds--;
-        whiteTimerText->SetLabel(secondsToString(whiteSeconds));
+            whiteTimerText->SetLabel(secondsToString(whiteSeconds));
         if (whiteSeconds == 0) {
             whiteTimer->Stop();
             return 1;
