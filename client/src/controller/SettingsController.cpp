@@ -28,6 +28,8 @@ void SettingsController::BackPanel(wxCommandEvent& event) {
 
 void SettingsController::SaveSettings(wxCommandEvent& event) {
     configuration = panel->GetGameGraphicOptions();
+    backPanel->Show();
+    panel->Hide();
 }
 
 GameGraphicOptions* SettingsController::GetGameGraphicOptions() {

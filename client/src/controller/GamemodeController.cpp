@@ -90,10 +90,10 @@ void GamemodeController::SearchOpponent(wxCommandEvent& event) {
         panel->CallAfter([this, opponent_id, side]() {
             panel->GetBtnQuitMultiplayer()->Hide();
             GameOptions* options = panel->GetGameOptions();
-            GameGraphicOptions* graphicOptions = panel->GetGameGraphicOptions();
+            // GameGraphicOptions* graphicOptions = panel->GetGameGraphicOptions();
             options->SetStartSide(side);
             std::cout << "Passing to gameplay controller " << opponent_id << std::endl;
-            gameplayController = new GameplayController(options,graphicOptions, red, opponent_id);
+            gameplayController = new GameplayController(options, configuration, red, opponent_id);
         });
     };
 
@@ -123,13 +123,13 @@ void GamemodeController::StopSearchOpponent(wxCommandEvent& event){
 
 void GamemodeController::StartGame(wxCommandEvent& event){
     GameOptions* options = panel->GetGameOptions();
-    GameGraphicOptions* graphicOptions = panel->GetGameGraphicOptions();
+    // GameGraphicOptions* graphicOptions = panel->GetGameGraphicOptions();
 //    printf("Against human is %d \n",options->GetAgaintsHuman());
 //    printf("Gametime is %d|%d \n",options->GetGameDurationInSeconds(),options->GetGameIncrement());
 //    printf("Computer elo is %d \n",options->GetComputerElo());
 //    printf("You start with %d \n",options->GetStartSide());
 //    printf("---------------------------------------------------\n");
-    gameplayController = new GameplayController(options,graphicOptions);
+    gameplayController = new GameplayController(options, configuration);
 
 //    if (gameplayController == nullptr) {
 //        gameplayController = new GameplayController(options);
@@ -147,6 +147,10 @@ void GamemodeController::ChangePanel(wxPanel* show, wxPanel* hide) {
 
 void GamemodeController::ShowPanel() {
     panel->Show();
+}
+
+void GamemodeController::SetGameGraphicOptions(GameGraphicOptions* configuration) {
+    this->configuration = configuration;
 }
 
 void GamemodeController::BackPanel(wxCommandEvent& event) {

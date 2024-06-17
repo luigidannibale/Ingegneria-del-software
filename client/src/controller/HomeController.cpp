@@ -38,6 +38,8 @@ void HomeController::addButtonEvents() {
 
 void HomeController::showGamemode(wxCommandEvent& event){
     // GamemodeController* game = new GamemodeController(frame->GetHomePanel());
+    auto configuration = settingsController->GetGameGraphicOptions();
+    gamemodeController->SetGameGraphicOptions(configuration);
     gamemodeController->ShowPanel();
     frame->HidePanel();
 }

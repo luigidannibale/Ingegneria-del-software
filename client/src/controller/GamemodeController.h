@@ -16,11 +16,12 @@ class GamemodeController
 
 
         void ShowPanel();
-
+        void SetGameGraphicOptions(GameGraphicOptions*);
 
     private:
         GameMode* panel;
         wxPanel* backPanel;
+        GameGraphicOptions* configuration;
 
         bool searching = false;
         std::string message;

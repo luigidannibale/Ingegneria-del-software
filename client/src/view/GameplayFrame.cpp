@@ -33,6 +33,7 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options, GameGraphicOpti
     std::string iconset;
     switch (graphicOptions->GetPiecesStyle()) {
         case PiecesStyle::neo :
+        case PiecesStyle::neo2 :
             iconset = "icons_neo/";
             break;
         case PiecesStyle::pixel :

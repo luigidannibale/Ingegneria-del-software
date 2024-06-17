@@ -18,7 +18,6 @@ public:
     wxPanel* GetMultiplayerPanel();
     wxPanel* GetComputerPanel();
     GameOptions* GetGameOptions();
-    GameGraphicOptions* GetGameGraphicOptions();
 
 private:
     wxButton* btnMultiplayer;

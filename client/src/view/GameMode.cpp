@@ -109,16 +109,6 @@ GameOptions* GameMode::GetGameOptions() {
                                         static_cast<ComputerElo>(selectedDifficulty),
                                         static_cast<StartSide>(selectedSide));
 }
-GameGraphicOptions* GameMode::GetGameGraphicOptions() {
-    bool againstHuman = multiplayerPanel->IsShown();
-
-    if (againstHuman) selectedDuration = multiplayerTimeBox->GetSelection();
-    else selectedDuration = computerTimeBox->GetSelection();
-
-    selectedDifficulty = difficultyBox->GetSelection();
-    selectedSide = startSideBox->GetSelection();
-    return new GameGraphicOptions(BoardStyle::black,PiecesStyle::pixel);
-}
 
 void GameMode::initPanel(wxPanel* panel){
     panel->SetBackgroundColour(wxColour(118,150,86));
