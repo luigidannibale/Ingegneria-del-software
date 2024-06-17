@@ -61,6 +61,7 @@ SettingsPanel::SettingsPanel(wxWindow* parent, GameGraphicOptions* graphicOption
     selectedPiecesBitmap = new wxStaticBitmap(rightPanel, wxID_ANY, wxNullBitmap);
     // selectedPiecesBitmap->Move(150, 300);
     //-----------------------
+    this->graphicOptions = graphicOptions;
     SetGameGraphicOptions(graphicOptions);
 
 
@@ -106,61 +107,67 @@ SettingsPanel::SettingsPanel(wxWindow* parent, GameGraphicOptions* graphicOption
 }
 
 void SettingsPanel::SetGameGraphicOptions(GameGraphicOptions* graphicOptions) {
-    this->graphicOptions= graphicOptions;
+    // this->graphicOptions= graphicOptions;
     switch (graphicOptions->GetBoardStyle()) {
         case BoardStyle::black:
-            setSelectedChessboardBitmap(chessboard3,chessboard3Bitmap);
+            setSelectedChessboardBitmap(BoardStyle::black,chessboard3Bitmap);
             break;
         case BoardStyle::blue:
-            setSelectedChessboardBitmap(chessboard2,chessboard2Bitmap);
+            setSelectedChessboardBitmap(BoardStyle::blue,chessboard2Bitmap);
             break;
         case BoardStyle::brown:
-            setSelectedChessboardBitmap(chessboard1,chessboard1Bitmap);
+            setSelectedChessboardBitmap(BoardStyle::brown,chessboard1Bitmap);
             break;
     }
     switch (graphicOptions->GetPiecesStyle()) {
         case PiecesStyle::neo:
-            setSelectedPiecesBitmap(pieces1, pieces1Bitmap);
+            setSelectedPiecesBitmap(PiecesStyle::neo, pieces1Bitmap);
+            break;
+        case PiecesStyle::neo2:
+            setSelectedPiecesBitmap(PiecesStyle::neo2, pieces2Bitmap);
             break;
         case PiecesStyle::pixel:
-            setSelectedPiecesBitmap(pieces2, pieces2Bitmap);
+            setSelectedPiecesBitmap(PiecesStyle::pixel, pieces3Bitmap);
             break;
     }
 }
+
 GameGraphicOptions* SettingsPanel::GetGameGraphicOptions() {return graphicOptions;}
 
 void SettingsPanel::Chessboard1Click(wxMouseEvent&) {
-    setSelectedChessboardBitmap(chessboard1,chessboard1Bitmap);
+    setSelectedChessboardBitmap(BoardStyle::brown,chessboard1Bitmap);
 }
 void SettingsPanel::Chessboard2Click(wxMouseEvent&) {
-    setSelectedChessboardBitmap(chessboard2, chessboard2Bitmap);
+    setSelectedChessboardBitmap(BoardStyle::blue, chessboard2Bitmap);
 }
 void SettingsPanel::Chessboard3Click(wxMouseEvent&) {
-    setSelectedChessboardBitmap(chessboard3, chessboard3Bitmap);
+    setSelectedChessboardBitmap(BoardStyle::black, chessboard3Bitmap);
 }
 
-void SettingsPanel::setSelectedChessboardBitmap(wxImage image, wxStaticBitmap* bitmap){
-    selectedChessboard = image;
+void SettingsPanel::setSelectedChessboardBitmap(BoardStyle board, wxStaticBitmap* bitmap){
+    // selectedChessboard = image;
+    graphicOptions->SetBoardStyle(board);
     chessboardSelectedBitmap->SetBitmap(bitmap->GetBitmap());
     Layout();
 }
 
-void SettingsPanel::setSelectedPiecesBitmap(wxImage image, wxStaticBitmap* bitmap){
-    selectedPieces = image;
+void SettingsPanel::setSelectedPiecesBitmap(PiecesStyle pieces, wxStaticBitmap* bitmap){
+    // selectedPieces = image;
+    graphicOptions->SetPiecesStyle(pieces);
     selectedPiecesBitmap->SetBitmap(bitmap->GetBitmap());
     Layout();
 }
 
 void SettingsPanel::Pieces1Click(wxMouseEvent& event) {
-    setSelectedPiecesBitmap(pieces1, pieces1Bitmap);
+    setSelectedPiecesBitmap(PiecesStyle::neo, pieces1Bitmap);
 }
 
 void SettingsPanel::Pieces2Click(wxMouseEvent& event) {
-    setSelectedPiecesBitmap(pieces2, pieces2Bitmap);
+    setSelectedPiecesBitmap(PiecesStyle::neo2, pieces2Bitmap);
 }
 
 void SettingsPanel::Pieces3Click(wxMouseEvent& event) {
-    setSelectedPiecesBitmap(pieces3, pieces3Bitmap);
+    setSelectedPiecesBitmap(PiecesStyle::pixel, pieces3Bitmap);
 }
 
 wxButton* SettingsPanel::GetBtnBack() { return btnBack; }

@@ -21,8 +21,10 @@ private:
     wxButton* btnBack;
     wxButton* btnSave;
 
-    wxImage selectedChessboard;
-    wxImage selectedPieces;
+    // wxImage selectedChessboard;
+    // wxImage selectedPieces;
+    // BoardStyle boardStyle;
+    // PiecesStyle piecesStyle;
     wxStaticBitmap* chessboardSelectedBitmap;
     wxStaticBitmap* selectedPiecesBitmap;
 
@@ -49,8 +51,8 @@ private:
     void Pieces2Click(wxMouseEvent&);
     void Pieces3Click(wxMouseEvent&);
 
-    void setSelectedChessboardBitmap(wxImage, wxStaticBitmap*);
-    void setSelectedPiecesBitmap(wxImage, wxStaticBitmap*);
+    void setSelectedChessboardBitmap(BoardStyle, wxStaticBitmap*);
+    void setSelectedPiecesBitmap(PiecesStyle, wxStaticBitmap*);
 };
 
 #endif //SETTINGSPANEL_H

@@ -3,8 +3,9 @@
 
 SettingsController::SettingsController(wxPanel* parent)
 {
-    GameGraphicOptions* configuration = new GameGraphicOptions(BoardStyle::brown,PiecesStyle::neo);
-    panel = new SettingsPanel(parent->GetParent(), configuration);
+    configuration = new GameGraphicOptions(BoardStyle::brown,PiecesStyle::neo);
+    GameGraphicOptions* viewConfiguration = new GameGraphicOptions(configuration->GetBoardStyle(),configuration->GetPiecesStyle());
+    panel = new SettingsPanel(parent->GetParent(), viewConfiguration);
     panel->Hide();
     backPanel = parent;
     addButtonEvents();
@@ -12,6 +13,7 @@ SettingsController::SettingsController(wxPanel* parent)
 
 void SettingsController::addButtonEvents() {
     panel->GetBtnBack()->Bind(wxEVT_BUTTON, &SettingsController::BackPanel, this);
+    panel->GetBtnSave()->Bind(wxEVT_BUTTON, &SettingsController::SaveSettings, this);
 }
 
 void SettingsController::ShowPanel() {
@@ -21,6 +23,15 @@ void SettingsController::ShowPanel() {
 void SettingsController::BackPanel(wxCommandEvent& event) {
     backPanel->Show();
     panel->Hide();
+    panel->SetGameGraphicOptions(configuration);
+}
+
+void SettingsController::SaveSettings(wxCommandEvent& event) {
+    configuration = panel->GetGameGraphicOptions();
+}
+
+GameGraphicOptions* SettingsController::GetGameGraphicOptions() {
+    return configuration;
 }
 
 SettingsController::~SettingsController()

@@ -8,6 +8,7 @@ enum class BoardStyle : int{
 };
 enum class PiecesStyle : int{
     neo = 1,
+    neo2,
     pixel,
 };
 
@@ -16,6 +17,9 @@ public:
     GameGraphicOptions(BoardStyle, PiecesStyle);
     BoardStyle GetBoardStyle();
     PiecesStyle GetPiecesStyle();
+
+    void SetBoardStyle(BoardStyle);
+    void SetPiecesStyle(PiecesStyle);
 
 private:
     BoardStyle boardStyle;

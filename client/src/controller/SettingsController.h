@@ -12,13 +12,17 @@ public:
     ~SettingsController();
 
     void ShowPanel();
+    GameGraphicOptions* GetGameGraphicOptions();
 
 private:
     SettingsPanel* panel;
     wxPanel* backPanel;
 
+    GameGraphicOptions* configuration;
+
     void addButtonEvents();
     void BackPanel(wxCommandEvent&);
+    void SaveSettings(wxCommandEvent&);
 
 };
 
