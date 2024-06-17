@@ -3,6 +3,7 @@
 
 #include "../lib.h"
 #include "../view/SettingsPanel.h"
+#include "../view/GameGraphicOptions.h"
 
 class SettingsController
 {

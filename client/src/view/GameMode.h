@@ -3,6 +3,7 @@
 
 #include "../lib.h"
 #include "../model/GameOptions.h"
+#include "GameGraphicOptions.h"
 
 class GameMode : public wxPanel {
 public:
@@ -17,6 +18,7 @@ public:
     wxPanel* GetMultiplayerPanel();
     wxPanel* GetComputerPanel();
     GameOptions* GetGameOptions();
+    GameGraphicOptions* GetGameGraphicOptions();
 
 private:
     wxButton* btnMultiplayer;

@@ -3,20 +3,20 @@
 
 #include "../lib.h"
 #include "ImageFuncions.h"
-#include "../model/SettingsConfiguration.h"
+#include "GameGraphicOptions.h"
+
 
 class SettingsPanel : public wxPanel{
 public:
-    SettingsPanel(wxWindow*, SettingsConfiguration*);
+    SettingsPanel(wxWindow*, GameGraphicOptions*);
 
     wxButton* GetBtnBack();
     wxButton* GetBtnSave();
-    void SetSettingsConfig(SettingsConfiguration* configuration);
-    SettingsConfiguration* GetSettingsConfig();
+    void SetGameGraphicOptions(GameGraphicOptions*);
+    GameGraphicOptions* GetGameGraphicOptions();
 
 private:
-
-    SettingsConfiguration* configuration;
+    GameGraphicOptions* graphicOptions;
 
     wxButton* btnBack;
     wxButton* btnSave;

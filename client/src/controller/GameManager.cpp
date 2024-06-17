@@ -60,16 +60,10 @@ chess::Move GameManager::GetBestMove() {
 
     // Fix Castling moves
     if (f == "e8") {
-        if (t == "g8")
-            t = "h8";
-        else if (t == "c8")
-            t = "a8";
+        t = (t == "g8") ? "h8" : "a8";
     }
     else if (f == "e1") {
-        if (t == "g1")
-            t = "h1";
-        else if (t == "c1")
-            t = "a1";
+        t = (t == "g1") ? "h1" : "a1";
     }
 
     chess::Square from = chess::Square(f);
@@ -84,6 +78,13 @@ chess::Move GameManager::GetBestMove() {
         }
     }
     std::cout << "Errore in GetBestMove: mossa non trovata" << std::endl;
+
+    // DEBUG SECTION
+    std::cout << "Mosse disponibili: " << std::endl;
+    for (const auto &move : moves) {
+        std::cout << "Mossa: " << move.from() << " -> " << move.to() << std::endl;
+    }
+
     return chess::Move();
 }
 

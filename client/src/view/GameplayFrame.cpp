@@ -4,7 +4,7 @@
 #include <chrono>
 
 
-GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, wxID_ANY, wxString("Gioca la partita vinci la fatica"), wxPoint(0,0), wxSize(0,0), wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER) {
+GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options, GameGraphicOptions* graphicOptions): wxFrame(NULL, wxID_ANY, wxString("Gioca la partita vinci la fatica"), wxPoint(0,0), wxSize(0,0), wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER) {
     float scal =  static_cast<float>(wxSystemSettings::GetMetric ( wxSYS_SCREEN_Y )) / 1080; //optimized for 1080 width screen and scaled to be played on all screen
     chessX *= scal;
     chessY *= scal;
@@ -16,9 +16,31 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
     wxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
     wxPanel *leftPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
     wxPanel *rightPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    wxImage boardImg;
+    std::string board;
+    switch (graphicOptions->GetBoardStyle()) {
+        case BoardStyle::blue :
+            board = "chessboard-blue.png";
+            break;
+        case BoardStyle::brown :
+            board = "chessboard-brown.png";
+            break;
+        case BoardStyle::black :
+            board = "chessboard-black.png";
+            break;
+    }
 
-    wxImage boardImg = img::GetImageAndScale(IMGPATH + "chessboard-blue.png",scal);
-    chessboard = new ChessboardView(new wxStaticBitmap(leftPanel, wxID_ANY, wxBitmap(boardImg)),"icons/", chessX, chessY, isWhite,scal);
+    std::string iconset;
+    switch (graphicOptions->GetPiecesStyle()) {
+        case PiecesStyle::neo :
+            iconset = "icons_neo/";
+            break;
+        case PiecesStyle::pixel :
+            iconset = "icons_pixel/";
+            break;
+    }
+    boardImg = img::GetImageAndScale(IMGPATH + board,scal);
+    chessboard = new ChessboardView(new wxStaticBitmap(leftPanel, wxID_ANY, wxBitmap(boardImg)),iconset, chessX, chessY, isWhite,scal);
 
     opponentText = new wxStaticText(rightPanel, wxID_ANY,wxString("Opponent name"));
     opponentText->Move(100*scal,60*scal);
@@ -72,7 +94,7 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions* options): wxFrame(NULL, 
     whiteTimer = new wxTimer(this, wxID_ANY);
     blackTimer = new wxTimer(this, wxID_ANY);
 
-    mainSizer->Add(leftPanel, wxSizerFlags(1).Expand());
+    mainSizer->Add(leftPanel, wxSizerFlags(1).Expand().Border(wxBOTTOM, 10));
     mainSizer->Add(rightPanel, wxSizerFlags(1).Expand());
 
     SetSizerAndFit(mainSizer);
@@ -118,21 +140,14 @@ void GameplayFrame::UpdateTransparentPanel(std::string text) {
     loadingText->SetValue(text);
 }
 
-void GameplayFrame::AddMoveToList(chess::Piece piece, chess::Move move) {
+void GameplayFrame::AddMoveToList(std::string move) {
     long index = movesPlayedList->GetItemCount();
-    std::string item = std::string(piece) + std::string(move.to());
-
-    if (whiteMove) {
+    if (whiteMove)
         movesPlayedList->InsertItem(index, std::to_string(index+1));
-        movesPlayedList->SetItem(index, 1, item);
-        whiteMove = false;
-    }
-    else {
+    else
         index--;
-        movesPlayedList->SetItem(index, 2, item);
-        whiteMove = true;
-    }
-
+    movesPlayedList->SetItem(index, whiteMove ? 1 : 2, move);
+    whiteMove = !whiteMove;
     movesPlayedList->EnsureVisible(index);
 }
 

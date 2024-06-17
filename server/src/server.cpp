@@ -5,6 +5,7 @@
 #include <vector>
 #include <signal.h>
 #include <unordered_map>
+#include "Database.h"
 
 std::vector<std::string> connected_clients;
 std::unordered_map<std::string, std::vector<std::string>> client_map;
@@ -159,6 +160,46 @@ int main() {
     // listen_thread.join();
 
     redisFree(c);
+
+//    try {
+        ;
+        PGconn *conn = PQconnectdb(connection_string);
+
+        // Check to see that the backend connection was successfully made
+        if (PQstatus(conn) != CONNECTION_OK) {
+            std::cerr << "Connection to database failed: " << PQerrorMessage(conn) << std::endl;
+            PQfinish(conn);
+            return 1;
+        }
+
+        createSchema(conn);
+        std::cout << "Database schema created successfully." << std::endl;
+
+        PQfinish(conn);
+        //db.insertGiocatore("john_doe", "John", "Doe", "123", 1500);
+//        db.insertGiocatore("jane_smith", "Jane", "Smith", "123", 1600);
+//        db.insertGiocatore("alice_jones", "Alice", "Jones", "123", 1700);
+//        db.insertGiocatore("bob_brown", "Bob", "Brown", "123", 1800);
+//        db.insertGiocatore("charlie_black", "Charlie", "Black", "123", 1900);
+//
+//        db.insertPreferenza("john_doe", 1);
+//        db.insertPreferenza("jane_smith", 2);
+//        db.insertPreferenza("alice_jones", 3);
+//        db.insertPreferenza("bob_brown", 4);
+//        db.insertPreferenza("charlie_black", 5);
+//
+//        db.insertTema(1, 1);
+//        db.insertTema(1, 2);
+//        db.insertTema(2, 1);
+//        db.insertTema(2, 2);
+//        db.insertTema(3, 1);
+//        db.insertTema(3, 2);
+
+//
+//
+//    } catch (const std::exception &e) {
+//        std::cerr << e.what() << std::endl;
+//    }
 
     return 0;
 }

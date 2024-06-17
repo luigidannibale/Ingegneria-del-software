@@ -1,9 +1,9 @@
 #include "SettingsController.h"
-#include "../model/SettingsConfiguration.h"
+
 
 SettingsController::SettingsController(wxPanel* parent)
 {
-    SettingsConfiguration* configuration = new SettingsConfiguration(Chessboard::Brown,Pieces::p1);
+    GameGraphicOptions* configuration = new GameGraphicOptions(BoardStyle::brown,PiecesStyle::neo);
     panel = new SettingsPanel(parent->GetParent(), configuration);
     panel->Hide();
     backPanel = parent;

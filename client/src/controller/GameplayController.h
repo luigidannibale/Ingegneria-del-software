@@ -28,7 +28,7 @@ public:
 
 class GameplayController {
 public:
-    GameplayController(GameOptions*, RedisManager* = nullptr, std::string channel = "");
+    GameplayController(GameOptions*,GameGraphicOptions*, RedisManager* = nullptr, std::string channel = "");
     ~GameplayController();
 
 private:
@@ -48,6 +48,7 @@ private:
     std::map<chess::Square,chess::Move> playableMoves;
     void makeMove(std::string_view);
     void markFeasible(chess::Move);
+    void printMove(chess::Piece, chess::Move, bool, bool);
     void unmarkFeasibles();
     bool CheckCheckmate();
     void AsyncComputerMove();

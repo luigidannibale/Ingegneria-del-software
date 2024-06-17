@@ -13,6 +13,8 @@ GameTime::GameTime(int duration, int increment) {
 int GameTime::GetDurationInSeconds() {return duration;}
 int GameTime::GetIncrement() {return increment;}
 
+
+
 GameOptions::GameOptions(bool againstHuman,GameTime* gameTime, ComputerElo computerElo, StartSide startSide) {
     this->againtsHuman = againstHuman;
     this->computerElo = computerElo;

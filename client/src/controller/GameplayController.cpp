@@ -5,7 +5,7 @@ const char* ROWS[] =  {"abcdefgh","hgfedcba"};
 const bool MARK_CELLS = true;
 bool Stock_init = false;
 
-GameplayController::GameplayController(GameOptions* options, RedisManager* redisManager, std::string channel) {
+GameplayController::GameplayController(GameOptions* options,GameGraphicOptions* graphicOptions, RedisManager* redisManager, std::string channel) {
     gameManager = new GameManager(options);
     this->redisManager = redisManager;
     this->channel = channel;
@@ -40,7 +40,7 @@ GameplayController::GameplayController(GameOptions* options, RedisManager* redis
     std::thread t(f);
     t.detach();
 
-    frame = new GameplayFrame(gameManager->isWhite(), options);
+    frame = new GameplayFrame(gameManager->isWhite(), options, graphicOptions);
     frame->Bind(wxEVT_CLOSE_WINDOW, &GameplayController::OnClose, this);
     frame->GetChessboard()->SetPreFEN(gameManager->GetBoard().getFen());
     frame->Bind(wxEVT_TIMER, &GameplayController::UpdateTime, this);
@@ -52,7 +52,7 @@ GameplayController::~GameplayController(){
 }
 
 void GameplayController::OnClose(wxCloseEvent& event){
-    std::cout<<"Chiudo gamplaycontroller"<<std::endl;
+    std::cout<<"Chiudo gameplaycontroller"<<std::endl;
 
     // if (!gameEnded && gameManager->isAgainstHuman()) {
     //     std::string message = "quit";
@@ -149,10 +149,25 @@ void GameplayController::unmarkFeasibles(){
         chessboard->GetCell(r, f)->feasible->Show(false);
     }
 }
-void printMove(chess::Move move){
-    printf("E' stata giocata la mossa : ");
-    std::cout << move << std::endl;
-    //TOdo stampare la mossa in un pannello accanto la scacchiera
+void GameplayController::printMove(chess::Piece piece,chess::Move move, bool capture, bool ischeck){
+    std::cout << "E' stata giocata la mossa : " << move << std::endl;
+    std::string p = std::string(piece);
+    std::string item = (p != "p" && p != "P" ? p : "") + std::string(move.to());
+    if (move.typeOf() == move.CASTLING){
+        if (move.to()==chess::Square("h8") || move.to()==chess::Square("h1"))
+            item = "O-O";
+        if (move.to()==chess::Square("a8") || move.to()==chess::Square("a1"))
+            item = "O-O-O";
+    }
+    else if (capture)
+        item = (p != "p" && p != "P" ? p : "") + std::string(move.from()) + "x" + std::string(move.to());
+
+    auto gameOver = gameManager->GetBoard().isGameOver().second;
+    if (gameOver != chess::GameResult::NONE && gameOver != chess::GameResult::DRAW)
+        item = item+"#";
+    else if (ischeck)
+        item = item+"+";
+    frame->AddMoveToList(item);
 }
 
 bool GameplayController::CheckCheckmate(){
@@ -188,20 +203,23 @@ bool GameplayController::CheckCheckmate(){
 
 void GameplayController::AsyncComputerMove() {
     auto f = [this]() {
-        chess::Move move = gameManager->GetBestMove();
-        if (move == chess::Move()) {
-            std::cout << "Nessuna mossa ritornata" << std::endl;
-            return;
+        chess::Move move = chess::Move();
+        int i = 0;
+        while (move == chess::Move()) {
+            move = gameManager->GetBestMove();
+            if (i == 10)
+                return;
         }
         chess::Board c = gameManager->GetBoard();
+
         chess::Piece piece = c.at(chess::Square(move.from()));
-        // std::cout << "Piece at " << move.from() << " is " << c.at(chess::Square(move.from())).type() << std::endl;
-        // std::cout << "Piece at " << move.to() << " is " << c.at(chess::Square(move.to())).type() << std::endl;
+
+        bool isCapture = gameManager->GetBoard().isCapture(move);
 
         c.makeMove(move);
         gameManager->swapTurn();
         gameManager->updateBoard(c);
-
+        bool inCheck = gameManager->GetBoard().inCheck();
         int random = std::rand() % MS_STOCKFISH_DELAY;
         std::cout << "Sleeping for " << random << " milliseconds" << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(random));
@@ -209,11 +227,12 @@ void GameplayController::AsyncComputerMove() {
             return;
 
         std::string string_move = chess::uci::moveToUci(move);
-        frame->CallAfter([this, piece, move]() {
+        frame->CallAfter([this, piece, move, isCapture, inCheck]() {
             if (gameClosed)
                 return;
             frame->GetChessboard()->update(gameManager->GetBoard().getFen());
-            frame->AddMoveToList(piece, move);
+            printMove(piece,move, isCapture, inCheck);
+            //frame->AddMoveToList(piece, move);
             if (CheckCheckmate()) {
                 frame->StopUpdateTimer();
                 return;
@@ -238,14 +257,20 @@ void GameplayController::AsyncHumanMove() {
         chess::Move move = chess::uci::uciToMove(gameManager->GetBoard(), opponent_move);
         chess::Board c = gameManager->GetBoard();
         chess::Piece piece = c.at(chess::Square(move.from()));
+
+        bool isCapture = gameManager->GetBoard().isCapture(move);
+
         c.makeMove(move);
         gameManager->swapTurn();
         gameManager->updateBoard(c);
-        frame->CallAfter([this, piece, move]() {
+
+        bool inCheck = gameManager->GetBoard().inCheck();
+        frame->CallAfter([this, piece, move, isCapture, inCheck]() {
             if (gameClosed)
                 return;
             frame->GetChessboard()->update(gameManager->GetBoard().getFen());
-            frame->AddMoveToList(piece, move);
+            printMove(piece,move, isCapture, inCheck);
+            //frame->AddMoveToList(piece, move);
             if (CheckCheckmate()) {
                 frame->StopUpdateTimer();
                 return;
@@ -290,13 +315,16 @@ void GameplayController::makeMove(std::string_view to) {
     chess::Move move = playableMoves.at(chess::Square(to));
     chess::Board c = gameManager->GetBoard();
     chess::Piece piece = c.at(chess::Square(move.from()));
+
+    bool isCapture = gameManager->GetBoard().isCapture(move);
     c.makeMove(move);
     gameManager->updateBoard(c);
     frame->GetChessboard()->update(gameManager->GetBoard().getFen());
+    bool inCheck = gameManager->GetBoard().inCheck();
     // chessboard->MovePiece(preC->row, preC->col, coordinates->row, coordinates->col);
-    printMove(move);
+    printMove(piece,move,isCapture,inCheck);
     std::string string_move = chess::uci::moveToUci(move);
-    frame->AddMoveToList(piece, move);
+    //frame->AddMoveToList(piece, move);
 
     unmarkFeasibles();
     playableMoves.clear();

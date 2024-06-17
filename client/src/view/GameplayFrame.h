@@ -8,12 +8,13 @@
 #include "ImageFuncions.h"
 #include "ChessboardView.h"
 #include "../model/GameOptions.h"
+#include "GameGraphicOptions.h"
 #include <wx/listctrl.h>
 
 
 class GameplayFrame : public wxFrame{
 public:
-    GameplayFrame(bool, GameOptions*);
+    GameplayFrame(bool, GameOptions*, GameGraphicOptions*);
     ~GameplayFrame();
 
     void StartGame();
@@ -23,7 +24,7 @@ public:
     void ShowTransparentPanel();
     void HideTransparentPanel();
     void UpdateTransparentPanel(std::string);
-    void AddMoveToList(chess::Piece, chess::Move);
+    void AddMoveToList(std::string );
     wxStaticBitmap* GetBoard();
     ChessboardView* GetChessboard();
 

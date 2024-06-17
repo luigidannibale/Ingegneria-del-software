@@ -21,7 +21,6 @@ public:
     int GetDurationInSeconds();
     int GetIncrement();
 
-
 private:
     // In seconds
     int duration;
@@ -36,6 +35,7 @@ public:
     ComputerElo GetComputerElo();
     StartSide GetStartSide();
     GameTime* GetGameTime();
+
     int GetGameDurationInSeconds();
     int GetGameIncrement();
     bool GetAgaintsHuman();
@@ -45,6 +45,7 @@ private:
     enum ComputerElo computerElo;
     enum StartSide startSide;
     GameTime* gameTime;
+
 };
 
 

@@ -35,6 +35,7 @@ void GamemodeController::SearchOpponent(wxCommandEvent& event) {
     std::cout << "Searching for opponent" << std::endl;
 
     GameOptions* options = panel->GetGameOptions();
+
     int seconds = options->GetGameDurationInSeconds();
     int increment = options->GetGameIncrement();
     std::string mode = std::to_string(seconds) + "+" + std::to_string(increment);
@@ -89,9 +90,10 @@ void GamemodeController::SearchOpponent(wxCommandEvent& event) {
         panel->CallAfter([this, opponent_id, side]() {
             panel->GetBtnQuitMultiplayer()->Hide();
             GameOptions* options = panel->GetGameOptions();
+            GameGraphicOptions* graphicOptions = panel->GetGameGraphicOptions();
             options->SetStartSide(side);
             std::cout << "Passing to gameplay controller " << opponent_id << std::endl;
-            gameplayController = new GameplayController(options, red, opponent_id);
+            gameplayController = new GameplayController(options,graphicOptions, red, opponent_id);
         });
     };
 
@@ -121,12 +123,13 @@ void GamemodeController::StopSearchOpponent(wxCommandEvent& event){
 
 void GamemodeController::StartGame(wxCommandEvent& event){
     GameOptions* options = panel->GetGameOptions();
+    GameGraphicOptions* graphicOptions = panel->GetGameGraphicOptions();
 //    printf("Against human is %d \n",options->GetAgaintsHuman());
 //    printf("Gametime is %d|%d \n",options->GetGameDurationInSeconds(),options->GetGameIncrement());
 //    printf("Computer elo is %d \n",options->GetComputerElo());
 //    printf("You start with %d \n",options->GetStartSide());
 //    printf("---------------------------------------------------\n");
-    gameplayController = new GameplayController(options);
+    gameplayController = new GameplayController(options,graphicOptions);
 
 //    if (gameplayController == nullptr) {
 //        gameplayController = new GameplayController(options);

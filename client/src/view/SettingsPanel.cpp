@@ -1,7 +1,7 @@
 #include "SettingsPanel.h"
 
 
-SettingsPanel::SettingsPanel(wxWindow* parent, SettingsConfiguration* configuration): wxPanel(parent) {
+SettingsPanel::SettingsPanel(wxWindow* parent, GameGraphicOptions* graphicOptions): wxPanel(parent) {
     SetSize(parent->GetSize());
     SetBackgroundColour(wxColour(118,150,86));
 
@@ -33,15 +33,15 @@ SettingsPanel::SettingsPanel(wxWindow* parent, SettingsConfiguration* configurat
     chessboard2Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Chessboard2Click, this);
     chessboard3Bitmap->Bind(wxEVT_LEFT_DOWN, &SettingsPanel::Chessboard3Click, this);
 
-    pieces1 = img::GetImageAndScale(IMGPATH + "icons/blackKnight.png", 1.44);
+    pieces1 = img::GetImageAndScale(IMGPATH + "icons_neo/blackKnight.png", 1.44);
     pieces1Bitmap = new wxStaticBitmap(leftPanel, wxID_ANY, wxBitmap(pieces1));
     // pieces1Bitmap->Move(100, 150);
 
-    pieces2 = img::GetImageAndScale(IMGPATH + "icons/whiteKnight.png", 1.44);
+    pieces2 = img::GetImageAndScale(IMGPATH + "icons_neo/whiteKnight.png", 1.44);
     pieces2Bitmap = new wxStaticBitmap(leftPanel, wxID_ANY, wxBitmap(pieces2));
     // pieces2Bitmap->Move(200, 150);
 
-    pieces3 = img::GetImageAndScale(IMGPATH + "icons2/black_horse.png", 1.8);
+    pieces3 = img::GetImageAndScale(IMGPATH + "icons_pixel/whiteKnight.png", 1.44);
     pieces3Bitmap = new wxStaticBitmap(leftPanel, wxID_ANY, wxBitmap(pieces3));
     // pieces3Bitmap->Move(300, 150);
 
@@ -61,7 +61,7 @@ SettingsPanel::SettingsPanel(wxWindow* parent, SettingsConfiguration* configurat
     selectedPiecesBitmap = new wxStaticBitmap(rightPanel, wxID_ANY, wxNullBitmap);
     // selectedPiecesBitmap->Move(150, 300);
     //-----------------------
-    SetSettingsConfig(configuration);
+    SetGameGraphicOptions(graphicOptions);
 
 
     wxStaticText* chooseText = new wxStaticText(this, wxID_ANY, "Scegliere una configurazione", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
@@ -105,32 +105,30 @@ SettingsPanel::SettingsPanel(wxWindow* parent, SettingsConfiguration* configurat
     // TODO: Scacchiera di riferimento per vedere la configurazione con tutti i pezzi della scacchiera
 }
 
-void SettingsPanel::SetSettingsConfig(SettingsConfiguration* configuration) {
-    this->configuration= configuration;
-    switch (configuration->GetChessboard()) {
-        case Chessboard::Black:
+void SettingsPanel::SetGameGraphicOptions(GameGraphicOptions* graphicOptions) {
+    this->graphicOptions= graphicOptions;
+    switch (graphicOptions->GetBoardStyle()) {
+        case BoardStyle::black:
             setSelectedChessboardBitmap(chessboard3,chessboard3Bitmap);
             break;
-        case Chessboard::Blue:
+        case BoardStyle::blue:
             setSelectedChessboardBitmap(chessboard2,chessboard2Bitmap);
             break;
-        case Chessboard::Brown:
+        case BoardStyle::brown:
             setSelectedChessboardBitmap(chessboard1,chessboard1Bitmap);
             break;
     }
-    switch (configuration->GetPieces()) {
-        case Pieces::p1:
+    switch (graphicOptions->GetPiecesStyle()) {
+        case PiecesStyle::neo:
             setSelectedPiecesBitmap(pieces1, pieces1Bitmap);
             break;
-        case Pieces::p2:
+        case PiecesStyle::pixel:
             setSelectedPiecesBitmap(pieces2, pieces2Bitmap);
-            break;
-        case Pieces::p3:
-            setSelectedPiecesBitmap(pieces3, pieces3Bitmap);
             break;
     }
 }
-SettingsConfiguration* SettingsPanel::GetSettingsConfig() {return configuration;}
+GameGraphicOptions* SettingsPanel::GetGameGraphicOptions() {return graphicOptions;}
+
 void SettingsPanel::Chessboard1Click(wxMouseEvent&) {
     setSelectedChessboardBitmap(chessboard1,chessboard1Bitmap);
 }
