@@ -1,0 +1,18 @@
+/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/opt/clion/bin/ninja/linux/x64/ninja -DCMAKE_CXX_COMPILER=/bin/g++ -G Ninja -S /home/luigi/CLionProjects/Ingegneria-degli-scacchi-client -B /home/luigi/CLionProjects/Ingegneria-degli-scacchi-client/cmake-build-debug
+CMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- The CXX compiler identification is GNU 14.1.1
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /bin/g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (32.0s)
+-- Generating done (0.2s)
+-- Build files have been written to: /home/luigi/CLionProjects/Ingegneria-degli-scacchi-client/cmake-build-debug
