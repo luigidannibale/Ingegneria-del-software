@@ -72,7 +72,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /usr/bin/cmake --regenerate-during-build -S/home/luigi/CLionProjects/Ingegneria-degli-scacchi-client -B/home/luigi/CLionProjects/Ingegneria-degli-scacchi-client/cmake-build-debug
+  command = /usr/bin/cmake --regenerate-during-build -S/home/luigi/Documents/Ingegeria-degli-scacchi/Client -B/home/luigi/Documents/Ingegeria-degli-scacchi/Client/cmake-build-debug
   description = Re-running CMake...
   generator = 1
 

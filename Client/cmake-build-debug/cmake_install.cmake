@@ -1,4 +1,4 @@
-# Install script for directory: /home/luigi/CLionProjects/Ingegneria-degli-scacchi-client
+# Install script for directory: /home/luigi/Documents/Ingegeria-degli-scacchi/Client
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/luigi/CLionProjects/Ingegneria-degli-scacchi-client/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/luigi/Documents/Ingegeria-degli-scacchi/Client/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
