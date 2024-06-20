@@ -1,0 +1,182 @@
+------------------------------------------------------
+operazione new_game codice 101:
+input expected = {
+	time_duration: x,
+	time_increment: y,
+	black : u_id_1,
+	white : u_id_2
+} |
+  | int : x,y
+  |string : u_id_1,u_id_2
+
+output expected = {
+	game_id = g_id
+} |
+  | int g_id
+{
+	operations expected:
+	- create game with:
+		game_id = g_id,
+		time_duration: x,
+		time_increment: y,
+		black : u_id_1,
+		white : u_id_2,
+		moves : empty{}
+		esito : null
+		motivo : null
+}
+------------------------------------------------------
+operazione search_opponent codice 102:
+input expected = {
+    user : u_id
+	time_duration: x,
+	time_increment: y
+} |
+  | int : x,y,
+  | string : u_id
+
+output expected = {}
+------------------------------------------------------
+operazione update_game codice 103:
+input expected = {
+	game_id : g_id,
+	moves : {}
+	esito : e
+	motivo : m
+} |
+  | int : g_id
+  | esito : e as enum("W","D","B","NF")
+  | motivo : m as enum("checkmate","wonOnTime","quitmate","stalemate","insufficientMaterial","threefoldRepetition,"50moveRule","NF")
+  | v.esito e -> m : 1|3-> 1|2|3, 2-> 4,5,6,7, 4 -> 8
+
+output expected = {
+	game_id : g_id
+} |
+  | int g_id
+{
+	operations expected:
+	- update game with:
+		time_duration: x,
+		time_increment: y,
+		black : u_id_1,
+		white : u_id_2,
+		moves : empty{}
+		esito : null
+		motivo : null
+			where game_id = g_id
+}
+------------------------------------------------------
+operazione search_game codice 104:
+input expected = {
+	game_id : g_id
+} |
+  | int : g_id
+
+output expected = {
+	game : g (nullable)
+} |
+  | Game g
+{
+	operations expected:
+	return (select *
+			from Game g
+			where g.id = g_id)
+}
+------------------------------------------------------
+operazione new_user codice 201:
+input expected = {
+    nome : n
+    cognome : c
+    username : u_id
+    elo : points
+    chessboard_style : c_st
+    pieces_style : p_st
+}   |
+    | int points
+    | string n,c,u_id
+    | chessboard_style : c_st as enum("blue","brown","black")
+    | pieces_style : c_st as enum("neo","pixel")
+output expected = {
+	User : u
+	UserPreference : p
+} |
+  | User u
+  | UserPreference p
+{
+	operations expected:
+	- create User u with:
+	    username : u_id
+	    nome : n
+        cognome : c
+        elo : points
+    - create UserPreference pu with:
+        User : u_id
+        UserPreference : (
+            select p_id
+            from UserPreference
+            where chessboard_style = c_st and pieces_style = p_st
+            )
+}
+------------------------------------------------------
+operazione update_user codice 202:
+input expected = {
+    nome : n
+    cognome : c
+    username : u_id
+    elo : points
+}   |
+    | int points
+    | string n,c,u_id
+output expected = {
+	User : u
+} |
+  | User u
+{
+	operations expected:
+	- update User u with:
+	    username : u_id
+	    nome : n
+        cognome : c
+        elo : points
+}
+------------------------------------------------------
+operazione update_UserPreference codice 203:
+input expected = {
+    username : u_id
+    chessboard_style : c_st
+    pieces_style : p_st
+}   |
+    | int points
+    | string : u_id
+    | chessboard_style : c_st as enum("blue","brown","black")
+    | pieces_style : c_st as enum("neo","pixel")
+output expected = {
+	UserPreference : p
+} |
+  | UserPreference p
+{
+	operations expected:
+	- update UserPreference pu where pu.User = u_id with:
+        User : User
+        UserPreference : (
+            select p_id
+            from UserPreference
+            where chessboard_style = c_st and pieces_style = p_st
+            )
+}
+------------------------------------------------------
+operazione delete_user codice 204:
+input expected = {
+    username : u_id
+
+}   |
+    | string : u_id
+output expected = {}
+{
+	operations expected:
+	- delete User u where u.username = u_id
+	- delete UserPreference pu where pu.User = u_id
+}
+------------------------------------------------------
+
+

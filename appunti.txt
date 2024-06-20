@@ -31,34 +31,43 @@ Matchmaking casuale:
 -------------------------------------------------------DB
 
 CREATE TYPE Esito AS ENUM("B","N","P")
-
-CREATE TABLE Giocatori( 
+CREATE TYPE Motivo AS ENUM("")
+CREATE TYPE Chessboard_style AS ENUM("blue","brown","black")
+CREATE TYPE Pieces_style AS ENUM("neo","pixel")
+CREATE TABLE User( 
 	Username	PRIMARY KEY	Varchar(20) NOT NULL,
 	Nome 				Varchar(20),
 	Cognome 			Varchar(25),
-	Password			Varchar(15) NOT NULL,
 	PuntiElo 			Integer NOT	NULL
 	)
 
 
-CREATE TABLE Preferenze( 
-	Giocatore 	Varchar(20) NOT NULL REFERENCES Giocatori(Username),
-	Tema 		Integer NOT NULL REFERENCES Temi(ID)
+CREATE TABLE UserPreference( 
+	User 	PRIMARY KEY Varchar(20) NOT NULL ,
+	Tema 		Integer NOT NULL ,
+
+	FOREIGN KEY Tema REFERENCES Temi(ID)
+	FOREIGN KEY User REFERENCES User(Username) ON DELETE CASCADE
 	)
 
-CREATE TABLE Temi(
-	ID				SERIAL PRIMARY KEY	NOT NULL,
+CREATE TABLE Theme(
+	ID					SERIAL PRIMARY KEY	NOT NULL,
 	ColoreScacchiera	Integer NOT NULL,
-	TemaPedine			Integer NOT NULL	
-	)
+	TemaPedine			Integer NOT NULL
+)
 
-CREATE TABLE Partite (
+CREATE TABLE Game (
 	ID				SERIAL PRIMARY KEY	NOT NULL,
-	GiocatoreBianco		Varchar(20) NOT NULL REFERENCES Giocatori(Username),
-	GiocatoreNero		Varchar(20) NOT NULL REFERENCES Giocatori(Username),
-	Cadenza				Varchar(20) NOT NULL,
+	White				Varchar(20) NOT NULL,
+	Black				Varchar(20) NOT NULL,
+	Duration			Int NOT NULL,
+	Increment			Int NOT NULL,
 	MosseGiocate		Varchar NOT NULL,
-	Esito				Esito NOT NULL
+	Esito				Esito NOT NULL,
+	Motivo				Motivo NOT NULL,
+
+	FOREIGN KEY White REFERENCES User(Username),
+	FOREIGN KEY Black REFERENCES User(Username),
 	)
 
 CREATE TABLE Logs(

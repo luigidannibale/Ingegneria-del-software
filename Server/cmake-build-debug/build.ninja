@@ -94,7 +94,22 @@ build CMakeFiles/Server.dir/RedisManager.cpp.o: CXX_COMPILER__Server_scanned_Deb
   OBJECT_FILE_DIR = CMakeFiles/Server.dir
   dyndep = CMakeFiles/Server.dir/CXX.dd
 
-build CMakeFiles/Server.dir/CXX.dd | /home/luigi/Documents/Ingegeria-degli-scacchi/Server/cmake-build-debug/CMakeFiles/Server.dir/CXXModules.json CMakeFiles/Server.dir/server.cpp.o.modmap CMakeFiles/Server.dir/Server.cpp.o.modmap CMakeFiles/Server.dir/RedisManager.cpp.o.modmap: CXX_DYNDEP__Server_Debug CMakeFiles/Server.dir/server.cpp.o.ddi CMakeFiles/Server.dir/Server.cpp.o.ddi CMakeFiles/Server.dir/RedisManager.cpp.o.ddi | /home/luigi/Documents/Ingegeria-degli-scacchi/Server/cmake-build-debug/CMakeFiles/Server.dir/CXXDependInfo.json
+build CMakeFiles/Server.dir/Database.cpp.o.ddi: CXX_SCAN__Server_Debug /home/luigi/Documents/Ingegeria-degli-scacchi/Server/Database.cpp || cmake_object_order_depends_target_Server
+  DEP_FILE = CMakeFiles/Server.dir/Database.cpp.o.ddi.d
+  DYNDEP_INTERMEDIATE_FILE = CMakeFiles/Server.dir/Database.cpp.o.ddi
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  OBJ_FILE = CMakeFiles/Server.dir/Database.cpp.o
+  PREPROCESSED_OUTPUT_FILE = CMakeFiles/Server.dir/Database.cpp.o.ddi.i
+
+build CMakeFiles/Server.dir/Database.cpp.o: CXX_COMPILER__Server_scanned_Debug /home/luigi/Documents/Ingegeria-degli-scacchi/Server/Database.cpp | CMakeFiles/Server.dir/Database.cpp.o.modmap || cmake_object_order_depends_target_Server CMakeFiles/Server.dir/CXX.dd
+  DEP_FILE = CMakeFiles/Server.dir/Database.cpp.o.d
+  DYNDEP_MODULE_MAP_FILE = CMakeFiles/Server.dir/Database.cpp.o.modmap
+  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles/Server.dir
+  OBJECT_FILE_DIR = CMakeFiles/Server.dir
+  dyndep = CMakeFiles/Server.dir/CXX.dd
+
+build CMakeFiles/Server.dir/CXX.dd | /home/luigi/Documents/Ingegeria-degli-scacchi/Server/cmake-build-debug/CMakeFiles/Server.dir/CXXModules.json CMakeFiles/Server.dir/server.cpp.o.modmap CMakeFiles/Server.dir/Server.cpp.o.modmap CMakeFiles/Server.dir/RedisManager.cpp.o.modmap CMakeFiles/Server.dir/Database.cpp.o.modmap: CXX_DYNDEP__Server_Debug CMakeFiles/Server.dir/server.cpp.o.ddi CMakeFiles/Server.dir/Server.cpp.o.ddi CMakeFiles/Server.dir/RedisManager.cpp.o.ddi CMakeFiles/Server.dir/Database.cpp.o.ddi | /home/luigi/Documents/Ingegeria-degli-scacchi/Server/cmake-build-debug/CMakeFiles/Server.dir/CXXDependInfo.json
 
 
 # =============================================================================
@@ -104,7 +119,7 @@ build CMakeFiles/Server.dir/CXX.dd | /home/luigi/Documents/Ingegeria-degli-scacc
 #############################################
 # Link the executable Server
 
-build Server: CXX_EXECUTABLE_LINKER__Server_Debug CMakeFiles/Server.dir/server.cpp.o CMakeFiles/Server.dir/Server.cpp.o CMakeFiles/Server.dir/RedisManager.cpp.o
+build Server: CXX_EXECUTABLE_LINKER__Server_Debug CMakeFiles/Server.dir/server.cpp.o CMakeFiles/Server.dir/Server.cpp.o CMakeFiles/Server.dir/RedisManager.cpp.o CMakeFiles/Server.dir/Database.cpp.o
   FLAGS = -g
   OBJECT_DIR = CMakeFiles/Server.dir
   POST_BUILD = :
@@ -156,14 +171,14 @@ build all: phony Server
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | /home/luigi/Documents/Ingegeria-degli-scacchi/Server/CMakeLists.txt /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux-Initialize.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | /home/luigi/Documents/Ingegeria-degli-scacchi/Server/CMakeLists.txt /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake/Modules/FindPackageMessage.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux-Initialize.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake /usr/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake /usr/share/cmake/nlohmann_json/nlohmann_jsonConfigVersion.cmake /usr/share/cmake/nlohmann_json/nlohmann_jsonTargets.cmake CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build /home/luigi/Documents/Ingegeria-degli-scacchi/Server/CMakeLists.txt /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux-Initialize.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake: phony
+build /home/luigi/Documents/Ingegeria-degli-scacchi/Server/CMakeLists.txt /usr/share/cmake/Modules/CMakeCInformation.cmake /usr/share/cmake/Modules/CMakeCXXInformation.cmake /usr/share/cmake/Modules/CMakeCommonLanguageInclude.cmake /usr/share/cmake/Modules/CMakeGenericSystem.cmake /usr/share/cmake/Modules/CMakeInitializeConfigs.cmake /usr/share/cmake/Modules/CMakeLanguageInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInformation.cmake /usr/share/cmake/Modules/CMakeSystemSpecificInitialize.cmake /usr/share/cmake/Modules/Compiler/CMakeCommonCompilerMacros.cmake /usr/share/cmake/Modules/Compiler/GNU-C.cmake /usr/share/cmake/Modules/Compiler/GNU-CXX.cmake /usr/share/cmake/Modules/Compiler/GNU.cmake /usr/share/cmake/Modules/FindPackageHandleStandardArgs.cmake /usr/share/cmake/Modules/FindPackageMessage.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-C.cmake /usr/share/cmake/Modules/Platform/Linux-GNU-CXX.cmake /usr/share/cmake/Modules/Platform/Linux-GNU.cmake /usr/share/cmake/Modules/Platform/Linux-Initialize.cmake /usr/share/cmake/Modules/Platform/Linux.cmake /usr/share/cmake/Modules/Platform/UnixPaths.cmake /usr/share/cmake/nlohmann_json/nlohmann_jsonConfig.cmake /usr/share/cmake/nlohmann_json/nlohmann_jsonConfigVersion.cmake /usr/share/cmake/nlohmann_json/nlohmann_jsonTargets.cmake CMakeCache.txt CMakeFiles/3.29.6/CMakeCCompiler.cmake CMakeFiles/3.29.6/CMakeCXXCompiler.cmake CMakeFiles/3.29.6/CMakeSystem.cmake: phony
 
 
 #############################################

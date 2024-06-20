@@ -8,4 +8,8 @@ add_executable(Server
         Server.cpp
         Server.hpp
         RedisManager.cpp
-        RedisManager.hpp)
+        RedisManager.hpp
+        Database.cpp
+        Database.hpp)
+find_package(nlohmann_json 3.2.0 REQUIRED)
+target_link_libraries(Server PRIVATE nlohmann_json::nlohmann_json)
