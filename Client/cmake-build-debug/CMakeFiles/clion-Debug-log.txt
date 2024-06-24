@@ -1,4 +1,13 @@
-/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/opt/clion/bin/ninja/linux/x64/ninja -DCMAKE_CXX_COMPILER=/bin/g++ -G Ninja -S /home/luigi/Documents/Ingegeria-degli-scacchi/Client -B /home/luigi/Documents/Ingegeria-degli-scacchi/Client/cmake-build-debug
+/snap/clion/284/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/luigi/Desktop/Ingegneria-del-software/Client -B /home/luigi/Desktop/Ingegneria-del-software/Client/cmake-build-debug
+CMake Deprecation Warning:
+  Support for "Extra Generators" like
+
+    CodeBlocks
+
+  is deprecated and will be removed from a future version of CMake.  IDEs may
+  use the cmake-file-api(7) to view CMake-generated project build trees.
+
+
 CMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
   Compatibility with CMake < 3.5 will be removed from a future version of
   CMake.
@@ -7,13 +16,6 @@ CMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
   CMake that the project does not need compatibility with older versions.
 
 
--- The CXX compiler identification is GNU 14.1.1
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /bin/g++ - skipped
--- Detecting CXX compile features
--- Detecting CXX compile features - done
--- Found wxWidgets: -pthread;-lwx_gtk3u_xrc-3.2;-lwx_gtk3u_html-3.2;-lwx_gtk3u_qa-3.2;-lwx_gtk3u_core-3.2;-lwx_baseu_xml-3.2;-lwx_baseu_net-3.2;-lwx_baseu-3.2 (found version "3.2.5")
--- Configuring done (3.9s)
+-- Configuring done (0.1s)
 -- Generating done (0.0s)
--- Build files have been written to: /home/luigi/Documents/Ingegeria-degli-scacchi/Client/cmake-build-debug
+-- Build files have been written to: /home/luigi/Desktop/Ingegneria-del-software/Client/cmake-build-debug

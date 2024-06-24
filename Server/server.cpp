@@ -1,3 +1,4 @@
+/*
 #include <iostream>
 #include <thread>
 #include <hiredis/hiredis.h>
@@ -202,3 +203,4 @@ namespace Server {
         return 0;
     }
 }
+*/

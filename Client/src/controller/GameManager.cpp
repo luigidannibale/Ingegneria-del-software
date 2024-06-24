@@ -29,7 +29,6 @@ GameManager::GameManager(GameOptions* options){
             depthLevel = 1;
             break;
     }
-    // stockfishManager = new StockfishManager();
 }
 GameManager::~GameManager() {
     if (!againstHuman)
@@ -104,6 +103,7 @@ bool GameManager::playerCanPlay() {
     return false;
 }
 bool GameManager::isAgainstHuman() {return againstHuman;}
+
 chess::PieceGenType TypeToGenType(chess::PieceType piece){
     if(piece == chess::PieceType::NONE){
         std::cout << "Errore in TypeToGenType: mi hai passato NONE" << std::endl;

@@ -1,4 +1,21 @@
-/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/opt/clion/bin/ninja/linux/x64/ninja -DCMAKE_CXX_COMPILER=/bin/g++ -G Ninja -S /home/luigi/Documents/Ingegeria-degli-scacchi/Server -B /home/luigi/Documents/Ingegeria-degli-scacchi/Server/cmake-build-debug
--- Configuring done (1.8s)
+/snap/clion/284/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" -S /home/luigi/Desktop/Ingegneria-del-software/Server -B /home/luigi/Desktop/Ingegneria-del-software/Server/cmake-build-debug
+CMake Deprecation Warning:
+  Support for "Extra Generators" like
+
+    CodeBlocks
+
+  is deprecated and will be removed from a future version of CMake.  IDEs may
+  use the cmake-file-api(7) to view CMake-generated project build trees.
+
+
+CMake Deprecation Warning at CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a ...<max> suffix to tell
+  CMake that the project does not need compatibility with older versions.
+
+
+-- Configuring done (0.0s)
 -- Generating done (0.0s)
--- Build files have been written to: /home/luigi/Documents/Ingegeria-degli-scacchi/Server/cmake-build-debug
+-- Build files have been written to: /home/luigi/Desktop/Ingegneria-del-software/Server/cmake-build-debug

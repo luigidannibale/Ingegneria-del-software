@@ -16,7 +16,6 @@ Profilo di un giocatore:
 	- Nome
 	- Cognome
 	- Username
-	- Password
 	- Punteggio elo
 
 Impostazioni del sistema:

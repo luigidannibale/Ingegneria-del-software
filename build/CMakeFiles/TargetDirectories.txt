@@ -1,3 +1,0 @@
-/home/luigi/Documents/Ingegeria-degli-scacchi/build/CMakeFiles/MyExecutable.dir
-/home/luigi/Documents/Ingegeria-degli-scacchi/build/CMakeFiles/edit_cache.dir
-/home/luigi/Documents/Ingegeria-degli-scacchi/build/CMakeFiles/rebuild_cache.dir

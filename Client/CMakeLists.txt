@@ -1,12 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
-project(Ingegneria-degli-scacchi-client CXX)
-#Setting the standard c++ we are using
+project(Client CXX)
 set(CMAKE_CXX_STANDARD 20)
 
-
 # Set the path to wxWidgets installation directory
-set(wxWidgets_ROOT_DIR /usr/include/wx-3.2)
-#set(wxWidgets_ROOT_DIR /usr/include/wx-3.0)
+#set(wxWidgets_ROOT_DIR /usr/include/wx-3.2)
+set(wxWidgets_ROOT_DIR /usr/local/include/wx-3.2)
 
 # Find wxWidgets
 find_package(wxWidgets REQUIRED)
@@ -18,6 +16,7 @@ include_directories(${wxWidgets_INCLUDE_DIRS})
 # Add source files to your project
 set(SOURCES
         src/main.cpp
+
         src/controller/GameManager.cpp
         src/controller/GameManager.hpp
         src/controller/GamemodeController.cpp
@@ -39,7 +38,6 @@ set(SOURCES
         src/model/GameOptions.hpp
         src/model/User.cpp
         src/model/User.hpp
-
         src/model/chess_pachage/chess.hpp
 
         src/view/ChessboardView.cpp
@@ -62,18 +60,6 @@ set(SOURCES
         src/view/SettingsPanel.hpp
 
 )
-#*******************************************
-#[[# Add the Stockfish source files
-file(GLOB STOCKFISH_SOURCES
-        "src/stockfish/*.cpp"
-        "include/src/stockfish/*.hpp"
-)
-# Include directories
-include_directories(include/stockfish)
-# Add the executable
-add_executable(MyProject main.cpp ${STOCKFISH_SOURCES})]]
-#*******************************************
-
 
 # Add an executable target
 add_executable(chess ${SOURCES})
