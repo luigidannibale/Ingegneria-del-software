@@ -12,7 +12,7 @@ Server::Server() {
     std::cout<< s << std::endl;
     listen_for_clients();*/
 
-    Database DB = Database();
+    db = new Database();
 }
 
 
@@ -74,6 +74,12 @@ void Server::listen_for_clients() {
 }
 
 json Server::new_game(int duration, int increment, std::string u_id_b, std::string u_id_w) {
+    int gameID = db->InsertNewGame(u_id_b.c_str(), u_id_w.c_str(), duration, increment);
+    if (gameID == -1) {
+        // errore
+        return json();
+    }
+    // non errore
     return json();
 }
 
@@ -81,20 +87,28 @@ json Server::search_opponent(std::string u_id, int duration, int increment) {
     return json();
 }
 
-json Server::update_game(int g_id, std::vector<std::string> moves, Esito e, Motivo m) {
+json Server::update_game(int g_id, std::string moves, Esito e, Motivo m) {
+    json esito = e;
+    json motivo = m;
+    db->UpdateGame(g_id, moves.c_str(), esito.dump().c_str(), motivo.dump().c_str());
     return json();
 }
 
 json Server::search_game(int g_id) {
+    Game game = db->SearchGame(g_id);
     return json();
 }
 
 json Server::new_user(std::string username, std::string nome, std::string cognome, int elo, Chessboard_style c_st,
                       Pieces_style p_st) {
+    json chessboard = c_st;
+    json pieces = p_st;
+    db->InsertUser(username.c_str(), nome.c_str(), cognome.c_str(), elo, chessboard.dump().c_str(), pieces.dump().c_str());
     return json();
 }
 
 json Server::update_user(std::string username, std::string nome, std::string cognome, int elo) {
+    db->UpdateUser(username.c_str(), nome.c_str(), cognome.c_str(), elo);
     return json();
 }
 
@@ -103,6 +117,7 @@ json Server::update_userPreference(std::string username, Chessboard_style c_st, 
 }
 
 json Server::delete_user(std::string username) {
+    db->DeleteUser(username.c_str());
     return json();
 }
 

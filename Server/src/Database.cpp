@@ -116,10 +116,93 @@ PGresult* Database::GetResult() {
     return res;
 }
 
+void Database::InsertUser(const char* username, const char* nome, const char* cognome, int elo, const char* chessboard_style, const char* pieces_style) {
+    std::string query = "INSERT INTO Player (Username, Nome, Cognome, PuntiElo, Theme) VALUES ("
+                        + escape_literal(conn, username) + ", "
+                        + escape_literal(conn, nome) + ", "
+                        + escape_literal(conn, cognome) + ", "
+                        + std::to_string(elo) + ", "
+                        + "(SELECT ID FROM Theme WHERE ChessboardColor = " + escape_literal(conn, chessboard_style) + " AND PiecesColor = " + escape_literal(conn, pieces_style) + ")"
+                        + ");";
+    if (ExecuteQuery(query.c_str())) {
+        PQclear(res);
+        // return username ??
+    }
+}
+
+void Database::UpdateUser(const char* username, const char* nome, const char* cognome, int elo) {
+    std::string query = "UPDATE Player SET Nome = " + escape_literal(conn, nome) + 
+                        ", Cognome = " + escape_literal(conn, cognome) + 
+                        ", PuntiElo = " + std::to_string(elo) + 
+                        " WHERE Username = " + escape_literal(conn, username) + ";";
+    if (ExecuteQuery(query.c_str())) {
+        PQclear(res);
+        // return username ??
+    }
+}
+
+void Database::DeleteUser(const char* username) {
+    std::string query = "DELETE FROM Player WHERE Username = " + escape_literal(conn, username) + ";";
+    if (ExecuteQuery(query.c_str())) {
+        PQclear(res);
+        // return true
+    }
+    // return false
+}
+
+int Database::InsertNewGame(const char* white, const char* black, int timeDuration, int timeIncrement) {
+    std::string query = "INSERT INTO Game (White, Black, TimeDuration, TimeIncrement, Moves, Esito, Motivo) VALUES ("
+                        + escape_literal(conn, white) + ", "
+                        + escape_literal(conn, black) + ", "
+                        + std::to_string(timeDuration) + ", "
+                        + std::to_string(timeIncrement) + ", "
+                        + "NULL, "
+                        + "NULL, "
+                        + "NULL) RETURNING ID;";
+    if (ExecuteQuery(query.c_str())) {
+        int gameId = std::stoi(PQgetvalue(res, 0, 0));
+        PQclear(res);
+        return gameId;
+    }
+    return -1;
+}
+
+void Database::UpdateGame(int gameId, const char* moves, const char* esito, const char* motivo) {
+    std::string query = "UPDATE Game SET Moves = " + escape_literal(conn, moves) + 
+                        ", Esito = " + escape_literal(conn, esito) + 
+                        ", Motivo = " + escape_literal(conn, motivo) + 
+                        " WHERE ID = " + std::to_string(gameId) + ";";
+    if (ExecuteQuery(query.c_str())) {
+        PQclear(res);
+        // return gameId ??
+    }
+}
+
+Game Database::SearchGame(int gameId) {
+    std::string query = "SELECT * FROM Game WHERE ID = " + std::to_string(gameId) + ";";
+    if (ExecuteQuery(query.c_str())) {
+        json esito = PQgetvalue(res, 0, 6);
+        json motivo = PQgetvalue(res, 0, 7);
+        // ERRORE
+        // anche moves va portato in vector di string
+        Game game(std::stoi(PQgetvalue(res, 0, 0)), // ID
+              PQgetvalue(res, 0, 1),                // White
+              PQgetvalue(res, 0, 2),                // Black
+              std::stoi(PQgetvalue(res, 0, 3)),     // TimeDuration
+              std::stoi(PQgetvalue(res, 0, 4)),     // TimeIncrement
+              PQgetvalue(res, 0, 5),                // Moves
+              esito.get<Esito>(),                   // Esito
+              motivo.get<Motivo>());                 // Motivo
+        PQclear(res);
+        return game;
+    }
+    return Game();
+}
+
 void Database::createSchema() {
     const char* queries[] = {
-        "CREATE TYPE Esito AS ENUM('B','N','P');",
-        "CREATE TYPE Motivo AS ENUM('');",
+        "CREATE TYPE Esito AS ENUM('W','D','B','NF');",
+        "CREATE TYPE Motivo AS ENUM('checkmate','wonOnTime','quitmate','stalemate','insufficientMaterial','threefoldRepetition','fiftyMoveRule','NF');",
         "CREATE TYPE Chessboard_style AS ENUM('blue','brown','black');",
         "CREATE TYPE Pieces_style AS ENUM('neo','pixel');",
 
@@ -147,9 +230,9 @@ void Database::createSchema() {
         "Black VARCHAR(20) NOT NULL REFERENCES Player(Username),"
         "TimeDuration INTEGER NOT NULL,"
         "TimeIncrement INTEGER NOT NULL,"
-        "Moves VARCHAR(200) NOT NULL,"
-        "Esito Esito NOT NULL,"
-        "Motivo Motivo NOT NULL"
+        "Moves VARCHAR(500),"
+        "Esito Esito,"
+        "Motivo Motivo"
         ");",
         "CREATE TABLE Log("
         "ID SERIAL PRIMARY KEY NOT NULL, "

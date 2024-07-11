@@ -70,7 +70,7 @@ private:
     //Operations
     json new_game(int duration,int increment,std::string u_id_b,std::string u_id_w);
     json search_opponent(std::string u_id, int duration,int increment);
-    json update_game(int g_id, std::vector<std::string> moves, Esito e, Motivo m);
+    json update_game(int g_id, std::string moves, Esito e, Motivo m);
     json search_game(int g_id);
     json new_user(std::string username, std::string nome, std::string cognome, int elo, Chessboard_style c_st, Pieces_style p_st);
     json update_user(std::string username, std::string nome, std::string cognome, int elo);
@@ -81,6 +81,8 @@ private:
     bool stop_server;
     RedisManager* redisManager;
     const std::string NEW_CLIENTS_CHANNEL = "new_clients";
+
+    Database* db;
 };
 
 #endif //SERVER_SERVER_HPP
