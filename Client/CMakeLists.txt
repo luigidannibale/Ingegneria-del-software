@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 # Set the path to wxWidgets installation directory
 #set(wxWidgets_ROOT_DIR /usr/include/wx-3.2)
-set(wxWidgets_ROOT_DIR /usr/local/include/wx-3.2)
+set(wxWidgets_ROOT_DIR /usr/local/include/wx-3.0)
 
 # Find wxWidgets
 find_package(wxWidgets REQUIRED)
@@ -63,6 +63,8 @@ set(SOURCES
 
 # Add an executable target
 add_executable(chess ${SOURCES})
+
+# set_target_properties(chess PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 # Link against wxWidgets libraries
 target_link_libraries(chess PRIVATE ${wxWidgets_LIBRARIES})
