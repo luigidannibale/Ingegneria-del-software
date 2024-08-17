@@ -1,5 +1,201 @@
 #include "Server.hpp"
 
+std::unordered_map<std::string, std::vector<std::string>> users;
+
+Server::Server()
+{
+    this->stop_server = false;
+    this->redisManager = new RedisManager();
+
+    db = new Database();
+
+    // Redis connection part
+    redisManager->Connect();
+    bool accepted = redisManager->SubscribeToChannel(NEW_CLIENTS_CHANNEL.c_str());
+    std::string s = accepted ? "Connection accepted" : "Connection not accepted";
+    std::cout << s << std::endl;
+    listen_for_clients();
+
+    // db->Disconnect();
+    // db->ConnectDefault();
+    // db->deleteDatabase("chess");
+}
+
+void Server::handle_client(std::string messaggio)
+{
+    json jmess;
+    try
+    {
+        jmess = json::parse(messaggio);
+    }
+    catch (nlohmann::json::parse_error &e)
+    {
+        std::cerr << "Cannot parse message: " << messaggio << std::endl;
+        return;
+    }
+
+    Richiesta r = Richiesta::fromJson(jmess);
+    std::cout << "Received request: " << r.toJson().dump() << std::endl;
+
+    switch (r.getCodice())
+    {
+    case CodiceRichiesta::new_game:
+        new_game(r.getPayload().at("time_duration"),
+                 r.getPayload().at("time_increment"),
+                 r.getPayload().at("black"),
+                 r.getPayload().at("white"));
+        break;
+    case CodiceRichiesta::search_opponent:
+        search_opponent(r.getPayload().at("user"),
+                        r.getPayload().at("time_duration"),
+                        r.getPayload().at("time_increment"));
+        break;
+    case CodiceRichiesta::quit_search_opponent:
+        search_opponent(r.getPayload().at("user"),
+                        r.getPayload().at("time_duration"),
+                        r.getPayload().at("time_increment"),
+                        true);
+        break;
+    case CodiceRichiesta::update_game:
+        update_game(r.getPayload().at("game_id"),
+                    r.getPayload().at("moves"),
+                    r.getPayload().at("esito"),
+                    r.getPayload().at("motivo"));
+        break;
+    case CodiceRichiesta::search_game:
+        search_game(r.getPayload().at("game_id"));
+        break;
+    case CodiceRichiesta::new_user:
+        new_user(r.getPayload().at("username"),
+                 r.getPayload().at("nome"),
+                 r.getPayload().at("cognome"),
+                 r.getPayload().at("elo"),
+                 r.getPayload().at("chessboard_style"),
+                 r.getPayload().at("pieces_style"));
+        break;
+    case CodiceRichiesta::update_user:
+        update_user(r.getPayload().at("username"),
+                    r.getPayload().at("nome"),
+                    r.getPayload().at("cognome"),
+                    r.getPayload().at("elo"));
+        break;
+    case CodiceRichiesta::update_userPreference:
+        update_userPreference(r.getPayload().at("username"),
+                              r.getPayload().at("chessboard_style"),
+                              r.getPayload().at("pieces_style"));
+        break;
+    case CodiceRichiesta::delete_user:
+        delete_user(r.getPayload().at("username"));
+        break;
+    }
+}
+
+void Server::listen_for_clients()
+{
+    while (!stop_server)
+    {
+        std::string message = redisManager->WaitResponse();
+        if (message.empty())
+            continue;
+        std::thread(&Server::handle_client, this, message).detach();
+    }
+}
+
+json Server::new_game(int duration, int increment, std::string u_id_b, std::string u_id_w)
+{
+    int gameID = db->InsertNewGame(u_id_b.c_str(), u_id_w.c_str(), duration, increment);
+    if (gameID == -1)
+    {
+        // errore
+        return json();
+    }
+    // non errore
+    return json();
+}
+
+json Server::search_opponent(std::string u_id, int duration, int increment, bool quit)
+{
+    std::cout << "Searching for opponent" << std::endl;
+    std::cout << "User: " << u_id << "\nDuration: " << duration << "\nIncrement: " << increment << std::endl;
+
+    std::string key = std::to_string(duration) + "+" + std::to_string(increment);
+
+    if (quit) // User has quit the search
+    {
+        std::vector<std::string>::iterator it = std::find(users[key].begin(), users[key].end(), u_id);
+        if (it != users[key].end())
+            users[key].erase(it);
+        return json();
+    }
+
+    // Add user to the list of users searching for an opponent
+    users[key].push_back(u_id);
+
+    if (users[key].size() >= 2)
+    {
+        std::string black = users[key].back();
+        users[key].pop_back();
+        std::string white = users[key].back();
+        users[key].pop_back();
+
+        std::string reply_white = black + ":0";
+        std::string reply_black = white + ":1";
+
+        std::cout << "Found opponent: " << white << " with side 0" << std::endl;
+        std::cout << "Found opponent: " << black << " with side 1" << std::endl;
+
+        redisManager->PublishToChannel(white.c_str(), reply_white.c_str());
+        redisManager->PublishToChannel(black.c_str(), reply_black.c_str());
+    }
+    return json();
+}
+
+json Server::update_game(int g_id, std::string moves, Esito e, Motivo m)
+{
+    json esito = e;
+    json motivo = m;
+    db->UpdateGame(g_id, moves.c_str(), esito.dump().c_str(), motivo.dump().c_str());
+    return json();
+}
+
+json Server::search_game(int g_id)
+{
+    Game game = db->SearchGame(g_id);
+    return json();
+}
+
+json Server::new_user(std::string username, std::string nome, std::string cognome, int elo, Chessboard_style c_st,
+                      Pieces_style p_st)
+{
+    json chessboard = c_st;
+    json pieces = p_st;
+    db->InsertUser(username.c_str(), nome.c_str(), cognome.c_str(), elo, chessboard.dump().c_str(), pieces.dump().c_str());
+    return json();
+}
+
+json Server::update_user(std::string username, std::string nome, std::string cognome, int elo)
+{
+    db->UpdateUser(username.c_str(), nome.c_str(), cognome.c_str(), elo);
+    return json();
+}
+
+json Server::update_userPreference(std::string username, Chessboard_style c_st, Pieces_style p_st)
+{
+    return json();
+}
+
+json Server::delete_user(std::string username)
+{
+    db->DeleteUser(username.c_str());
+    return json();
+}
+
+int main()
+{
+    Server server = Server();
+    return 0;
+}
+
 // Serializzazione e deserializzazione per Esito
 // NLOHMANN_JSON_SERIALIZE_ENUM(Esito, {
 //     {Esito::W, "W"},
@@ -169,148 +365,4 @@ void pieces_from_json(const json &j, Pieces_style &pieces_style)
     {
         pieces_style = Pieces_style::pixel;
     }
-}
-
-Server::Server()
-{
-    this->stop_server = false;
-    this->redisManager = new RedisManager();
-
-    db = new Database();
-
-    // Redis connection part
-    redisManager->Connect();
-    bool accepted = redisManager->SubscribeToChannel(NEW_CLIENTS_CHANNEL.c_str());
-    std::string s = accepted ? "Connection accepted" : "Connection not accepted";
-    std::cout << s << std::endl;
-    listen_for_clients();
-
-    // db->Disconnect();
-    // db->ConnectDefault();
-    // db->deleteDatabase("chess");
-}
-
-void Server::handle_client(std::string messaggio)
-{
-    json jmess = json::parse(messaggio);
-    Richiesta r = Richiesta::fromJson(jmess);
-    switch (r.getCodice())
-    {
-    case CodiceRichiesta::new_game:
-        new_game(r.getPayload().at("time_duration"),
-                 r.getPayload().at("time_increment"),
-                 r.getPayload().at("black"),
-                 r.getPayload().at("white"));
-        break;
-    case CodiceRichiesta::search_opponent:
-        search_opponent(r.getPayload().at("user"),
-                        r.getPayload().at("time_duration"),
-                        r.getPayload().at("time_increment"));
-        break;
-    case CodiceRichiesta::update_game:
-        update_game(r.getPayload().at("game_id"),
-                    r.getPayload().at("moves"),
-                    r.getPayload().at("esito"),
-                    r.getPayload().at("motivo"));
-        break;
-    case CodiceRichiesta::search_game:
-        search_game(r.getPayload().at("game_id"));
-        break;
-    case CodiceRichiesta::new_user:
-        new_user(r.getPayload().at("username"),
-                 r.getPayload().at("nome"),
-                 r.getPayload().at("cognome"),
-                 r.getPayload().at("elo"),
-                 r.getPayload().at("chessboard_style"),
-                 r.getPayload().at("pieces_style"));
-        break;
-    case CodiceRichiesta::update_user:
-        update_user(r.getPayload().at("username"),
-                    r.getPayload().at("nome"),
-                    r.getPayload().at("cognome"),
-                    r.getPayload().at("elo"));
-        break;
-    case CodiceRichiesta::update_userPreference:
-        update_userPreference(r.getPayload().at("username"),
-                              r.getPayload().at("chessboard_style"),
-                              r.getPayload().at("pieces_style"));
-        break;
-    case CodiceRichiesta::delete_user:
-        delete_user(r.getPayload().at("username"));
-        break;
-    }
-}
-
-void Server::listen_for_clients()
-{
-    while (!stop_server)
-    {
-        std::string message = redisManager->WaitResponse();
-        if (message.empty())
-            continue;
-        std::thread(&Server::handle_client, this, message).detach();
-    }
-}
-
-json Server::new_game(int duration, int increment, std::string u_id_b, std::string u_id_w)
-{
-    int gameID = db->InsertNewGame(u_id_b.c_str(), u_id_w.c_str(), duration, increment);
-    if (gameID == -1)
-    {
-        // errore
-        return json();
-    }
-    // non errore
-    return json();
-}
-
-json Server::search_opponent(std::string u_id, int duration, int increment)
-{
-    return json();
-}
-
-json Server::update_game(int g_id, std::string moves, Esito e, Motivo m)
-{
-    json esito = e;
-    json motivo = m;
-    db->UpdateGame(g_id, moves.c_str(), esito.dump().c_str(), motivo.dump().c_str());
-    return json();
-}
-
-json Server::search_game(int g_id)
-{
-    Game game = db->SearchGame(g_id);
-    return json();
-}
-
-json Server::new_user(std::string username, std::string nome, std::string cognome, int elo, Chessboard_style c_st,
-                      Pieces_style p_st)
-{
-    json chessboard = c_st;
-    json pieces = p_st;
-    db->InsertUser(username.c_str(), nome.c_str(), cognome.c_str(), elo, chessboard.dump().c_str(), pieces.dump().c_str());
-    return json();
-}
-
-json Server::update_user(std::string username, std::string nome, std::string cognome, int elo)
-{
-    db->UpdateUser(username.c_str(), nome.c_str(), cognome.c_str(), elo);
-    return json();
-}
-
-json Server::update_userPreference(std::string username, Chessboard_style c_st, Pieces_style p_st)
-{
-    return json();
-}
-
-json Server::delete_user(std::string username)
-{
-    db->DeleteUser(username.c_str());
-    return json();
-}
-
-int main()
-{
-    Server server = Server();
-    return 0;
 }

@@ -14,9 +14,11 @@
 #include <random>
 #include <string_view>
 
-struct CellCoordinates{
+struct CellCoordinates
+{
 public:
-    CellCoordinates(int row, int col, std::string coordinates) {
+    CellCoordinates(int row, int col, std::string coordinates)
+    {
         this->row = row;
         this->col = col;
         this->coordinates = coordinates;
@@ -26,26 +28,28 @@ public:
     std::string coordinates;
 };
 
-class GameplayController {
+class GameplayController
+{
 public:
-    GameplayController(GameOptions*,GameGraphicOptions*, RedisManager* = nullptr, std::string channel = "");
+    GameplayController(GameOptions *, GameGraphicOptions *, RedisManager * = nullptr, std::string user_id = "", std::string opponent_id = "");
     ~GameplayController();
 
 private:
-    //bool isWhite;
+    // bool isWhite;
     bool gameClosed = false;
     bool gameEnded = false;
-    GameManager* gameManager;
-    RedisManager* redisManager;
-    std::string channel;
-    CellCoordinates* clickedCoord = nullptr;
-    GameplayFrame* frame;
+    GameManager *gameManager;
+    RedisManager *redisManager;
+    std::string user_id;
+    std::string opponent_id;
+    CellCoordinates *clickedCoord = nullptr;
+    GameplayFrame *frame;
 
     const int MS_STOCKFISH_DELAY = 2000;
 
-    //chess::Board board;
+    // chess::Board board;
     chess::Movelist moves;
-    std::map<chess::Square,chess::Move> playableMoves;
+    std::map<chess::Square, chess::Move> playableMoves;
     void makeMove(std::string_view);
     void markFeasible(chess::Move);
     void printMove(chess::Piece, chess::Move, bool, bool);
@@ -56,11 +60,9 @@ private:
     void AsyncHumanMove();
 
     void UpdateChessboard();
-    void OnClose(wxCloseEvent&);
-    void ClickBoard(wxMouseEvent&);
-    void UpdateTime(wxTimerEvent&);
+    void OnClose(wxCloseEvent &);
+    void ClickBoard(wxMouseEvent &);
+    void UpdateTime(wxTimerEvent &);
 };
 
-
-
-#endif //GAMEPLAYCONTROLLER_H
+#endif // GAMEPLAYCONTROLLER_H

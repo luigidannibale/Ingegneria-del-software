@@ -1,21 +1,41 @@
 #include "RedisManager.hpp"
 
-RedisManager::RedisManager() {
+RedisManager::RedisManager()
+{
     isCommandRunning.store(false);
     isWaitingResponse.store(false);
 }
 
-RedisManager::~RedisManager() {
-    
+RedisManager::~RedisManager()
+{
 }
 
-bool RedisManager::Connect() {
+bool RedisManager::Connect()
+{
     isCommandRunning.store(true);
-    c = redisConnect("127.0.0.1", 6379);
-    if (c == NULL || c->err) {
-        if (c) {
-            std::cerr << "Connection error: " << c->errstr << std::endl;
-        } else {
+    input = redisConnect(HOST, PORT);
+    if (input == NULL || input->err)
+    {
+        if (input)
+        {
+            std::cerr << "Connection error: " << input->errstr << std::endl;
+        }
+        else
+        {
+            std::cerr << "Connection error: can't allocate redis context" << std::endl;
+        }
+        isCommandRunning.store(false);
+        return false;
+    }
+    output = redisConnect(HOST, PORT);
+    if (output == NULL || output->err)
+    {
+        if (output)
+        {
+            std::cerr << "Connection error: " << output->errstr << std::endl;
+        }
+        else
+        {
             std::cerr << "Connection error: can't allocate redis context" << std::endl;
         }
         isCommandRunning.store(false);
@@ -25,25 +45,30 @@ bool RedisManager::Connect() {
     return true;
 }
 
-void RedisManager::Disconnect() {
+void RedisManager::Disconnect()
+{
     isCommandRunning.store(true);
-    redisFree(c);
+    redisFree(output);
+    redisFree(input);
     isCommandRunning.store(false);
 }
 
-bool RedisManager::CheckChannel(const char* channel) {
+bool RedisManager::CheckChannel(const char *channel)
+{
     isCommandRunning.store(true);
-    redisReply *reply = (redisReply*)redisCommand(c, "PUBSUB NUMSUB %s", channel);
-    if (reply == NULL || reply->type != REDIS_REPLY_ARRAY || reply->elements != 2) {
+    redisReply *reply = (redisReply *)redisCommand(output, "PUBSUB NUMSUB %s", channel);
+    if (reply == NULL || reply->type != REDIS_REPLY_ARRAY || reply->elements != 2)
+    {
         std::cerr << "Failed to check new_clients channel" << std::endl;
         freeReplyObject(reply);
         isCommandRunning.store(false);
         return false;
     }
     int numSubscribers = reply->element[1]->integer;
-    freeReplyObject(reply);;
+    freeReplyObject(reply);
 
-    if (numSubscribers < 0) {
+    if (numSubscribers < 0)
+    {
         std::cout << "No one is on the 'new_clients' channel" << std::endl;
         isCommandRunning.store(false);
         return false;
@@ -52,10 +77,12 @@ bool RedisManager::CheckChannel(const char* channel) {
     return true;
 }
 
-bool RedisManager::PublishToChannel(const char* channel, const char* message) {
+bool RedisManager::PublishToChannel(const char *channel, const char *message)
+{
     isCommandRunning.store(false);
-    redisReply *reply = (redisReply*)redisCommand(c, "PUBLISH %s %s", channel, message);
-    if (reply == NULL || reply->type != REDIS_REPLY_INTEGER) {
+    redisReply *reply = (redisReply *)redisCommand(output, "PUBLISH %s %s", channel, message);
+    if (reply == NULL || reply->type != REDIS_REPLY_INTEGER)
+    {
         std::cerr << "Failed to publish message to channel" << std::endl;
         std::cerr << "Errore: " << reply->str << std::endl;
         freeReplyObject(reply);
@@ -67,10 +94,12 @@ bool RedisManager::PublishToChannel(const char* channel, const char* message) {
     return true;
 }
 
-bool RedisManager::SubscribeToChannel(const char* channel) {
+bool RedisManager::SubscribeToChannel(const char *channel)
+{
     isCommandRunning.store(true);
-    redisReply *reply = (redisReply*)redisCommand(c, "SUBSCRIBE %s", channel);
-    if (reply == NULL || reply->type != REDIS_REPLY_ARRAY) {
+    redisReply *reply = (redisReply *)redisCommand(input, "SUBSCRIBE %s", channel);
+    if (reply == NULL || reply->type != REDIS_REPLY_ARRAY)
+    {
         std::cerr << "Failed to subscribe to new_clients channel" << std::endl;
         freeReplyObject(reply);
         isCommandRunning.store(false);
@@ -82,14 +111,16 @@ bool RedisManager::SubscribeToChannel(const char* channel) {
     return true;
 }
 
-bool RedisManager::UnsubscribeFromChannel(const char* channel) {
+bool RedisManager::UnsubscribeFromChannel(const char *channel)
+{
     isCommandRunning.store(true);
     redisReply *reply = nullptr;
-    if (channel == nullptr) 
-        reply = (redisReply*)redisCommand(c, "UNSUBSCRIBE");
-    else 
-        reply = (redisReply*)redisCommand(c, "UNSUBSCRIBE %s", channel);
-    if (reply == NULL || reply->type != REDIS_REPLY_ARRAY) {
+    if (channel == nullptr)
+        reply = (redisReply *)redisCommand(input, "UNSUBSCRIBE");
+    else
+        reply = (redisReply *)redisCommand(input, "UNSUBSCRIBE %s", channel);
+    if (reply == NULL || reply->type != REDIS_REPLY_ARRAY)
+    {
         std::cerr << "Failed to unsubscribe from new_clients channel" << std::endl;
         freeReplyObject(reply);
         isCommandRunning.store(false);
@@ -101,18 +132,23 @@ bool RedisManager::UnsubscribeFromChannel(const char* channel) {
     return true;
 }
 
-std::string RedisManager::WaitResponse() {
+std::string RedisManager::WaitResponse()
+{
     isCommandRunning.store(true);
     isWaitingResponse.store(true);
-    while (isWaitingResponse.load()) {
+    while (isWaitingResponse.load())
+    {
         redisReply *reply = nullptr;
-        if (redisGetReply(c, (void**)&reply) == REDIS_OK && reply != nullptr) {
-            if (reply != NULL) {
+        if (redisGetReply(input, (void **)&reply) == REDIS_OK && reply != nullptr)
+        {
+            if (reply != NULL)
+            {
                 std::cout << "Received message: " << reply->element[2]->str << std::endl;
                 isWaitingResponse.store(false);
                 return reply->element[2]->str;
             }
-            else {
+            else
+            {
                 std::cerr << "Failed to receive message" << std::endl;
             }
             freeReplyObject(reply);
@@ -126,6 +162,7 @@ std::string RedisManager::WaitResponse() {
     return "";
 }
 
-void RedisManager::StopWaitingResponse() {
+void RedisManager::StopWaitingResponse()
+{
     isWaitingResponse.store(false);
 }

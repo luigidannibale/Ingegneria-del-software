@@ -8,25 +8,33 @@
 #include <iostream>
 #include <cstring>
 
-class RedisManager {
+class RedisManager
+{
 public:
     RedisManager();
     ~RedisManager();
 
     bool Connect();
     void Disconnect();
-    bool CheckChannel(const char* channel);
-    bool PublishToChannel(const char* channel, const char* message);
-    bool SubscribeToChannel(const char* channel);
-    bool UnsubscribeFromChannel(const char* channel = nullptr);
+    bool CheckChannel(const char *channel);
+    bool PublishToChannel(const char *channel, const char *message);
+    bool SubscribeToChannel(const char *channel);
+    bool UnsubscribeFromChannel(const char *channel = nullptr);
 
     std::string WaitResponse();
     void StopWaitingResponse();
+
 private:
     redisContext *c;
 
+    redisContext *output;
+    redisContext *input;
+
     std::atomic<bool> isCommandRunning;
     std::atomic<bool> isWaitingResponse;
+
+    const int PORT = 6379;
+    const char *HOST = "127.0.0.1";
 };
 
-#endif //REDISMANAGER_H
+#endif // REDISMANAGER_H
