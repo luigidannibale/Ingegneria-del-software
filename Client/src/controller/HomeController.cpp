@@ -12,9 +12,14 @@ HomeController::HomeController(/* args */)
     wxInitAllImageHandlers();
     addButtonEvents();
 
+    red = new RedisManager();
+
     gamemodeController = new GamemodeController(frame->GetHomePanel());
     settingsController = new SettingsController(frame->GetHomePanel());
     profileController = new ProfileController(frame->GetHomePanel());
+    loginController = new LoginController(frame->GetHomePanel(), red);
+    
+    loginController->ShowPanel();
 }
 
 void HomeController::addButtonEvents() {

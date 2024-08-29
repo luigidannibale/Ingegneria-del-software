@@ -24,6 +24,8 @@ public:
     std::string WaitResponse();
     void StopWaitingResponse();
 
+    const char* SERVER_CHANNEL = "new_clients";
+
 private:
     redisContext *c;
 

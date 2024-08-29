@@ -8,6 +8,10 @@
 #include "GameplayController.hpp"
 #include "RedisManager.hpp"
 
+#include "JsonManager.hpp"
+    
+
+
 class GamemodeController
 {
 public:
@@ -26,6 +30,8 @@ private:
     std::string message;
     GameplayController *gameplayController;
     RedisManager *red;
+
+    Ricerca ricerca;
 
     void addButtonEvents();
     void SearchOpponent(wxCommandEvent &);

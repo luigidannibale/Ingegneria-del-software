@@ -59,7 +59,7 @@ bool RedisManager::CheckChannel(const char *channel)
     redisReply *reply = (redisReply *)redisCommand(output, "PUBSUB NUMSUB %s", channel);
     if (reply == NULL || reply->type != REDIS_REPLY_ARRAY || reply->elements != 2)
     {
-        std::cerr << "Failed to check new_clients channel" << std::endl;
+        std::cerr << "Failed to check " << channel << " channel" << std::endl;
         freeReplyObject(reply);
         isCommandRunning.store(false);
         return false;
@@ -69,7 +69,7 @@ bool RedisManager::CheckChannel(const char *channel)
 
     if (numSubscribers < 0)
     {
-        std::cout << "No one is on the 'new_clients' channel" << std::endl;
+        std::cout << "No one is on the " << channel << " channel" << std::endl;
         isCommandRunning.store(false);
         return false;
     }

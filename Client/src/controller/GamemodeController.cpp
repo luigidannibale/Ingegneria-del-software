@@ -4,31 +4,6 @@
 #include <unistd.h>
 #include <thread>
 
-namespace ns
-{
-    void from_json(const json &j, Richiesta &r)
-    {
-        r.codice = j.at("codice").get<int>();
-        r.input = j.at("input").get<json>();
-    }
-
-    void to_json(json &j, const Richiesta &r)
-    {
-        j = json{{"codice", r.codice}, {"input", r.input}};
-    }
-
-    void from_json(const json &j, Ricerca &r)
-    {
-        r.user = j.at("user").get<std::string>();
-        r.time_duration = j.at("time_duration").get<int>();
-        r.time_increment = j.at("time_increment").get<int>();
-    }
-
-    void to_json(json &j, const Ricerca &r)
-    {
-        j = json{{"user", r.user}, {"time_duration", r.time_duration}, {"time_increment", r.time_increment}};
-    }
-}
 
 GamemodeController::GamemodeController(wxPanel *parent)
 {
@@ -73,8 +48,8 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
         return;
     }
 
-    const char *channel = "new_clients";
-    if (!red->CheckChannel(channel))
+    //const char *channel = "new_clients";
+    if (!red->CheckChannel(red->SERVER_CHANNEL))
     {
         std::cerr << "Failed to check new_clients channel" << std::endl;
         return;
@@ -84,15 +59,15 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
     ricerca.time_duration = seconds;
     ricerca.time_increment = increment;
 
-    ns::Richiesta richiesta;
-    richiesta.codice = static_cast<int>(ns::CodiceRichiesta::search_opponent);
+    Richiesta richiesta;
+    richiesta.codice = static_cast<int>(CodiceRichiesta::search_opponent);
     richiesta.input = json(ricerca);
     json j = richiesta;
 
     // Publish client ID to 'new_clients' channel
-    if (!red->PublishToChannel(channel, j.dump().c_str()))
+    if (!red->PublishToChannel(red->SERVER_CHANNEL, j.dump().c_str()))
     {
-        std::cerr << "Failed to publish message to " << channel << " channel" << std::endl;
+        std::cerr << "Failed to publish message to " << red->SERVER_CHANNEL << " channel" << std::endl;
         return;
     }
 
@@ -151,11 +126,11 @@ void GamemodeController::StopSearchOpponent(wxCommandEvent &event)
         return;
     }
 
-    ns::Richiesta richiesta;
-    richiesta.codice = static_cast<int>(ns::CodiceRichiesta::quit_search_opponent);
+    Richiesta richiesta;
+    richiesta.codice = static_cast<int>(CodiceRichiesta::quit_search_opponent);
     richiesta.input = json(ricerca);
     json j = richiesta;
-    if (!red->PublishToChannel("new_clients", j.dump().c_str()))
+    if (!red->PublishToChannel(red->SERVER_CHANNEL, j.dump().c_str()))
     {
         std::cerr << "Failed to publish message to new_clients channel" << std::endl;
         return;

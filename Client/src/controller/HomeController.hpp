@@ -7,6 +7,7 @@
 #include "GamemodeController.hpp"
 #include "ProfileController.hpp"
 #include "SettingsController.hpp"
+#include "LoginController.hpp"
 
 class HomeController
 {
@@ -17,9 +18,12 @@ class HomeController
     private:
         HomePage* frame;
 
+        LoginController* loginController;
         GamemodeController* gamemodeController;
         SettingsController* settingsController;
         ProfileController* profileController;
+
+        RedisManager* red;
 
         void addButtonEvents();
 

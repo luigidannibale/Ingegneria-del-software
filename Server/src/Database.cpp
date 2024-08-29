@@ -148,7 +148,8 @@ PGresult *Database::GetResult()
 
 void Database::InsertUser(const char *username, const char *nome, const char *cognome, int elo, const char *chessboard_style, const char *pieces_style)
 {
-    std::string query = "INSERT INTO Player (Username, Nome, Cognome, PuntiElo, Theme) VALUES (" + escape_literal(conn, username) + ", " + escape_literal(conn, nome) + ", " + escape_literal(conn, cognome) + ", " + std::to_string(elo) + ", " + "(SELECT ID FROM Theme WHERE ChessboardColor = " + escape_literal(conn, chessboard_style) + " AND PiecesColor = " + escape_literal(conn, pieces_style) + ")" + ");";
+    // std::string query = "INSERT INTO Player (Username, Nome, Cognome, PuntiElo, Theme) VALUES (" + escape_literal(conn, username) + ", " + escape_literal(conn, nome) + ", " + escape_literal(conn, cognome) + ", " + std::to_string(elo) + ", " + "(SELECT ID FROM Theme WHERE ChessboardColor = " + escape_literal(conn, chessboard_style) + " AND PiecesColor = " + escape_literal(conn, pieces_style) + ")" + ");";
+    std::string query = "INSERT INTO Player (Username, Nome, Cognome, PuntiElo, ChessboardColor, PiecesColor) VALUES (" + escape_literal(conn, username) + ", " + escape_literal(conn, nome) + ", " + escape_literal(conn, cognome) + ", " + std::to_string(elo) + ", " + escape_literal(conn, chessboard_style) + ", " + escape_literal(conn, pieces_style) + ");";
     if (ExecuteQuery(query.c_str()))
     {
         PQclear(res);
@@ -247,8 +248,8 @@ void Database::createSchema()
         "Cognome VARCHAR(25) NOT NULL,"
         "PuntiElo INTEGER NOT NULL,"
         // "Theme INTEGER NOT NULL REFERENCES Theme(ID)"
-        "ChessboardColor Chessboard_style,"
-        "PiecesColor Pieces_style"
+        "ChessboardColor Chessboard_style DEFAULT 'brown',"
+        "PiecesColor Pieces_style DEFAULT 'neo'"
         ");",
         // In teoria basta mettere il tema nella tabella user
         /*"CREATE TABLE UserPreference("

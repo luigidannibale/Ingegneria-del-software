@@ -33,6 +33,10 @@ set(SOURCES
         src/controller/SettingsController.hpp
         src/controller/StockfishManager.cpp
         src/controller/StockfishManager.hpp
+        src/controller/JsonManager.hpp
+        src/controller/JsonManager.cpp
+        src/controller/LoginController.cpp
+        src/controller/LoginController.hpp
 
         src/model/GameOptions.cpp
         src/model/GameOptions.hpp
