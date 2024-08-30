@@ -8,7 +8,8 @@ Database::Database()
     if (!Connect(default_connection))
         return;
     std::cerr << "2" << std::endl;
-    if (!databaseExists(targetDbName))
+    bool exists = databaseExists(targetDbName);
+    if (!exists)
     {
         createDatabase(targetDbName);
     }
@@ -21,6 +22,8 @@ Database::Database()
     std::cerr << "4" << std::endl;
     if (!Connect(database_connection))
         return;
+    if (!exists)
+        createSchema();
 }
 
 Database::~Database()
@@ -111,7 +114,7 @@ void Database::createDatabase(const char *dbName)
     PQclear(res);
 
     // Crea tabelle
-    createSchema();
+    // createSchema();
 }
 
 void Database::deleteDatabase(const char *dbName)
@@ -132,7 +135,7 @@ void Database::deleteDatabase(const char *dbName)
 bool Database::ExecuteQuery(const char *query)
 {
     res = PQexec(conn, query);
-    if (PQresultStatus(res) != PGRES_COMMAND_OK)
+    if (PQresultStatus(res) != PGRES_COMMAND_OK && PQresultStatus(res) != PGRES_TUPLES_OK)
     {
         std::cerr << "Query failed: " << PQerrorMessage(conn) << std::endl;
         PQclear(res);
@@ -146,7 +149,7 @@ PGresult *Database::GetResult()
     return res;
 }
 
-void Database::InsertUser(const char *username, const char *nome, const char *cognome, int elo, const char *chessboard_style, const char *pieces_style)
+void Database::InsertUser(const char *username, const char *nome, const char *cognome, int elo, const std::string chessboard_style, const std::string pieces_style)
 {
     // std::string query = "INSERT INTO Player (Username, Nome, Cognome, PuntiElo, Theme) VALUES (" + escape_literal(conn, username) + ", " + escape_literal(conn, nome) + ", " + escape_literal(conn, cognome) + ", " + std::to_string(elo) + ", " + "(SELECT ID FROM Theme WHERE ChessboardColor = " + escape_literal(conn, chessboard_style) + " AND PiecesColor = " + escape_literal(conn, pieces_style) + ")" + ");";
     std::string query = "INSERT INTO Player (Username, Nome, Cognome, PuntiElo, ChessboardColor, PiecesColor) VALUES (" + escape_literal(conn, username) + ", " + escape_literal(conn, nome) + ", " + escape_literal(conn, cognome) + ", " + std::to_string(elo) + ", " + escape_literal(conn, chessboard_style) + ", " + escape_literal(conn, pieces_style) + ");";
@@ -179,6 +182,41 @@ void Database::DeleteUser(const char *username)
         // return true
     }
     // return false
+}
+
+int Database::FindUser(const char *username, User &user)
+{
+    std::string query = "SELECT * FROM Player WHERE Username = " + escape_literal(conn, username) + ";";
+    if (ExecuteQuery(query.c_str()))
+    {
+        if (PQntuples(res) == 0)
+        {
+            std::cout << "User not found" << std::endl;
+            PQclear(res);
+            return 0;
+        }
+
+        if (PQresultStatus(res) == PGRES_TUPLES_OK)
+        {
+            std::cout << "User found" << std::endl;
+            json chess_style = PQgetvalue(res, 0, 4);
+            json pieces_style = PQgetvalue(res, 0, 5);
+
+            user = User(PQgetvalue(res, 0, 0),               // Username
+                        PQgetvalue(res, 0, 1),               // Nome
+                        PQgetvalue(res, 0, 2),               // Cognome
+                        std::stoi(PQgetvalue(res, 0, 3)),    // PuntiElo
+                        chess_style.get<Chessboard_style>(), // ChessboardColor
+                        pieces_style.get<Pieces_style>());   // PiecesColor
+            PQclear(res);
+            return 1;
+        }
+        std::cout << "User not found and found at the same time" << std::endl;
+        PQclear(res);
+        return -1;
+    }
+    std::cout << "Find User Query failed" << std::endl;
+    return -1;
 }
 
 int Database::InsertNewGame(const char *white, const char *black, int timeDuration, int timeIncrement)

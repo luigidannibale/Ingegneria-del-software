@@ -3,6 +3,7 @@
 
 #include "../view/LoginPanel.hpp"
 #include "RedisManager.hpp"
+#include "JsonManager.hpp"
 
 class LoginController
 {
@@ -16,7 +17,7 @@ private:
     LoginPanel *panel;
     wxPanel *backPanel;
 
-    RedisManager* red;
+    RedisManager *red;
 
     void addButtonEvents();
     void Login(wxCommandEvent &event);

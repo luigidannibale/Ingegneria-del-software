@@ -66,12 +66,13 @@ void Server::handle_client(std::string messaggio)
         search_game(r.getPayload().at("game_id"));
         break;
     case CodiceRichiesta::new_user:
-        new_user(r.getPayload().at("username"),
-                 r.getPayload().at("nome"),
-                 r.getPayload().at("cognome"),
-                 r.getPayload().at("elo"),
-                 r.getPayload().at("chessboard_style"),
-                 r.getPayload().at("pieces_style"));
+        // new_user(r.getPayload().at("username"),
+        //          r.getPayload().at("nome"),
+        //          r.getPayload().at("cognome"),
+        //          r.getPayload().at("elo"),
+        //          r.getPayload().at("chessboard_style"),
+        //          r.getPayload().at("pieces_style"));
+        new_user(r.getPayload().at("username"));
         break;
     case CodiceRichiesta::update_user:
         update_user(r.getPayload().at("username"),
@@ -164,13 +165,54 @@ json Server::search_game(int g_id)
     return json();
 }
 
-json Server::new_user(std::string username, std::string nome, std::string cognome, int elo, Chessboard_style c_st,
-                      Pieces_style p_st)
+// json Server::new_user(std::string username, std::string nome, std::string cognome, int elo, Chessboard_style c_st,
+//                       Pieces_style p_st)
+// {
+//     json chessboard = c_st;
+//     json pieces = p_st;
+//     db->InsertUser(username.c_str(), nome.c_str(), cognome.c_str(), elo, chessboard.dump().c_str(), pieces.dump().c_str());
+//     return json();
+// }
+
+json Server::new_user(std::string username)
 {
-    json chessboard = c_st;
-    json pieces = p_st;
-    db->InsertUser(username.c_str(), nome.c_str(), cognome.c_str(), elo, chessboard.dump().c_str(), pieces.dump().c_str());
-    return json();
+    User user;
+    int res = db->FindUser(username.c_str(), user);
+    json mess;
+
+    if (res == 0) // User does not exist
+    {
+        json default_c_st = Chessboard_style::brown;
+        json default_p_st = Pieces_style::neo;
+
+        std::string default_c_st_str = default_c_st.get<std::string>();
+        std::string default_p_st_str = default_p_st.get<std::string>();
+
+        db->InsertUser(username.c_str(), "", "", 500, default_c_st_str, default_p_st_str);
+
+        user.setUsername(username);
+        user.setNome("");
+        user.setCognome("");
+        user.setPuntiElo(500);
+        user.setChessboardStyle(Chessboard_style::brown);
+        user.setPiecesStyle(Pieces_style::neo);
+
+        mess["codice"] = 204;
+        mess["input"] = user.toJson();
+    }
+    else if (res == 1) // User already exists
+    {
+        mess["codice"] = 204;
+        mess["input"] = user.toJson();
+    }
+    else // Internal server error
+    {
+        mess["codice"] = 500;
+        mess["input"] = "Internal server error";
+    }
+
+    redisManager->PublishToChannel(username.c_str(), mess.dump().c_str());
+    return mess;
 }
 
 json Server::update_user(std::string username, std::string nome, std::string cognome, int elo)
@@ -205,7 +247,7 @@ int main()
 // })
 
 // Function to convert Esito to JSON
-void esito_to_json(json &j, const Esito &esito)
+void to_json(json &j, const Esito &esito)
 {
     switch (esito)
     {
@@ -225,7 +267,7 @@ void esito_to_json(json &j, const Esito &esito)
 }
 
 // Function to convert JSON to Esito
-void esito_from_json(const json &j, Esito &esito)
+void from_json(const json &j, Esito &esito)
 {
     std::string esitoStr = j.get<std::string>();
     if (esitoStr == "W")
@@ -250,7 +292,7 @@ void esito_from_json(const json &j, Esito &esito)
 // {Motivo::NF, "NF"}
 // })
 
-void motivo_to_json(json &j, const Motivo &motivo)
+void to_json(json &j, const Motivo &motivo)
 {
     switch (motivo)
     {
@@ -282,7 +324,7 @@ void motivo_to_json(json &j, const Motivo &motivo)
 }
 
 // Function to convert JSON to Motivo
-void motivo_from_json(const json &j, Motivo &motivo)
+void from_json(const json &j, Motivo &motivo)
 {
     std::string motivoStr = j.get<std::string>();
     if (motivoStr == "checkmate")
@@ -314,7 +356,7 @@ void motivo_from_json(const json &j, Motivo &motivo)
 // {Pieces_style::pixel, "pixel"}
 // })
 
-void chessboard_to_json(json &j, const Chessboard_style &chessboard_style)
+void to_json(json &j, const Chessboard_style &chessboard_style)
 {
     switch (chessboard_style)
     {
@@ -330,7 +372,7 @@ void chessboard_to_json(json &j, const Chessboard_style &chessboard_style)
     }
 }
 
-void chessboard_from_json(const json &j, Chessboard_style &chessboard_style)
+void from_json(const json &j, Chessboard_style &chessboard_style)
 {
     std::string chessboardStyleStr = j.get<std::string>();
     if (chessboardStyleStr == "blue")
@@ -341,7 +383,7 @@ void chessboard_from_json(const json &j, Chessboard_style &chessboard_style)
         chessboard_style = Chessboard_style::black;
 }
 
-void pieces_to_json(json &j, const Pieces_style &pieces_style)
+void to_json(json &j, const Pieces_style &pieces_style)
 {
     switch (pieces_style)
     {
@@ -354,7 +396,7 @@ void pieces_to_json(json &j, const Pieces_style &pieces_style)
     }
 }
 
-void pieces_from_json(const json &j, Pieces_style &pieces_style)
+void from_json(const json &j, Pieces_style &pieces_style)
 {
     std::string piecesStyleStr = j.get<std::string>();
     if (piecesStyleStr == "neo")

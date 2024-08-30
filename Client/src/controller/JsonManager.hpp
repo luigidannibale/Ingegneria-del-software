@@ -19,7 +19,7 @@ enum class CodiceRichiesta
     delete_user = 204
 };
 
-enum class CodiceRisposta 
+enum class CodiceRisposta
 {
     ok = 200,
     created = 201,
@@ -32,23 +32,23 @@ enum class CodiceRisposta
     server_error = 500,
 };
 
-struct Richiesta {
+struct Richiesta
+{
     int codice;
     json input;
 };
 
-void from_json(const json &j, Richiesta &r);
-void to_json(json &j, const Richiesta &r);
-
-struct Ricerca {
+struct Ricerca
+{
     std::string user;
     int time_duration;
     int time_increment;
 };
 
+void from_json(const json &j, Richiesta &r);
+void to_json(json &j, const Richiesta &r);
+
 void from_json(const json &j, Ricerca &r);
 void to_json(json &j, const Ricerca &r);
-
-
 
 #endif // JSONMANAGER_HPP

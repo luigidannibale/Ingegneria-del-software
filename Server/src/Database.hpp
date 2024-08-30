@@ -166,6 +166,82 @@ public:
     }
 };
 
+class User
+{
+public:
+    User() {}
+    // Constructor
+    User(const std::string &username, const std::string &nome, const std::string &cognome, int puntiElo, Chessboard_style c_st, Pieces_style p_st)
+        : username_(username), nome_(nome), cognome_(cognome), puntiElo_(puntiElo), c_st_(c_st), p_st_(p_st) {}
+
+    // Metodo per convertire l'oggetto User in JSON
+    json toJson() const
+    {
+        return json{
+            {"username", username_},
+            {"nome", nome_},
+            {"cognome", cognome_},
+            {"puntiElo", puntiElo_},
+            {"c_st", c_st_},
+            {"p_st", p_st_}};
+    }
+
+    // Metodo statico per creare un oggetto User da JSON
+    static User fromJson(const json &j)
+    {
+        return User{
+            j.at("username").get<std::string>(),
+            j.at("nome").get<std::string>(),
+            j.at("cognome").get<std::string>(),
+            j.at("puntiElo").get<int>(),
+            j.at("c_st").get<Chessboard_style>(),
+            j.at("p_st").get<Pieces_style>()};
+    }
+
+    // Getter and Setter for Username
+    std::string getUsername() const { return username_; }
+    void setUsername(const std::string &username) { username_ = username; }
+
+    // Getter and Setter for Nome
+    std::string getNome() const { return nome_; }
+    void setNome(const std::string &nome) { nome_ = nome; }
+
+    // Getter and Setter for Cognome
+    std::string getCognome() const { return cognome_; }
+    void setCognome(const std::string &cognome) { cognome_ = cognome; }
+
+    // Getter and Setter for PuntiElo
+    int getPuntiElo() const { return puntiElo_; }
+    void setPuntiElo(int puntiElo) { puntiElo_ = puntiElo; }
+
+    // Getter and Setter for Chessboard_style
+    Chessboard_style getChessboardStyle() const { return c_st_; }
+    void setChessboardStyle(Chessboard_style style) { c_st_ = style; }
+
+    // Getter and Setter for Pieces_style
+    Pieces_style getPiecesStyle() const { return p_st_; }
+    void setPiecesStyle(Pieces_style style) { p_st_ = style; }
+
+    // Method to display player details
+    void display() const
+    {
+        std::cout << "Username: " << username_ << std::endl;
+        std::cout << "Nome: " << nome_ << std::endl;
+        std::cout << "Cognome: " << cognome_ << std::endl;
+        std::cout << "Punti Elo: " << puntiElo_ << std::endl;
+        std::cout << "Chessboard Style: " << static_cast<int>(c_st_) << std::endl;
+        std::cout << "Pieces Style: " << static_cast<int>(p_st_) << std::endl;
+    }
+
+private:
+    std::string username_;
+    std::string nome_;
+    std::string cognome_;
+    int puntiElo_;
+    Chessboard_style c_st_;
+    Pieces_style p_st_;
+};
+
 class Database
 {
 
@@ -181,9 +257,10 @@ public:
     void createDatabase(const char *dbName);
     void deleteDatabase(const char *dbName);
 
-    void InsertUser(const char *username, const char *nome, const char *cognome, int elo, const char *chessboard_style, const char *pieces_style);
+    void InsertUser(const char *username, const char *nome, const char *cognome, int elo, const std::string chessboard_style, const std::string pieces_style);
     void UpdateUser(const char *username, const char *nome, const char *cognome, int elo);
     void DeleteUser(const char *username);
+    int FindUser(const char *username, User &user);
 
     int InsertNewGame(const char *white, const char *black, int timeDuration, int timeIncrement);
     void UpdateGame(int game_id, const char *moves, const char *esito, const char *motivo);
@@ -200,73 +277,6 @@ private:
 
     PGconn *conn;
     PGresult *res;
-};
-
-class User
-{
-public:
-    // Constructor
-    User(const std::string &username, const std::string &nome, const std::string &cognome, const std::string &password, int puntiElo)
-        : username_(username), nome_(nome), cognome_(cognome), password_(password), puntiElo_(puntiElo) {}
-
-    // Metodo per convertire l'oggetto User in JSON
-    json toJson() const
-    {
-        return json{
-            {"username", username_},
-            {"nome", nome_},
-            {"cognome", cognome_},
-            {"password", password_},
-            {"puntiElo", puntiElo_}};
-    }
-
-    // Metodo statico per creare un oggetto User da JSON
-    static User fromJson(const json &j)
-    {
-        return User{
-            j.at("username").get<std::string>(),
-            j.at("nome").get<std::string>(),
-            j.at("cognome").get<std::string>(),
-            j.at("password").get<std::string>(),
-            j.at("puntiElo").get<int>()};
-    }
-
-    // Getter and Setter for Username
-    std::string getUsername() const { return username_; }
-    void setUsername(const std::string &username) { username_ = username; }
-
-    // Getter and Setter for Nome
-    std::string getNome() const { return nome_; }
-    void setNome(const std::string &nome) { nome_ = nome; }
-
-    // Getter and Setter for Cognome
-    std::string getCognome() const { return cognome_; }
-    void setCognome(const std::string &cognome) { cognome_ = cognome; }
-
-    // Getter and Setter for Password
-    std::string getPassword() const { return password_; }
-    void setPassword(const std::string &password) { password_ = password; }
-
-    // Getter and Setter for PuntiElo
-    int getPuntiElo() const { return puntiElo_; }
-    void setPuntiElo(int puntiElo) { puntiElo_ = puntiElo; }
-
-    // Method to display player details
-    void display() const
-    {
-        std::cout << "Username: " << username_ << std::endl;
-        std::cout << "Nome: " << nome_ << std::endl;
-        std::cout << "Cognome: " << cognome_ << std::endl;
-        std::cout << "Password: " << password_ << std::endl;
-        std::cout << "Punti Elo: " << puntiElo_ << std::endl;
-    }
-
-private:
-    std::string username_;
-    std::string nome_;
-    std::string cognome_;
-    std::string password_;
-    int puntiElo_;
 };
 
 class UserPreference
