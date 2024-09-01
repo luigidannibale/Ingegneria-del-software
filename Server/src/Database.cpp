@@ -149,28 +149,44 @@ PGresult *Database::GetResult()
     return res;
 }
 
-void Database::InsertUser(const char *username, const char *nome, const char *cognome, int elo, const std::string chessboard_style, const std::string pieces_style)
+bool Database::InsertUser(const char *username, const char *nome, const char *cognome, int elo, const std::string chessboard_style, const std::string pieces_style)
 {
     // std::string query = "INSERT INTO Player (Username, Nome, Cognome, PuntiElo, Theme) VALUES (" + escape_literal(conn, username) + ", " + escape_literal(conn, nome) + ", " + escape_literal(conn, cognome) + ", " + std::to_string(elo) + ", " + "(SELECT ID FROM Theme WHERE ChessboardColor = " + escape_literal(conn, chessboard_style) + " AND PiecesColor = " + escape_literal(conn, pieces_style) + ")" + ");";
     std::string query = "INSERT INTO Player (Username, Nome, Cognome, PuntiElo, ChessboardColor, PiecesColor) VALUES (" + escape_literal(conn, username) + ", " + escape_literal(conn, nome) + ", " + escape_literal(conn, cognome) + ", " + std::to_string(elo) + ", " + escape_literal(conn, chessboard_style) + ", " + escape_literal(conn, pieces_style) + ");";
     if (ExecuteQuery(query.c_str()))
     {
         PQclear(res);
-        // return username ??
+        return true;
     }
+    return false;
 }
 
-void Database::UpdateUser(const char *username, const char *nome, const char *cognome, int elo)
+bool Database::UpdateUser(const char *username, const char *new_username, const char *nome, const char *cognome, int elo)
 {
-    std::string query = "UPDATE Player SET Nome = " + escape_literal(conn, nome) +
+    std::string query = "UPDATE Player SET Username = " + escape_literal(conn, new_username) +
+                        ", Nome = " + escape_literal(conn, nome) +
                         ", Cognome = " + escape_literal(conn, cognome) +
                         ", PuntiElo = " + std::to_string(elo) +
                         " WHERE Username = " + escape_literal(conn, username) + ";";
     if (ExecuteQuery(query.c_str()))
     {
         PQclear(res);
-        // return username ??
+        return true;
     }
+    return false;
+}
+
+bool Database::UpdateUserPreference(const char *username, const std::string chessboard_style, const std::string pieces_style)
+{
+    std::string query = "UPDATE Player SET ChessboardColor = " + escape_literal(conn, chessboard_style) +
+                        ", PiecesColor = " + escape_literal(conn, pieces_style) +
+                        " WHERE Username = " + escape_literal(conn, username) + ";";
+    if (ExecuteQuery(query.c_str()))
+    {
+        PQclear(res);
+        return true;
+    }
+    return false;
 }
 
 void Database::DeleteUser(const char *username)
@@ -191,7 +207,7 @@ int Database::FindUser(const char *username, User &user)
     {
         if (PQntuples(res) == 0)
         {
-            std::cout << "User not found" << std::endl;
+            std::cerr << "User not found" << std::endl;
             PQclear(res);
             return 0;
         }
@@ -211,11 +227,11 @@ int Database::FindUser(const char *username, User &user)
             PQclear(res);
             return 1;
         }
-        std::cout << "User not found and found at the same time" << std::endl;
+        std::cerr << "User not found and found at the same time" << std::endl;
         PQclear(res);
         return -1;
     }
-    std::cout << "Find User Query failed" << std::endl;
+    std::cerr << "Find User Query failed" << std::endl;
     return -1;
 }
 
@@ -275,11 +291,11 @@ void Database::createSchema()
         "CREATE TYPE Chessboard_style AS ENUM('blue','brown','black');",
         "CREATE TYPE Pieces_style AS ENUM('neo','pixel');",
 
-        "CREATE TABLE Theme ("
-        "ID SERIAL PRIMARY KEY NOT NULL,"
-        "ChessboardColor Chessboard_style NOT NULL,"
-        "PiecesColor Pieces_style NOT NULL"
-        ");",
+        // "CREATE TABLE Theme ("
+        // "ID SERIAL PRIMARY KEY NOT NULL,"
+        // "ChessboardColor Chessboard_style NOT NULL,"
+        // "PiecesColor Pieces_style NOT NULL"
+        // ");",
         "CREATE TABLE Player ("
         "Username VARCHAR(20) PRIMARY KEY NOT NULL,"
         "Nome VARCHAR(20) NOT NULL,"

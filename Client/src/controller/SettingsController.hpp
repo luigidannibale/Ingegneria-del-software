@@ -4,28 +4,31 @@
 #include "../lib.hpp"
 #include "../view/SettingsPanel.hpp"
 #include "../view/GameGraphicOptions.hpp"
+#include "JsonManager.hpp"
+#include "RedisManager.hpp"
 
 class SettingsController
 {
 public:
-    SettingsController(wxPanel*);
+    SettingsController(wxPanel *, RedisManager *, GameGraphicOptions &);
     ~SettingsController();
 
     void ShowPanel();
-    GameGraphicOptions* GetGameGraphicOptions();
+    void SetGameGraphicOptions(GameGraphicOptions *);
+    void SetUsername(std::string);
+    GameGraphicOptions *GetGameGraphicOptions();
 
 private:
-    SettingsPanel* panel;
-    wxPanel* backPanel;
+    SettingsPanel *panel;
+    wxPanel *backPanel;
 
-    GameGraphicOptions* configuration;
+    RedisManager *redisManager;
+    GameGraphicOptions *configuration;
+    std::string username;
 
     void addButtonEvents();
-    void BackPanel(wxCommandEvent&);
-    void SaveSettings(wxCommandEvent&);
-
+    void BackPanel(wxCommandEvent &);
+    void SaveSettings(wxCommandEvent &);
 };
 
-
 #endif // SETTINGSCONTROLLER_H
-

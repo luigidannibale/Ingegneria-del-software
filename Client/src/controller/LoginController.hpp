@@ -4,11 +4,13 @@
 #include "../view/LoginPanel.hpp"
 #include "RedisManager.hpp"
 #include "JsonManager.hpp"
+#include "../model/User.hpp"
+#include "../view/GameGraphicOptions.hpp"
 
 class LoginController
 {
 public:
-    LoginController(wxPanel *, RedisManager *);
+    LoginController(wxPanel *, RedisManager *, User &, GameGraphicOptions &);
     ~LoginController();
 
     void ShowPanel();
@@ -18,6 +20,8 @@ private:
     wxPanel *backPanel;
 
     RedisManager *red;
+    User *user;
+    GameGraphicOptions *configuration;
 
     void addButtonEvents();
     void Login(wxCommandEvent &event);

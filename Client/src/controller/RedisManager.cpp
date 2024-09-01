@@ -67,7 +67,7 @@ bool RedisManager::CheckChannel(const char *channel)
     int numSubscribers = reply->element[1]->integer;
     freeReplyObject(reply);
 
-    if (numSubscribers < 0)
+    if (numSubscribers <= 0)
     {
         std::cout << "No one is on the " << channel << " channel" << std::endl;
         isCommandRunning.store(false);
@@ -116,7 +116,12 @@ bool RedisManager::UnsubscribeFromChannel(const char *channel)
     isCommandRunning.store(true);
     redisReply *reply = nullptr;
     if (channel == nullptr)
+    {
         reply = (redisReply *)redisCommand(input, "UNSUBSCRIBE");
+        freeReplyObject(reply);
+        isCommandRunning.store(false);
+        return true;
+    }
     else
         reply = (redisReply *)redisCommand(input, "UNSUBSCRIBE %s", channel);
     if (reply == NULL || reply->type != REDIS_REPLY_ARRAY)

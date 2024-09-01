@@ -3,6 +3,7 @@
 
 #include <nlohmann/json.hpp>
 #include <string>
+#include "../view/GameGraphicOptions.hpp"
 
 using json = nlohmann::json;
 
@@ -32,7 +33,7 @@ enum class CodiceRisposta
     server_error = 500,
 };
 
-struct Richiesta
+struct Messaggio
 {
     int codice;
     json input;
@@ -45,10 +46,16 @@ struct Ricerca
     int time_increment;
 };
 
-void from_json(const json &j, Richiesta &r);
-void to_json(json &j, const Richiesta &r);
+void from_json(const json &j, Messaggio &r);
+void to_json(json &j, const Messaggio &r);
 
 void from_json(const json &j, Ricerca &r);
 void to_json(json &j, const Ricerca &r);
+
+void from_json(const json &j, BoardStyle &r);
+void to_json(json &j, const BoardStyle &r);
+
+void from_json(const json &j, PiecesStyle &r);
+void to_json(json &j, const PiecesStyle &r);
 
 #endif // JSONMANAGER_HPP

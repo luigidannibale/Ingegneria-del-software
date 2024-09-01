@@ -76,6 +76,7 @@ void Server::handle_client(std::string messaggio)
         break;
     case CodiceRichiesta::update_user:
         update_user(r.getPayload().at("username"),
+                    r.getPayload().at("new_username"),
                     r.getPayload().at("nome"),
                     r.getPayload().at("cognome"),
                     r.getPayload().at("elo"));
@@ -188,26 +189,32 @@ json Server::new_user(std::string username)
         std::string default_c_st_str = default_c_st.get<std::string>();
         std::string default_p_st_str = default_p_st.get<std::string>();
 
-        db->InsertUser(username.c_str(), "", "", 500, default_c_st_str, default_p_st_str);
+        if (db->InsertUser(username.c_str(), "", "", 500, default_c_st_str, default_p_st_str))
+        {
+            user.setUsername(username);
+            user.setNome("");
+            user.setCognome("");
+            user.setPuntiElo(500);
+            user.setChessboardStyle(Chessboard_style::brown);
+            user.setPiecesStyle(Pieces_style::neo);
 
-        user.setUsername(username);
-        user.setNome("");
-        user.setCognome("");
-        user.setPuntiElo(500);
-        user.setChessboardStyle(Chessboard_style::brown);
-        user.setPiecesStyle(Pieces_style::neo);
-
-        mess["codice"] = 204;
-        mess["input"] = user.toJson();
+            mess["codice"] = CodiceRisposta::user_created;
+            mess["input"] = user.toJson();
+        }
+        else
+        {
+            mess["codice"] = CodiceRisposta::server_error;
+            mess["input"] = "Internal server error";
+        }
     }
     else if (res == 1) // User already exists
     {
-        mess["codice"] = 204;
+        mess["codice"] = CodiceRisposta::user_created;
         mess["input"] = user.toJson();
     }
     else // Internal server error
     {
-        mess["codice"] = 500;
+        mess["codice"] = CodiceRisposta::server_error;
         mess["input"] = "Internal server error";
     }
 
@@ -215,15 +222,54 @@ json Server::new_user(std::string username)
     return mess;
 }
 
-json Server::update_user(std::string username, std::string nome, std::string cognome, int elo)
+json Server::update_user(std::string username, std::string new_username, std::string nome, std::string cognome, int elo)
 {
-    db->UpdateUser(username.c_str(), nome.c_str(), cognome.c_str(), elo);
-    return json();
+    json mess;
+    mess["input"] = "{}"; // Default value
+    if (db->UpdateUser(username.c_str(), new_username.c_str(), nome.c_str(), cognome.c_str(), elo))
+    {
+        mess["codice"] = CodiceRisposta::ok;
+    }
+    else
+    {
+        User dummy;
+        int res = db->FindUser(new_username.c_str(), dummy);
+        if (res == 1) // Username already taken
+        {
+            mess["codice"] = CodiceRisposta::bad_request;
+        }
+        else
+        {
+            mess["codice"] = CodiceRisposta::server_error;
+        }
+    }
+
+    redisManager->PublishToChannel(username.c_str(), mess.dump().c_str());
+    return mess;
 }
 
 json Server::update_userPreference(std::string username, Chessboard_style c_st, Pieces_style p_st)
 {
-    return json();
+    json mess;
+    mess["input"] = "{}"; // Default value
+
+    json chessboard = c_st;
+    json pieces = p_st;
+
+    std::string chessboard_str = chessboard.get<std::string>();
+    std::string pieces_str = pieces.get<std::string>();
+
+    if (db->UpdateUserPreference(username.c_str(), chessboard_str, pieces_str))
+    {
+        mess["codice"] = CodiceRisposta::ok;
+    }
+    else
+    {
+        mess["codice"] = CodiceRisposta::server_error;
+    }
+
+    redisManager->PublishToChannel(username.c_str(), mess.dump().c_str());
+    return mess;
 }
 
 json Server::delete_user(std::string username)
@@ -390,6 +436,9 @@ void to_json(json &j, const Pieces_style &pieces_style)
     case Pieces_style::neo:
         j = "neo";
         break;
+    case Pieces_style::neo2:
+        j = "neo2";
+        break;
     case Pieces_style::pixel:
         j = "pixel";
         break;
@@ -402,6 +451,10 @@ void from_json(const json &j, Pieces_style &pieces_style)
     if (piecesStyleStr == "neo")
     {
         pieces_style = Pieces_style::neo;
+    }
+    if (piecesStyleStr == "neo2")
+    {
+        pieces_style = Pieces_style::neo2;
     }
     else if (piecesStyleStr == "pixel")
     {

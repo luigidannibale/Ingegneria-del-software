@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <thread>
 
-
 GamemodeController::GamemodeController(wxPanel *parent)
 {
     panel = new GameMode(parent->GetParent());
@@ -48,7 +47,7 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
         return;
     }
 
-    //const char *channel = "new_clients";
+    // const char *channel = "new_clients";
     if (!red->CheckChannel(red->SERVER_CHANNEL))
     {
         std::cerr << "Failed to check new_clients channel" << std::endl;
@@ -59,7 +58,7 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
     ricerca.time_duration = seconds;
     ricerca.time_increment = increment;
 
-    Richiesta richiesta;
+    Messaggio richiesta;
     richiesta.codice = static_cast<int>(CodiceRichiesta::search_opponent);
     richiesta.input = json(ricerca);
     json j = richiesta;
@@ -126,7 +125,7 @@ void GamemodeController::StopSearchOpponent(wxCommandEvent &event)
         return;
     }
 
-    Richiesta richiesta;
+    Messaggio richiesta;
     richiesta.codice = static_cast<int>(CodiceRichiesta::quit_search_opponent);
     richiesta.input = json(ricerca);
     json j = richiesta;

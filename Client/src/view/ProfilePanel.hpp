@@ -1,42 +1,42 @@
 #ifndef PROFILEPANEL_H
-#define  PROFILEPANEL_H
+#define PROFILEPANEL_H
 
 #include "../lib.hpp"
 #include "../model/User.hpp"
 
-class ProfilePanel : public wxPanel{
+class ProfilePanel : public wxPanel
+{
 public:
-    ProfilePanel(wxWindow*, User*);
-    wxButton* GetBtnBack();
-    wxButton* GetBtnCancel();
-    wxButton* GetBtnUpdate();
-    wxButton* GetBtnSave();
-    wxTextCtrl* GetTxtUsername();
-    wxTextCtrl* GetTxtName();
-    wxTextCtrl* GetTxtSurname();
-    void UpdateUserDatas(User*);
-    void ShowUpdate(wxCommandEvent&);
-    void ShowDefault(wxCommandEvent&);
+    ProfilePanel(wxWindow *, User *);
+    wxButton *GetBtnBack();
+    wxButton *GetBtnCancel();
+    wxButton *GetBtnUpdate();
+    wxButton *GetBtnSave();
+    wxTextCtrl *GetTxtUsername();
+    wxTextCtrl *GetTxtName();
+    wxTextCtrl *GetTxtSurname();
+    void UpdateUserDatas(User *);
+    void ShowUpdate();
+    void ShowDefault();
 
 private:
-    wxPanel* defaultPanel;
-    wxStaticText* lblUsername;
-    wxStaticText* lblName;
-    wxStaticText* lblSurname;
-    wxButton* btnUpdateMode;
-    wxStaticText* lblEloPointsD;
-    wxButton* btnBack;
+    wxPanel *defaultPanel;
+    wxStaticText *lblUsername;
+    wxStaticText *lblName;
+    wxStaticText *lblSurname;
+    wxButton *btnUpdateMode;
+    wxStaticText *lblEloPointsD;
+    wxButton *btnBack;
 
-    wxPanel* updatePanel;
-    wxTextCtrl* txtUsername;
-    wxTextCtrl* txtName;
-    wxTextCtrl* txtSurname;
-    wxButton* btnSave;
-    wxStaticText* lblEloPointsU;
-    wxButton* btnCancel;
+    wxPanel *updatePanel;
+    wxTextCtrl *txtUsername;
+    wxTextCtrl *txtName;
+    wxTextCtrl *txtSurname;
+    wxButton *btnSave;
+    wxStaticText *lblEloPointsU;
+    wxButton *btnCancel;
 
-    //passwd wxTextCtrl* txtPassword;
-
+    // passwd wxTextCtrl* txtPassword;
 };
 
-#endif //PROFILEPANEL_H
+#endif // PROFILEPANEL_H

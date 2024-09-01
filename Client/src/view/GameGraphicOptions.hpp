@@ -1,19 +1,23 @@
 #ifndef GAMEGRAPHICOPTIONS_H
 #define GAMEGRAPHICOPTIONS_H
 
-enum class BoardStyle : int{
+enum class BoardStyle : int
+{
     brown = 1,
     blue,
     black,
 };
-enum class PiecesStyle : int{
+enum class PiecesStyle : int
+{
     neo = 1,
     neo2,
     pixel,
 };
 
-class GameGraphicOptions {
+class GameGraphicOptions
+{
 public:
+    GameGraphicOptions() {}
     GameGraphicOptions(BoardStyle, PiecesStyle);
     BoardStyle GetBoardStyle();
     PiecesStyle GetPiecesStyle();
@@ -26,6 +30,4 @@ private:
     PiecesStyle piecesStyle;
 };
 
-
-
-#endif //GAMEGRAPHICOPTIONS_H
+#endif // GAMEGRAPHICOPTIONS_H

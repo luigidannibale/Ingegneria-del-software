@@ -23,6 +23,19 @@ enum class CodiceRichiesta
     delete_user = 204
 };
 
+enum class CodiceRisposta
+{
+    ok = 200,
+    created = 201,
+    game_created = 202,
+    game_found = 203,
+    user_created = 204,
+    bad_request = 400,
+    forbidden = 403,
+    not_found = 404,
+    server_error = 500,
+};
+
 // Classe Richiesta
 class Richiesta
 {
@@ -79,7 +92,7 @@ private:
     json search_game(int g_id);
     // json new_user(std::string username, std::string nome, std::string cognome, int elo, Chessboard_style c_st, Pieces_style p_st);
     json new_user(std::string username);
-    json update_user(std::string username, std::string nome, std::string cognome, int elo);
+    json update_user(std::string username, std::string new_username, std::string nome, std::string cognome, int elo);
     json update_userPreference(std::string username, Chessboard_style c_st, Pieces_style p_st);
     json delete_user(std::string username);
 

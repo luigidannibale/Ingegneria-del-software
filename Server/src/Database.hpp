@@ -39,6 +39,7 @@ enum class Chessboard_style
 enum class Pieces_style
 {
     neo,
+    neo2,
     pixel
 };
 
@@ -257,8 +258,9 @@ public:
     void createDatabase(const char *dbName);
     void deleteDatabase(const char *dbName);
 
-    void InsertUser(const char *username, const char *nome, const char *cognome, int elo, const std::string chessboard_style, const std::string pieces_style);
-    void UpdateUser(const char *username, const char *nome, const char *cognome, int elo);
+    bool InsertUser(const char *username, const char *nome, const char *cognome, int elo, const std::string chessboard_style, const std::string pieces_style);
+    bool UpdateUser(const char *username, const char *new_username, const char *nome, const char *cognome, int elo);
+    bool UpdateUserPreference(const char *username, const std::string chessboard_style, const std::string pieces_style);
     void DeleteUser(const char *username);
     int FindUser(const char *username, User &user);
 
