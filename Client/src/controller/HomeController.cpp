@@ -16,9 +16,10 @@ HomeController::HomeController(/* args */)
     user = User("username", "nome", "cognome", 0);
     configuration = GameGraphicOptions(BoardStyle::brown, PiecesStyle::neo);
 
-    gamemodeController = new GamemodeController(frame->GetHomePanel());
+    gamemodeController = new GamemodeController(frame->GetHomePanel(), red, user);
     settingsController = new SettingsController(frame->GetHomePanel(), red, configuration);
     profileController = new ProfileController(frame->GetHomePanel(), red, user);
+    viewGameController = new ViewGameController(frame->GetHomePanel(), red);
     loginController = new LoginController(frame->GetHomePanel(), red, user, configuration);
 
     loginController->ShowPanel();
@@ -31,6 +32,8 @@ void HomeController::addButtonEvents()
     frame->GetBtnSettings()->Bind(wxEVT_BUTTON, &HomeController::showSettings, this);
 
     frame->GetBtnProfile()->Bind(wxEVT_BUTTON, &HomeController::showProfile, this);
+
+    frame->GetBtnViewGame()->Bind(wxEVT_BUTTON, &HomeController::showViewGame, this);
 
     frame->GetBtnExit()->Bind(wxEVT_BUTTON, &HomeController::Exit, this);
 
@@ -70,9 +73,15 @@ void HomeController::showProfile(wxCommandEvent &event)
     frame->HidePanel();
 }
 
+void HomeController::showViewGame(wxCommandEvent &event)
+{
+    viewGameController->SetGameGraphicOptions(&configuration);
+    viewGameController->ShowPanel(user.Username());
+    frame->HidePanel();
+}
+
 void HomeController::Exit(wxCommandEvent &event)
 {
-
     exit(1);
 }
 

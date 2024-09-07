@@ -17,6 +17,7 @@ enum class CodiceRichiesta
     update_game = 103,
     search_game = 104,
     quit_search_opponent = 105,
+    list_games = 106,
     new_user = 201,
     update_user = 202,
     update_userPreference = 203,
@@ -90,6 +91,7 @@ private:
     json search_opponent(std::string u_id, int duration, int increment, bool quit = false);
     json update_game(int g_id, std::string moves, Esito e, Motivo m);
     json search_game(int g_id);
+    json list_games(std::string user_id);
     // json new_user(std::string username, std::string nome, std::string cognome, int elo, Chessboard_style c_st, Pieces_style p_st);
     json new_user(std::string username);
     json update_user(std::string username, std::string new_username, std::string nome, std::string cognome, int elo);

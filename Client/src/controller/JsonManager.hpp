@@ -14,6 +14,7 @@ enum class CodiceRichiesta
     update_game = 103,
     search_game = 104,
     quit_search_opponent = 105,
+    list_games = 106,
     new_user = 201,
     update_user = 202,
     update_userPreference = 203,

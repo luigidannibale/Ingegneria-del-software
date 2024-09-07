@@ -21,10 +21,10 @@ public:
     bool SubscribeToChannel(const char *channel);
     bool UnsubscribeFromChannel(const char *channel = nullptr);
 
-    std::string WaitResponse();
+    std::string WaitResponse(bool timeout = true);
     void StopWaitingResponse();
 
-    const char* SERVER_CHANNEL = "new_clients";
+    const char *SERVER_CHANNEL = "new_clients";
 
 private:
     redisContext *c;

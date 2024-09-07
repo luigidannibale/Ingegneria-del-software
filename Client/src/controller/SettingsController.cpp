@@ -6,7 +6,7 @@ SettingsController::SettingsController(wxPanel *parent, RedisManager *redisManag
     this->redisManager = redisManager;
     this->configuration = &configuration;
     GameGraphicOptions *viewConfiguration = new GameGraphicOptions(this->configuration->GetBoardStyle(), this->configuration->GetPiecesStyle());
-    panel = new SettingsPanel(parent->GetParent(), viewConfiguration);
+    panel = new SettingsPanel(parent, viewConfiguration);
     panel->Hide();
     backPanel = parent;
     addButtonEvents();
@@ -69,6 +69,7 @@ void SettingsController::SaveSettings(wxCommandEvent &event)
     {
         std::string response = redisManager->WaitResponse();
         Messaggio risposta;
+        redisManager->UnsubscribeFromChannel(username.c_str());
         try
         {
             risposta = json::parse(response);
@@ -76,6 +77,7 @@ void SettingsController::SaveSettings(wxCommandEvent &event)
         catch (json::exception &e)
         {
             wxLogMessage("Error saving settings");
+            return;
         }
 
         if (risposta.codice != static_cast<int>(CodiceRisposta::ok))

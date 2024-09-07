@@ -1,6 +1,6 @@
 #include "ProfilePanel.hpp"
 
-ProfilePanel::ProfilePanel(wxWindow *parent, User *user) : wxPanel(parent)
+ProfilePanel::ProfilePanel(wxWindow *parent, User *user) : wxPanel(parent->GetParent())
 {
     SetSize(parent->GetSize());
     SetBackgroundColour(wxColour(118, 150, 86));

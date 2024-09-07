@@ -5,14 +5,17 @@
 #include "StockfishManager.hpp"
 #include <cmath>
 
-enum Turn{
+enum Turn
+{
     White = true,
     Black = false
 };
 
-class GameManager {
+class GameManager
+{
 public:
-    GameManager(GameOptions*);
+    GameManager(bool);
+    GameManager(GameOptions *);
     ~GameManager();
     void updateBoard(chess::Board);
     chess::Board GetBoard();
@@ -24,15 +27,15 @@ public:
     void swapTurn();
     void StartStockfish();
     chess::Move GetBestMove();
+
 private:
     bool againstHuman;
-    StockfishManager* stockfishManager;
+    StockfishManager *stockfishManager;
     chess::Board board;
     bool playerIsWhite;
     Turn turn;
     int depthLevel;
-
 };
 
 chess::PieceGenType TypeToGenType(chess::PieceType piece);
-#endif //GAMEMANAGER_H
+#endif // GAMEMANAGER_H

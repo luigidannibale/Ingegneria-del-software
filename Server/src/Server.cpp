@@ -65,6 +65,9 @@ void Server::handle_client(std::string messaggio)
     case CodiceRichiesta::search_game:
         search_game(r.getPayload().at("game_id"));
         break;
+    case CodiceRichiesta::list_games:
+        list_games(r.getPayload().at("username"));
+        break;
     case CodiceRichiesta::new_user:
         // new_user(r.getPayload().at("username"),
         //          r.getPayload().at("nome"),
@@ -105,21 +108,18 @@ void Server::listen_for_clients()
 
 json Server::new_game(int duration, int increment, std::string u_id_b, std::string u_id_w)
 {
-    int gameID = db->InsertNewGame(u_id_b.c_str(), u_id_w.c_str(), duration, increment);
-    if (gameID == -1)
-    {
-        // errore
-        return json();
-    }
-    // non errore
+    // int gameID = db->InsertNewGame(u_id_b.c_str(), u_id_w.c_str(), duration, increment);
+    // if (gameID == -1)
+    // {
+    //     // errore
+    //     return json();
+    // }
+    // // non errore
     return json();
 }
 
 json Server::search_opponent(std::string u_id, int duration, int increment, bool quit)
 {
-    std::cout << "Searching for opponent" << std::endl;
-    std::cout << "User: " << u_id << "\nDuration: " << duration << "\nIncrement: " << increment << std::endl;
-
     std::string key = std::to_string(duration) + "+" + std::to_string(increment);
 
     if (quit) // User has quit the search
@@ -127,11 +127,20 @@ json Server::search_opponent(std::string u_id, int duration, int increment, bool
         std::vector<std::string>::iterator it = std::find(users[key].begin(), users[key].end(), u_id);
         if (it != users[key].end())
             users[key].erase(it);
+
+        json mess;
+        mess["codice"] = CodiceRisposta::ok;
+        mess["input"] = {};
+        redisManager->PublishToChannel(u_id.c_str(), mess.dump().c_str());
         return json();
     }
 
     // Add user to the list of users searching for an opponent
     users[key].push_back(u_id);
+    json mess;
+    mess["codice"] = CodiceRisposta::ok;
+    mess["input"] = {};
+    redisManager->PublishToChannel(u_id.c_str(), mess.dump().c_str());
 
     if (users[key].size() >= 2)
     {
@@ -139,15 +148,42 @@ json Server::search_opponent(std::string u_id, int duration, int increment, bool
         users[key].pop_back();
         std::string white = users[key].back();
         users[key].pop_back();
+        try
+        {
+            json reply_white;
+            reply_white["codice"] = CodiceRisposta::game_created;
+            reply_white["input"]["opponent"] = black;
+            reply_white["input"]["side"] = 0;
 
-        std::string reply_white = black + ":0";
-        std::string reply_black = white + ":1";
+            json reply_black;
+            reply_black["codice"] = CodiceRisposta::game_created;
+            reply_black["input"]["opponent"] = white;
+            reply_black["input"]["side"] = 1;
 
-        std::cout << "Found opponent: " << white << " with side 0" << std::endl;
-        std::cout << "Found opponent: " << black << " with side 1" << std::endl;
+            std::cout << "Found opponent: " << white << " with side 0" << std::endl;
+            std::cout << "Found opponent: " << black << " with side 1" << std::endl;
 
-        redisManager->PublishToChannel(white.c_str(), reply_white.c_str());
-        redisManager->PublishToChannel(black.c_str(), reply_black.c_str());
+            // Create new game
+            int gameID = db->InsertNewGame(white.c_str(), black.c_str(), duration, increment);
+            if (gameID == -1)
+            {
+                throw std::runtime_error("Error creating game");
+                return json();
+            }
+
+            reply_white["input"]["game_id"] = gameID;
+            reply_black["input"]["game_id"] = gameID;
+
+            redisManager->PublishToChannel(white.c_str(), reply_white.dump().c_str());
+            redisManager->PublishToChannel(black.c_str(), reply_black.dump().c_str());
+        }
+        catch (std::exception &e)
+        {
+            mess["codice"] = CodiceRisposta::server_error;
+            mess["input"] = {};
+            redisManager->PublishToChannel(white.c_str(), mess.dump().c_str());
+            redisManager->PublishToChannel(black.c_str(), mess.dump().c_str());
+        }
     }
     return json();
 }
@@ -156,13 +192,76 @@ json Server::update_game(int g_id, std::string moves, Esito e, Motivo m)
 {
     json esito = e;
     json motivo = m;
-    db->UpdateGame(g_id, moves.c_str(), esito.dump().c_str(), motivo.dump().c_str());
+
+    std::string esito_str = esito.get<std::string>();
+    std::string motivo_str = motivo.get<std::string>();
+
+    json mess;
+
+    if (db->UpdateGame(g_id, moves.c_str(), esito_str.c_str(), motivo_str.c_str()))
+    {
+        // Game updated successfully
+        mess["codice"] = CodiceRisposta::ok;
+        mess["input"] = {};
+    }
+    else
+    {
+        // Error updating game
+        mess["codice"] = CodiceRisposta::server_error;
+        mess["input"] = {};
+    }
+
+    std::string channel = "game" + std::to_string(g_id);
+    redisManager->PublishToChannel(channel.c_str(), mess.dump().c_str());
     return json();
 }
 
 json Server::search_game(int g_id)
 {
     Game game = db->SearchGame(g_id);
+    json mess;
+
+    if (game.getID() == -1)
+    {
+        mess["codice"] = CodiceRisposta::not_found;
+        mess["input"] = "{}";
+    }
+    else if (game.getID() == -2)
+    {
+        mess["codice"] = CodiceRisposta::server_error;
+        mess["input"] = "{}";
+    }
+    else
+    {
+        mess["codice"] = CodiceRisposta::game_found;
+        mess["input"] = game.toJson();
+    }
+
+    std::string channel = "game" + std::to_string(g_id);
+    redisManager->PublishToChannel(channel.c_str(), mess.dump().c_str());
+    return json();
+}
+
+json Server::list_games(std::string user_id)
+{
+    std::vector<Game> games;
+    bool res = db->ListGames(user_id.c_str(), games);
+    json mess;
+    if (res)
+    {
+        mess["codice"] = CodiceRisposta::game_found;
+        mess["input"] = json::array();
+        for (Game game : games)
+        {
+            mess["input"].push_back(game.toJson());
+        }
+    }
+    else
+    {
+        mess["codice"] = CodiceRisposta::server_error;
+        mess["input"] = "Internal server error";
+    }
+    redisManager->PublishToChannel(user_id.c_str(), mess.dump().c_str());
     return json();
 }
 
@@ -436,9 +535,6 @@ void to_json(json &j, const Pieces_style &pieces_style)
     case Pieces_style::neo:
         j = "neo";
         break;
-    case Pieces_style::neo2:
-        j = "neo2";
-        break;
     case Pieces_style::pixel:
         j = "pixel";
         break;
@@ -451,10 +547,6 @@ void from_json(const json &j, Pieces_style &pieces_style)
     if (piecesStyleStr == "neo")
     {
         pieces_style = Pieces_style::neo;
-    }
-    if (piecesStyleStr == "neo2")
-    {
-        pieces_style = Pieces_style::neo2;
     }
     else if (piecesStyleStr == "pixel")
     {

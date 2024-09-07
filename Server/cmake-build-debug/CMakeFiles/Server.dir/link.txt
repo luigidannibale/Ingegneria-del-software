@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -rdynamic CMakeFiles/Server.dir/src/Server.cpp.o CMakeFiles/Server.dir/src/RedisManager.cpp.o CMakeFiles/Server.dir/src/Database.cpp.o -o Server  -lpq -lhiredis -lhiredis -lpq 

@@ -39,7 +39,6 @@ enum class Chessboard_style
 enum class Pieces_style
 {
     neo,
-    neo2,
     pixel
 };
 
@@ -51,31 +50,31 @@ private:
     int time_increment;
     std::string u_id_b;
     std::string u_id_w;
-    std::vector<std::string> moves;
+    std::string moves;
     Esito esito;
     Motivo motivo;
 
 public:
     Game() {};
     // Constructor
-    Game(int id, std::string black, std::string white, int duration, int increment, std::vector<std::string> game_moves, Esito game_esito, Motivo game_motivo)
+    Game(int id, std::string white, std::string black, int duration, int increment, std::string game_moves, Esito game_esito, Motivo game_motivo)
         : ID(id), time_duration(duration), time_increment(increment), u_id_b(black), u_id_w(white), moves(game_moves), esito(game_esito), motivo(game_motivo) {}
 
-    Game(int id, const char *black, const char *white, int duration, int increment, const char *game_moves, Esito game_esito, Motivo game_motivo)
-        : ID(id), time_duration(duration), time_increment(increment), u_id_b(black), u_id_w(white), esito(game_esito), motivo(game_motivo)
-    {
-        std::string moves_str(game_moves);
-        std::string delimiter = " ";
-        size_t pos = 0;
-        std::string token;
-        while ((pos = moves_str.find(delimiter)) != std::string::npos)
-        {
-            token = moves_str.substr(0, pos);
-            moves.push_back(token);
-            moves_str.erase(0, pos + delimiter.length());
-        }
-        moves.push_back(moves_str);
-    }
+    // Game(int id, const char *black, const char *white, int duration, int increment, const char *game_moves, Esito game_esito, Motivo game_motivo)
+    //     : ID(id), time_duration(duration), time_increment(increment), u_id_b(black), u_id_w(white), esito(game_esito), motivo(game_motivo)
+    // {
+    //     std::string moves_str(game_moves);
+    //     std::string delimiter = " ";
+    //     size_t pos = 0;
+    //     std::string token;
+    //     while ((pos = moves_str.find(delimiter)) != std::string::npos)
+    //     {
+    //         token = moves_str.substr(0, pos);
+    //         moves.push_back(token);
+    //         moves_str.erase(0, pos + delimiter.length());
+    //     }
+    //     moves.push_back(moves_str);
+    // }
 
     // Metodo per convertire l'oggetto Game in JSON
     json toJson() const
@@ -100,7 +99,7 @@ public:
             j.at("u_id_w").get<std::string>(),
             j.at("time_duration").get<int>(),
             j.at("time_increment").get<int>(),
-            j.at("moves").get<std::vector<std::string>>(),
+            j.at("moves").get<std::string>(),
             j.at("esito").get<Esito>(),
             j.at("motivo").get<Motivo>()};
     }
@@ -126,8 +125,8 @@ public:
     void setWhitePlayer(const std::string &white) { u_id_w = white; }
 
     // Getters and Setters for moves
-    std::vector<std::string> getMoves() const { return moves; }
-    void setMoves(const std::vector<std::string> &game_moves) { moves = game_moves; }
+    std::string getMoves() const { return moves; }
+    void setMoves(const std::string &game_moves) { moves = game_moves; }
 
     // Getters and Setters for esito
     Esito getEsito() const { return esito; }
@@ -155,7 +154,7 @@ public:
     }
 
     // Method to update the game
-    void updateGame(int duration, int increment, const std::string &black, const std::string &white, const std::vector<std::string> &game_moves, Esito game_esito, Motivo game_motivo)
+    void updateGame(int duration, int increment, const std::string &black, const std::string &white, const std::string &game_moves, Esito game_esito, Motivo game_motivo)
     {
         setTimeDuration(duration);
         setTimeIncrement(increment);
@@ -265,8 +264,9 @@ public:
     int FindUser(const char *username, User &user);
 
     int InsertNewGame(const char *white, const char *black, int timeDuration, int timeIncrement);
-    void UpdateGame(int game_id, const char *moves, const char *esito, const char *motivo);
+    bool UpdateGame(int game_id, const char *moves, const char *esito, const char *motivo);
     Game SearchGame(int game_id);
+    bool ListGames(const char *username, std::vector<Game> &games);
 
 private:
     const char *default_connection = "user=postgres password=postgres host=localhost port=5432 dbname=postgres";

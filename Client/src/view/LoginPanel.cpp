@@ -1,11 +1,12 @@
 #include "LoginPanel.hpp"
+#include <iostream>
 
-LoginPanel::LoginPanel(wxWindow* parent): wxPanel(parent)
+LoginPanel::LoginPanel(wxWindow *parent) : wxPanel(parent)
 {
     SetSize(parent->GetSize());
-    SetBackgroundColour(wxColour(118,150,86));
+    SetBackgroundColour(wxColour(118, 150, 86));
 
-    wxStaticText* usernameLabel = new wxStaticText(this, wxID_ANY, wxT("Enter username:"));
+    wxStaticText *usernameLabel = new wxStaticText(this, wxID_ANY, wxT("Enter username:"));
     usernameLabel->SetFont(wxFont(14, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     usernameLabel->SetMinSize(usernameLabel->GetTextExtent(usernameLabel->GetLabel()));
     txtUsername = new wxTextCtrl(this, wxID_ANY, wxT(""));
@@ -16,7 +17,7 @@ LoginPanel::LoginPanel(wxWindow* parent): wxPanel(parent)
     errorLabel->SetForegroundColour(wxColour(255, 0, 0));
     errorLabel->Hide();
 
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
     sizer->AddStretchSpacer();
     sizer->Add(usernameLabel, wxSizerFlags(0).Center().Border(wxALL, 5));
     sizer->Add(txtUsername, wxSizerFlags(0).Center().Expand().Border(wxALL, 5));

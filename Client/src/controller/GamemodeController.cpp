@@ -4,14 +4,15 @@
 #include <unistd.h>
 #include <thread>
 
-GamemodeController::GamemodeController(wxPanel *parent)
+GamemodeController::GamemodeController(wxPanel *parent, RedisManager *red, User &user)
 {
-    panel = new GameMode(parent->GetParent());
+    panel = new GameMode(parent);
     panel->Hide();
     backPanel = parent;
     addButtonEvents();
 
-    red = new RedisManager();
+    this->red = red;
+    this->user = &user;
 }
 
 void GamemodeController::addButtonEvents()
@@ -41,20 +42,20 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
     std::string mode = std::to_string(seconds) + "+" + std::to_string(increment);
 
     // Connect to server and send game request
-    if (!red->Connect())
-    {
-        std::cerr << "Failed to connect to Redis server" << std::endl;
-        return;
-    }
+    // if (!red->Connect())
+    // {
+    //     std::cerr << "Failed to connect to Redis server" << std::endl;
+    //     return;
+    // }
 
-    // const char *channel = "new_clients";
-    if (!red->CheckChannel(red->SERVER_CHANNEL))
-    {
-        std::cerr << "Failed to check new_clients channel" << std::endl;
-        return;
-    }
+    // // const char *channel = "new_clients";
+    // if (!red->CheckChannel(red->SERVER_CHANNEL))
+    // {
+    //     std::cerr << "Failed to check new_clients channel" << std::endl;
+    //     return;
+    // }
 
-    ricerca.user = "client_" + std::to_string(getpid());
+    ricerca.user = user->Username();
     ricerca.time_duration = seconds;
     ricerca.time_increment = increment;
 
@@ -73,6 +74,7 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
     // Set this to true so that the user can't search for another opponent
     searching = true;
     panel->GetBtnQuitMultiplayer()->Show();
+    panel->GetBtnBack()->Disable();
 
     // wait asynchronously for the server to find an opponent
     if (!red->SubscribeToChannel(ricerca.user.c_str()))
@@ -84,31 +86,92 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
     std::string user_id = ricerca.user;
     auto f = [this, user_id]()
     {
+        // Wait for ok from the server
         std::string response = red->WaitResponse();
-        searching = false;
+        Messaggio risposta;
+        try
+        {
+            risposta = json::parse(response);
+        }
+        catch (json::parse_error &e)
+        {
+            wxLogMessage("Failed to parse response");
+            red->UnsubscribeFromChannel();
+            panel->CallAfter([this]()
+                             {
+                searching = false;
+                panel->GetBtnQuitMultiplayer()->Hide();
+                panel->GetBtnBack()->Enable(); });
+            return;
+        }
+        if (risposta.codice != static_cast<int>(CodiceRisposta::ok))
+        {
+            wxLogMessage("Failed to find opponent");
+            red->UnsubscribeFromChannel();
+            panel->CallAfter([this]()
+                             {
+                searching = false;
+                panel->GetBtnQuitMultiplayer()->Hide();
+                panel->GetBtnBack()->Enable(); });
+            return;
+        }
 
-        std::cout << "Received response: " << response << std::endl;
+        // Now wait for an opponent to be found
+        response = red->WaitResponse(false);
+        try
+        {
+            risposta = json::parse(response);
+        }
+        catch (json::parse_error &e)
+        {
+            wxLogMessage("Failed to parse response");
+            red->UnsubscribeFromChannel();
+            panel->CallAfter([this]()
+                             {
+                searching = false;
+                panel->GetBtnQuitMultiplayer()->Hide();
+                panel->GetBtnBack()->Enable(); });
+            return;
+        }
+        searching = false;
+        if (risposta.codice != static_cast<int>(CodiceRisposta::game_created))
+        {
+            wxLogMessage("Failed to find opponent");
+            red->UnsubscribeFromChannel();
+            panel->CallAfter([this]()
+                             {
+                panel->GetBtnQuitMultiplayer()->Hide();
+                panel->GetBtnBack()->Enable(); });
+            return;
+        }
+
+        std::string opponent_id = risposta.input["opponent"];
+        int side = risposta.input["side"];
+        side += 1;
+        int gameId = risposta.input["game_id"];
 
         // Parse the response
-        std::string delimiter = ":";
-        size_t pos = response.find(delimiter);
-        std::string opponent_id = response.substr(0, pos);
-        int side = std::stoi(response.substr(pos + 1)) + 1;
-        std::cout << "Found opponent: " << opponent_id << " with side " << side << std::endl;
+        // std::string delimiter = ":";
+        // size_t pos = response.find(delimiter);
+        // std::string opponent_id = response.substr(0, pos);
+        // int side = std::stoi(response.substr(pos + 1)) + 1;
+        std::cout << "Found opponent: " << opponent_id << " with side " << side << " of game " << gameId << std::endl;
 
         // if (!red->UnsubscribeFromChannel(ricerca.user.c_str()))
         // {
         //     return;
         // }
 
-        panel->CallAfter([this, user_id, opponent_id, side]()
+        panel->CallAfter([this, user_id, opponent_id, side, gameId]()
                          {
             panel->GetBtnQuitMultiplayer()->Hide();
+            panel->GetBtnBack()->Enable();
+            panel->GetParent()->Hide();
             GameOptions* options = panel->GetGameOptions();
             // GameGraphicOptions* graphicOptions = panel->GetGameGraphicOptions();
             options->SetStartSide(side);
             std::cout << "Passing to gameplay controller " << opponent_id << std::endl;
-            gameplayController = new GameplayController(options, configuration, red, user_id, opponent_id); });
+            gameplayController = new GameplayController(panel, options, configuration, red, user_id, opponent_id, gameId); });
     };
 
     std::thread t(f);
@@ -119,11 +182,11 @@ void GamemodeController::StopSearchOpponent(wxCommandEvent &event)
 {
     std::cout << "Quit search multiplayer" << std::endl;
 
-    if (!red->UnsubscribeFromChannel())
-    {
-        std::cerr << "Failed to unsubscribe from channel" << std::endl;
-        return;
-    }
+    // if (!red->UnsubscribeFromChannel())
+    // {
+    //     std::cerr << "Failed to unsubscribe from channel" << std::endl;
+    //     return;
+    // }
 
     Messaggio richiesta;
     richiesta.codice = static_cast<int>(CodiceRichiesta::quit_search_opponent);
@@ -131,13 +194,38 @@ void GamemodeController::StopSearchOpponent(wxCommandEvent &event)
     json j = richiesta;
     if (!red->PublishToChannel(red->SERVER_CHANNEL, j.dump().c_str()))
     {
-        std::cerr << "Failed to publish message to new_clients channel" << std::endl;
+        wxLogMessage("Failed to contact the server");
         return;
     }
 
-    red->Disconnect();
-    searching = false;
-    panel->GetBtnQuitMultiplayer()->Hide();
+    auto f = [this]()
+    {
+        std::string response = red->WaitResponse();
+        Messaggio risposta;
+        try
+        {
+            risposta = json::parse(response);
+        }
+        catch (json::parse_error &e)
+        {
+            wxLogMessage("Failed to parse response");
+            return;
+        }
+        if (risposta.codice != static_cast<int>(CodiceRisposta::ok))
+        {
+            wxLogMessage("Failed to quit search");
+            return;
+        }
+        panel->CallAfter([this]()
+                         {
+            searching = false;
+            panel->GetBtnQuitMultiplayer()->Hide();
+            panel->GetBtnBack()->Enable(); });
+        red->UnsubscribeFromChannel();
+    };
+
+    std::thread t(f);
+    t.detach();
 }
 
 void GamemodeController::StartGame(wxCommandEvent &event)
@@ -149,7 +237,9 @@ void GamemodeController::StartGame(wxCommandEvent &event)
     //    printf("Computer elo is %d \n",options->GetComputerElo());
     //    printf("You start with %d \n",options->GetStartSide());
     //    printf("---------------------------------------------------\n");
-    gameplayController = new GameplayController(options, configuration);
+    panel->GetParent()->Hide();
+
+    gameplayController = new GameplayController(panel, options, configuration);
 
     //    if (gameplayController == nullptr) {
     //        gameplayController = new GameplayController(options);

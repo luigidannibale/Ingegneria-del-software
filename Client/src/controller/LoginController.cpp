@@ -84,12 +84,8 @@ void LoginController::Login(wxCommandEvent &event)
             red->Disconnect();
             return;
         }
-        if (!red->UnsubscribeFromChannel())
-        {
-            panel->ShowError("Error contacting the server");
-            red->Disconnect();
-            return;
-        }
+        red->UnsubscribeFromChannel();
+
         if (risposta.codice == static_cast<int>(CodiceRisposta::server_error))
         {
             panel->ShowError("Error contacting the server");

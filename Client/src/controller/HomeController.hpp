@@ -9,6 +9,7 @@
 #include "ProfileController.hpp"
 #include "SettingsController.hpp"
 #include "LoginController.hpp"
+#include "ViewGameController.hpp"
 
 class HomeController
 {
@@ -23,6 +24,7 @@ private:
     GamemodeController *gamemodeController;
     SettingsController *settingsController;
     ProfileController *profileController;
+    ViewGameController *viewGameController;
 
     RedisManager *red;
     User user;
@@ -33,6 +35,7 @@ private:
     void showGamemode(wxCommandEvent &);
     void showSettings(wxCommandEvent &);
     void showProfile(wxCommandEvent &);
+    void showViewGame(wxCommandEvent &);
     void Exit(wxCommandEvent &);
 };
 

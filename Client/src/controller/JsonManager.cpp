@@ -41,7 +41,6 @@ void to_json(json &j, const BoardStyle &chessboard_style)
 
 void from_json(const json &j, BoardStyle &chessboard_style)
 {
-    printf("from_json\n");
     std::string chessboardStyleStr = j.get<std::string>();
     if (chessboardStyleStr == "blue")
         chessboard_style = BoardStyle::blue;
@@ -58,9 +57,6 @@ void to_json(json &j, const PiecesStyle &pieces_style)
     case PiecesStyle::neo:
         j = "neo";
         break;
-    case PiecesStyle::neo2:
-        j = "neo2";
-        break;
     case PiecesStyle::pixel:
         j = "pixel";
         break;
@@ -73,10 +69,6 @@ void from_json(const json &j, PiecesStyle &pieces_style)
     if (piecesStyleStr == "neo")
     {
         pieces_style = PiecesStyle::neo;
-    }
-    if (piecesStyleStr == "neo2")
-    {
-        pieces_style = PiecesStyle::neo2;
     }
     else if (piecesStyleStr == "pixel")
     {

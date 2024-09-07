@@ -37,6 +37,8 @@ set(SOURCES
         src/controller/JsonManager.cpp
         src/controller/LoginController.cpp
         src/controller/LoginController.hpp
+        src/controller/ViewGameController.cpp
+        src/controller/ViewGameController.hpp
 
         src/model/GameOptions.cpp
         src/model/GameOptions.hpp
@@ -62,6 +64,8 @@ set(SOURCES
         src/view/ProfilePanel.hpp
         src/view/SettingsPanel.cpp
         src/view/SettingsPanel.hpp
+        src/view/ViewGamePanel.cpp
+        src/view/ViewGamePanel.hpp
 
 )
 

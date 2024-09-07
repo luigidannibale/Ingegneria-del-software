@@ -5,7 +5,7 @@ ProfileController::ProfileController(wxPanel *parent, RedisManager *red, User &u
     this->user = &user;
     this->red = red;
     // User *user = new User("gigi", "Luigi", "D'annibale", 1300);
-    panel = new ProfilePanel(parent->GetParent(), &user);
+    panel = new ProfilePanel(parent, &user);
     panel->Hide();
     backPanel = parent;
 
@@ -86,6 +86,11 @@ void ProfileController::SaveUser(wxCommandEvent &event)
         catch (const std::exception &e)
         {
             wxLogMessage("Error while updating user");
+            red->UnsubscribeFromChannel(user->Username().c_str());
+            panel->CallAfter([this]()
+                             {
+                panel->UpdateUserDatas(user);
+                panel->ShowDefault(); });
             return;
         }
 
@@ -94,11 +99,6 @@ void ProfileController::SaveUser(wxCommandEvent &event)
             user->SetUsername(username);
             user->SetName(name);
             user->SetSurname(surname);
-
-            panel->CallAfter([this]()
-                             {
-                panel->UpdateUserDatas(user);
-                panel->ShowDefault(); });
         }
         else if (risposta.codice == static_cast<int>(CodiceRisposta::bad_request))
         {
@@ -109,11 +109,15 @@ void ProfileController::SaveUser(wxCommandEvent &event)
             wxLogMessage("Error while updating user");
         }
 
-        if (!red->UnsubscribeFromChannel(user->Username().c_str()))
+        if (!red->UnsubscribeFromChannel())
         {
             wxLogMessage("Error contacting the server");
-            return;
         }
+
+        panel->CallAfter([this]()
+                         {
+                panel->UpdateUserDatas(user);
+                panel->ShowDefault(); });
     };
 
     std::thread t(f);

@@ -10,7 +10,6 @@ enum class BoardStyle : int
 enum class PiecesStyle : int
 {
     neo = 1,
-    neo2,
     pixel,
 };
 

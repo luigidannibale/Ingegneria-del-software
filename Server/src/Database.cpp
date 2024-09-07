@@ -237,7 +237,11 @@ int Database::FindUser(const char *username, User &user)
 
 int Database::InsertNewGame(const char *white, const char *black, int timeDuration, int timeIncrement)
 {
-    std::string query = "INSERT INTO Game (White, Black, TimeDuration, TimeIncrement, Moves, Esito, Motivo) VALUES (" + escape_literal(conn, white) + ", " + escape_literal(conn, black) + ", " + std::to_string(timeDuration) + ", " + std::to_string(timeIncrement) + ", " + "NULL, " + "NULL, " + "NULL) RETURNING ID;";
+    std::string query = "INSERT INTO Game (White, Black, TimeDuration, TimeIncrement, Moves, Esito, Motivo) VALUES (" +
+                        escape_literal(conn, white) + ", " +
+                        escape_literal(conn, black) + ", " +
+                        std::to_string(timeDuration) + ", " +
+                        std::to_string(timeIncrement) + ", " + "NULL, " + "'NF', " + "'NF') RETURNING ID;";
     if (ExecuteQuery(query.c_str()))
     {
         int gameId = std::stoi(PQgetvalue(res, 0, 0));
@@ -247,7 +251,7 @@ int Database::InsertNewGame(const char *white, const char *black, int timeDurati
     return -1;
 }
 
-void Database::UpdateGame(int gameId, const char *moves, const char *esito, const char *motivo)
+bool Database::UpdateGame(int gameId, const char *moves, const char *esito, const char *motivo)
 {
     std::string query = "UPDATE Game SET Moves = " + escape_literal(conn, moves) +
                         ", Esito = " + escape_literal(conn, esito) +
@@ -256,8 +260,9 @@ void Database::UpdateGame(int gameId, const char *moves, const char *esito, cons
     if (ExecuteQuery(query.c_str()))
     {
         PQclear(res);
-        // return gameId ??
+        return true;
     }
+    return false;
 }
 
 Game Database::SearchGame(int gameId)
@@ -265,6 +270,14 @@ Game Database::SearchGame(int gameId)
     std::string query = "SELECT * FROM Game WHERE ID = " + std::to_string(gameId) + ";";
     if (ExecuteQuery(query.c_str()))
     {
+        if (PQntuples(res) == 0)
+        {
+            std::cerr << "Game not found" << std::endl;
+            PQclear(res);
+            Game emptyGame;
+            emptyGame.setID(-1);
+            return Game();
+        }
         json esito = PQgetvalue(res, 0, 6);
         json motivo = PQgetvalue(res, 0, 7);
 
@@ -280,7 +293,37 @@ Game Database::SearchGame(int gameId)
         return game;
     }
     Game emptyGame;
+    emptyGame.setID(-2);
     return emptyGame;
+}
+
+bool Database::ListGames(const char *username, std::vector<Game> &games)
+{
+    std::string query = "SELECT ID, White, Black, Esito, Motivo FROM Game WHERE White = " +
+                        escape_literal(conn, username) + " OR Black = " +
+                        escape_literal(conn, username) + ";";
+    if (ExecuteQuery(query.c_str()))
+    {
+        std::vector<Game> *list_games = &games;
+        for (int i = 0; i < PQntuples(res); i++)
+        {
+            json esito = PQgetvalue(res, i, 3);
+            json motivo = PQgetvalue(res, i, 4);
+
+            Game game(std::stoi(PQgetvalue(res, i, 0)), // ID
+                      PQgetvalue(res, i, 1),            // White
+                      PQgetvalue(res, i, 2),            // Black
+                      0,                                // TimeDuration
+                      0,                                // TimeIncrement
+                      "",                               // Moves
+                      esito.get<Esito>(),               // Esito
+                      motivo.get<Motivo>());            // Motivo
+            list_games->push_back(game);
+        }
+        PQclear(res);
+        return true;
+    }
+    return false;
 }
 
 void Database::createSchema()
@@ -312,7 +355,7 @@ void Database::createSchema()
         ")",*/
 
         "CREATE TABLE Game("
-        "ID SERIAL PRIMARY KEY NOT NULL, "
+        "ID PRIMARY KEY NOT NULL, "
         "White VARCHAR(20) NOT NULL REFERENCES Player(Username),"
         "Black VARCHAR(20) NOT NULL REFERENCES Player(Username),"
         "TimeDuration INTEGER NOT NULL,"

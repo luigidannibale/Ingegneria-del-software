@@ -5,12 +5,16 @@ const char *ROWS[] = {"abcdefgh", "hgfedcba"};
 const bool MARK_CELLS = true;
 bool Stock_init = false;
 
-GameplayController::GameplayController(GameOptions *options, GameGraphicOptions *graphicOptions, RedisManager *redisManager, std::string user_id, std::string opponent_id)
+GameplayController::GameplayController(wxPanel *returnPanel, GameOptions *options, GameGraphicOptions *graphicOptions, RedisManager *redisManager, std::string user_id, std::string opponent_id, int gameId)
 {
     gameManager = new GameManager(options);
     this->redisManager = redisManager;
     this->user_id = user_id;
     this->opponent_id = opponent_id;
+    this->gameId = gameId;
+    this->returnPanel = returnPanel;
+
+    this->playedMoves = std::string();
 
     auto f = [this]()
     {
@@ -30,26 +34,52 @@ GameplayController::GameplayController(GameOptions *options, GameGraphicOptions 
         gameClosed = false;
         frame->CallAfter([this]()
                          {
-            if (gameClosed)
-                return;
+        if (gameClosed)
+            return;
 
-            frame->GetBoard()->Bind(wxEVT_LEFT_DOWN, &GameplayController::ClickBoard, this);
-            frame->HideTransparentPanel();
-            frame->StartTimer();
-            if (!gameManager->playerCanPlay()) {
-                if (!gameManager->isAgainstHuman())
-                    AsyncComputerMove();
-                else
-                    AsyncHumanMove();
-            } });
+        frame->GetBoard()->Bind(wxEVT_LEFT_DOWN, &GameplayController::ClickBoard, this);
+        frame->HideTransparentPanel();
+        frame->StartTimer();
+
+        if (gameManager->isAgainstHuman())
+            AsyncHumanMove();
+        else if (!gameManager->playerCanPlay())
+            AsyncComputerMove(); });
     };
 
     std::thread t(f);
     t.detach();
-    frame = new GameplayFrame(gameManager->isWhite(), options, graphicOptions);
+    frame = new GameplayFrame(gameManager->isWhite(), options, graphicOptions, user_id, opponent_id);
     frame->Bind(wxEVT_CLOSE_WINDOW, &GameplayController::OnClose, this);
     frame->GetChessboard()->SetPreFEN(gameManager->GetBoard().getFen());
     frame->Bind(wxEVT_TIMER, &GameplayController::UpdateTime, this);
+}
+
+GameplayController::GameplayController(wxPanel *returnPanel, GameGraphicOptions *graphicOptions, Game game, bool isWhite)
+{
+    this->returnPanel = returnPanel;
+    this->isReplay = true;
+
+    gameManager = new GameManager(isWhite);
+    frame = new GameplayFrame(isWhite, nullptr, graphicOptions, game.u_id_w, game.u_id_b);
+    frame->Bind(wxEVT_CLOSE_WINDOW, &GameplayController::OnClose, this);
+    frame->HideTransparentPanel();
+    frame->GetNextMoveButton()->Show();
+    frame->GetPrevMoveButton()->Show();
+    frame->GetNextMoveButton()->Bind(wxEVT_BUTTON, &GameplayController::OnNextMove, this);
+    frame->GetPrevMoveButton()->Bind(wxEVT_BUTTON, &GameplayController::OnPrevMove, this);
+
+    const char *delimiter = ":";
+    std::string moves = game.moves;
+    size_t pos = 0;
+    std::string move;
+    while ((pos = moves.find(delimiter)) != std::string::npos)
+    {
+        move = moves.substr(0, pos);
+        movesHistory.push_back(chess::uci::uciToMove(gameManager->GetBoard(), move));
+        moves.erase(0, pos + 1);
+    }
+    currentMove = 0;
 }
 
 GameplayController::~GameplayController()
@@ -58,9 +88,101 @@ GameplayController::~GameplayController()
 
 void GameplayController::OnClose(wxCloseEvent &event)
 {
-    gameManager->~GameManager();
+    if (isReplay)
+    {
+        std::cout << "Replay closed" << std::endl;
+        returnPanel->GetParent()->Show();
+        delete frame;
+        return;
+    }
+    if (gameManager->isAgainstHuman())
+    {
+        if (!gameEnded)
+        {
+            gameResult = GameResult::WIN;
+            resultReason = ResultReason::QUITMATE;
+            std::string move = "quit";
+            PublishHumanMove(move);
+        }
+        redisManager->UnsubscribeFromChannel();
+
+        // Publish update game result
+        Messaggio richiesta;
+        richiesta.codice = static_cast<int>(CodiceRichiesta::update_game);
+        richiesta.input["game_id"] = gameId;
+        richiesta.input["moves"] = playedMoves;
+        richiesta.input["esito"] = gameResult;
+        richiesta.input["motivo"] = resultReason;
+        json j = richiesta;
+
+        if (!redisManager->PublishToChannel(redisManager->SERVER_CHANNEL, j.dump().c_str()))
+        {
+            wxLogMessage("Failed to save the game");
+        }
+
+        std::string channel = "game" + std::to_string(gameId);
+        redisManager->SubscribeToChannel(channel.c_str());
+
+        auto f = [this]()
+        {
+            std::string response = redisManager->WaitResponse();
+            try
+            {
+                Messaggio risposta = json::parse(response);
+                if (risposta.codice != static_cast<int>(CodiceRisposta::ok))
+                {
+                    throw std::runtime_error("Failed to save the game");
+                }
+            }
+            catch (...)
+            {
+                wxLogMessage("Failed to save the game");
+            }
+            redisManager->UnsubscribeFromChannel();
+        };
+
+        std::thread t(f);
+        t.detach();
+    }
+
+    returnPanel->GetParent()->Show();
+    // gameManager->~GameManager();
+    delete gameManager;
     gameClosed = true;
-    frame->~GameplayFrame();
+    delete frame;
+
+    // frame->~GameplayFrame();
+}
+
+void GameplayController::OnNextMove(wxCommandEvent &event)
+{
+    if (movesHistory.size() == 0 || currentMove == movesHistory.size())
+        return;
+    chess::Move move = movesHistory[currentMove];
+    chess::Board c = gameManager->GetBoard();
+    chess::Piece piece = c.at(chess::Square(move.from()));
+    bool isCapture = gameManager->GetBoard().isCapture(move);
+    c.makeMove(move);
+    gameManager->updateBoard(c);
+    frame->GetChessboard()->update(gameManager->GetBoard().getFen());
+    bool inCheck = gameManager->GetBoard().inCheck();
+    printMove(piece, move, isCapture, inCheck);
+    currentMove++;
+}
+
+void GameplayController::OnPrevMove(wxCommandEvent &event)
+{
+    if (movesHistory.size() == 0 || currentMove == 0)
+        return;
+    currentMove--;
+    chess::Move move = movesHistory[currentMove];
+    chess::Board c = gameManager->GetBoard();
+    chess::Piece piece = c.at(chess::Square(move.to()));
+    c.unmakeMove(move);
+    gameManager->updateBoard(c);
+    frame->GetChessboard()->update(gameManager->GetBoard().getFen());
+    bool inCheck = gameManager->GetBoard().inCheck();
+    printMove(piece, move, false, inCheck);
 }
 
 void GameplayController::UpdateTime(wxTimerEvent &event)
@@ -68,6 +190,9 @@ void GameplayController::UpdateTime(wxTimerEvent &event)
     int res = frame->UpdateTime(event);
     if (res != 0)
     { // A timer ended
+        gameEnded = true;
+        gameResult = GameResult::WIN;
+        resultReason = ResultReason::TIME_OVER;
         if (gameManager->isWhite())
         {
             if (res == 1)
@@ -150,6 +275,7 @@ void GameplayController::unmarkFeasibles()
 void GameplayController::printMove(chess::Piece piece, chess::Move move, bool capture, bool ischeck)
 {
     std::cout << "E' stata giocata la mossa : " << move << std::endl;
+    playedMoves += chess::uci::moveToUci(move) + ":";
     std::string p = std::string(piece);
     std::string item = (p != "p" && p != "P" ? p : "") + std::string(move.to());
     if (move.typeOf() == move.CASTLING)
@@ -173,24 +299,31 @@ void GameplayController::printMove(chess::Piece piece, chess::Move move, bool ca
 bool GameplayController::CheckCheckmate()
 {
     std::pair<chess::GameResultReason, chess::GameResult> gameOver = gameManager->GetBoard().isGameOver();
+    chess::GameResultReason reason = gameOver.first;
     chess::GameResult result = gameOver.second;
     chess::Color sideToMove = gameManager->GetBoard().sideToMove();
     if (result != chess::GameResult::NONE && ((sideToMove == chess::Color::BLACK && gameManager->isWhite()) ||
                                               (sideToMove == chess::Color::WHITE && !gameManager->isWhite())))
         result = chess::GameResult::WIN;
+
+    resultReason = static_cast<ResultReason>(reason);
+
     switch (result)
     {
     case chess::GameResult::WIN:
+        gameResult = GameResult::WIN;
         frame->UpdateTransparentPanel("You Win!");
         frame->ShowTransparentPanel();
         gameEnded = true;
         break;
     case chess::GameResult::LOSE:
+        gameResult = GameResult::WIN;
         frame->UpdateTransparentPanel("You Lose!");
         frame->ShowTransparentPanel();
         gameEnded = true;
         break;
     case chess::GameResult::DRAW:
+        gameResult = GameResult::DRAW;
         frame->UpdateTransparentPanel("Draw!");
         frame->ShowTransparentPanel();
         gameEnded = true;
@@ -253,26 +386,42 @@ void GameplayController::AsyncHumanMove()
 {
     auto f = [this]()
     {
-        std::string response = redisManager->WaitResponse();
-        std::string delimiter = ":";
-        size_t pos = response.find(delimiter);
-        std::string opponent_move = response.substr(0, pos);
-        std::string fen = response.substr(pos + 1);
-        std::cout << "Received move " << opponent_move << " from opponent" << std::endl;
+        while (!gameEnded || !gameClosed)
+        {
+            std::string response = redisManager->WaitResponse(false);
 
-        chess::Move move = chess::uci::uciToMove(gameManager->GetBoard(), opponent_move);
-        chess::Board c = gameManager->GetBoard();
-        chess::Piece piece = c.at(chess::Square(move.from()));
+            if (response == "quit")
+            {
+                gameEnded = true;
+                gameResult = GameResult::WIN;
+                resultReason = ResultReason::QUITMATE;
+                frame->CallAfter([this]()
+                                 {
+                frame->UpdateTransparentPanel("You Win!");
+                frame->ShowTransparentPanel();
+                frame->StopUpdateTimer(); });
+                return;
+            }
 
-        bool isCapture = gameManager->GetBoard().isCapture(move);
+            std::string delimiter = ":";
+            size_t pos = response.find(delimiter);
+            std::string opponent_move = response.substr(0, pos);
+            std::string fen = response.substr(pos + 1);
+            std::cout << "Received move " << opponent_move << " from opponent" << std::endl;
 
-        c.makeMove(move);
-        gameManager->swapTurn();
-        gameManager->updateBoard(c);
+            chess::Move move = chess::uci::uciToMove(gameManager->GetBoard(), opponent_move);
+            chess::Board c = gameManager->GetBoard();
+            chess::Piece piece = c.at(chess::Square(move.from()));
 
-        bool inCheck = gameManager->GetBoard().inCheck();
-        frame->CallAfter([this, piece, move, isCapture, inCheck]()
-                         {
+            bool isCapture = gameManager->GetBoard().isCapture(move);
+
+            c.makeMove(move);
+            gameManager->swapTurn();
+            gameManager->updateBoard(c);
+
+            bool inCheck = gameManager->GetBoard().inCheck();
+            frame->CallAfter([this, piece, move, isCapture, inCheck]()
+                             {
             if (gameClosed)
                 return;
             frame->GetChessboard()->update(gameManager->GetBoard().getFen());
@@ -283,6 +432,7 @@ void GameplayController::AsyncHumanMove()
                 return;
             }
             frame->ChangeTimer(); });
+        }
     };
 
     std::thread t(f);
@@ -355,8 +505,8 @@ void GameplayController::makeMove(std::string_view to)
 
     if (!gameManager->isAgainstHuman())
         AsyncComputerMove();
-    else
-        AsyncHumanMove();
+    // else
+    //     AsyncHumanMove();
 
     gameManager->swapTurn();
     frame->ChangeTimer();
@@ -430,4 +580,85 @@ void GameplayController::ClickBoard(wxMouseEvent &event)
             return;
         }
     }
+}
+
+void from_json(const json &j, Game &r)
+{
+    r.ID = j.at("ID").get<int>();
+    r.time_duration = j.at("time_duration").get<int>();
+    r.time_increment = j.at("time_increment").get<int>();
+    r.u_id_b = j.at("u_id_b").get<std::string>();
+    r.u_id_w = j.at("u_id_w").get<std::string>();
+    r.moves = j.at("moves").get<std::string>();
+    r.esito = j.at("esito").get<GameResult>();
+    r.motivo = j.at("motivo").get<ResultReason>();
+}
+
+void to_json(nlohmann::json &j, const GameResult &result)
+{
+    switch (result)
+    {
+    case GameResult::WIN:
+        j = "W";
+        break;
+    case GameResult::DRAW:
+        j = "D";
+        break;
+    }
+}
+
+void from_json(const nlohmann::json &j, GameResult &result)
+{
+    std::string s = j.get<std::string>();
+    if (s == "W")
+        result = GameResult::WIN;
+    else if (s == "D")
+        result = GameResult::DRAW;
+}
+
+void to_json(nlohmann::json &j, const ResultReason &reason)
+{
+    switch (reason)
+    {
+    case ResultReason::CHECKMATE:
+        j = "checkmate";
+        break;
+    case ResultReason::STALEMATE:
+        j = "stalemate";
+        break;
+    case ResultReason::INSUFFICIENT_MATERIAL:
+        j = "insufficientMaterial";
+        break;
+    case ResultReason::FIFTY_MOVE_RULE:
+        j = "fiftyMoveRule";
+        break;
+    case ResultReason::THREEFOLD_REPETITION:
+        j = "threefoldRepetition";
+        break;
+    case ResultReason::TIME_OVER:
+        j = "wonOnTime";
+        break;
+    case ResultReason::QUITMATE:
+        j = "quitmate";
+        break;
+    }
+}
+
+void from_json(const nlohmann::json &j, ResultReason &reason)
+{
+    std::string s = j.get<std::string>();
+    if (s == "checkmate")
+        reason = ResultReason::CHECKMATE;
+    else if (s == "stalemate")
+        reason = ResultReason::STALEMATE;
+    else if (s == "insufficientMaterial")
+        reason = ResultReason::INSUFFICIENT_MATERIAL;
+    else if (s == "fiftyMoveRule")
+        reason = ResultReason::FIFTY_MOVE_RULE;
+    else if (s == "threefoldRepetition")
+        reason = ResultReason::THREEFOLD_REPETITION;
+    else if (s == "wonOnTime")
+        reason = ResultReason::TIME_OVER;
+    else if (s == "quitmate")
+        reason = ResultReason::QUITMATE;
 }

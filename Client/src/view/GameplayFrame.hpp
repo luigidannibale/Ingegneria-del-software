@@ -11,10 +11,10 @@
 #include <wx/listctrl.h>
 #include <thread>
 
-
-class GameplayFrame : public wxFrame{
+class GameplayFrame : public wxFrame
+{
 public:
-    GameplayFrame(bool, GameOptions*, GameGraphicOptions*);
+    GameplayFrame(bool, GameOptions *, GameGraphicOptions *, std::string, std::string);
     ~GameplayFrame();
 
     void StopUpdateTimer();
@@ -23,12 +23,13 @@ public:
     void ShowTransparentPanel();
     void HideTransparentPanel();
     void UpdateTransparentPanel(std::string);
-    void AddMoveToList(std::string );
-    wxStaticBitmap* GetBoard();
-    ChessboardView* GetChessboard();
+    void AddMoveToList(std::string);
+    wxStaticBitmap *GetBoard();
+    ChessboardView *GetChessboard();
+    wxButton *GetNextMoveButton();
+    wxButton *GetPrevMoveButton();
 
-    int UpdateTime(wxTimerEvent& event);
-
+    int UpdateTime(wxTimerEvent &event);
 
 private:
     float chessX = 50;
@@ -39,26 +40,26 @@ private:
     std::atomic_int blackSeconds;
 
     int increment;
-    wxTimer* whiteTimer;
-    wxTimer* blackTimer;
+    wxTimer *whiteTimer;
+    wxTimer *blackTimer;
 
+    ChessboardView *chessboard;
 
-    ChessboardView* chessboard;
+    wxStaticText *opponentText;
+    wxStaticText *userText;
+    wxStaticText *whiteStatText;
+    wxStaticText *blackStatText;
+    wxStaticText *whiteTimerText;
+    wxStaticText *blackTimerText;
 
+    wxButton *btnNextMove;
+    wxButton *btnPrevMove;
 
-    wxStaticText* opponentText;
-    wxStaticText* userText;
-    wxStaticText* whiteStatText;
-    wxStaticText* blackStatText;
-    wxStaticText* whiteTimerText;
-    wxStaticText* blackTimerText;
-
-    wxListView* movesPlayedList;
-    wxPanel* transparentPanel;
-    wxTextCtrl* loadingText;
+    wxListView *movesPlayedList;
+    wxPanel *transparentPanel;
+    wxTextCtrl *loadingText;
 
     std::string secondsToString(int seconds);
 };
 
-
-#endif //GAMEPLAYFRAME_H
+#endif // GAMEPLAYFRAME_H
