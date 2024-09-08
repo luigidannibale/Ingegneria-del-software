@@ -7,7 +7,7 @@ HomeController::HomeController(/* args */)
     frame = new HomePage("Gioco degli scacchi", wxPoint(10, 20), wxSize(800, 600));
     //    const wxIcon icona = new wxIcon(wxString(imgpath+"chessboard.png"), wxBITMAP_TYPE_PNG);
     //    frame->SetIcon(icona);
-    frame->Show(true);
+    // frame->Show(true);
 
     wxInitAllImageHandlers();
     addButtonEvents();
@@ -67,7 +67,6 @@ void HomeController::showSettings(wxCommandEvent &event)
 void HomeController::showProfile(wxCommandEvent &event)
 {
     // ProfileController* profile = new ProfileController(frame->GetHomePanel());
-    std::cout << user.Username() << std::endl;
     profileController->UpdateProfile(user);
     profileController->ShowPanel();
     frame->HidePanel();

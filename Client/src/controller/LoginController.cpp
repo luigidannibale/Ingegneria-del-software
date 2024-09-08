@@ -28,18 +28,27 @@ void LoginController::ShowPanel()
 
 void LoginController::Login(wxCommandEvent &event)
 {
+    panel->getLoginButton()->Disable();
     wxTextCtrl *usernameCtrl = panel->getUsername();
     std::string username = usernameCtrl->GetValue().ToStdString();
+
+    if (panel->GetErrorLabel()->IsShown())
+    {
+        panel->GetErrorLabel()->SetLabel("");
+        panel->GetErrorLabel()->Hide();
+    }
 
     if (username.empty())
     {
         panel->ShowError("Username cannot be empty");
+        panel->getLoginButton()->Enable();
         return;
     }
 
     if (!red->Connect())
     {
         panel->ShowError("Can't connect to server");
+        panel->getLoginButton()->Enable();
         red->Disconnect();
         return;
     }
@@ -47,6 +56,7 @@ void LoginController::Login(wxCommandEvent &event)
     if (!red->CheckChannel(red->SERVER_CHANNEL))
     {
         panel->ShowError("Error contacting the server");
+        panel->getLoginButton()->Enable();
         red->Disconnect();
         return;
     }
@@ -59,6 +69,7 @@ void LoginController::Login(wxCommandEvent &event)
     if (!red->PublishToChannel(red->SERVER_CHANNEL, j.dump().c_str()))
     {
         panel->ShowError("Error contacting the server");
+        panel->getLoginButton()->Enable();
         red->Disconnect();
         return;
     }
@@ -66,6 +77,7 @@ void LoginController::Login(wxCommandEvent &event)
     if (!red->SubscribeToChannel(username.c_str()))
     {
         panel->ShowError("Error contacting the server");
+        panel->getLoginButton()->Enable();
         red->Disconnect();
         return;
     }
@@ -79,8 +91,11 @@ void LoginController::Login(wxCommandEvent &event)
         }
         catch (nlohmann::json::parse_error &e)
         {
-            wxString errore = wxString::FromUTF8(("Cannot parse message: " + response).c_str());
-            panel->ShowError(errore);
+            wxString errore = wxString("Cannot parse message");
+            panel->CallAfter([this, errore]()
+                             { 
+                        panel->ShowError(errore);
+                        panel->getLoginButton()->Enable(); });
             red->Disconnect();
             return;
         }
@@ -88,13 +103,19 @@ void LoginController::Login(wxCommandEvent &event)
 
         if (risposta.codice == static_cast<int>(CodiceRisposta::server_error))
         {
-            panel->ShowError("Error contacting the server");
+            panel->CallAfter([this]()
+                             { 
+                            panel->ShowError("Server error"); 
+                            panel->getLoginButton()->Enable(); });
             red->Disconnect();
             return;
         }
         if (risposta.codice != static_cast<int>(CodiceRisposta::user_created))
         {
-            panel->ShowError("Unexpected response from server");
+            panel->CallAfter([this]()
+                             { 
+                            panel->ShowError("Unexpected response from server"); 
+                            panel->getLoginButton()->Enable(); });
             red->Disconnect();
             return;
         }

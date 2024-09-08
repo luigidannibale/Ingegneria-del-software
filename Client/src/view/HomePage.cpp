@@ -7,6 +7,7 @@ HomePage::HomePage(const wxString &title, const wxPoint &pos, const wxSize &size
     Center();
 
     homePanel = new wxPanel(this);
+    homePanel->SetBackgroundColour(wxColour(118, 150, 86));
 
     wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
 
@@ -24,6 +25,13 @@ HomePage::HomePage(const wxString &title, const wxPoint &pos, const wxSize &size
 
     homePanel->SetSizerAndFit(vbox);
     homePanel->Show();
+    Show();
+    homePanel->SetSize(GetClientSize());
+
+    // Da fare dopo il costruttore
+    // std::cout << "Panel Size: " << homePanel->GetSize().GetWidth() << "x" << homePanel->GetSize().GetHeight() << std::endl;
+    // std::cout << "Client Size: " << GetClientSize().GetWidth() << "x" << GetClientSize().GetHeight() << std::endl;
+    // std::cout << "Frame Size: " << GetSize().GetWidth() << "x" << GetSize().GetHeight() << std::endl;
 }
 
 void HomePage::HidePanel() { homePanel->Hide(); }

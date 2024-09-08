@@ -38,4 +38,6 @@ void LoginPanel::ShowError(const wxString &message)
     Layout();
 }
 
+wxStaticText *LoginPanel::GetErrorLabel() { return errorLabel; }
+
 // wxString LoginPanel::GetUsername() { return txtUsername->GetValue(); }

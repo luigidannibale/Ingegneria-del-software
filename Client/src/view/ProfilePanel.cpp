@@ -6,7 +6,17 @@ ProfilePanel::ProfilePanel(wxWindow *parent, User *user) : wxPanel(parent->GetPa
     SetBackgroundColour(wxColour(118, 150, 86));
 
     defaultPanel = new wxPanel(this, wxID_ANY);
+    defaultPanel->SetSize(GetSize());
     updatePanel = new wxPanel(this, wxID_ANY);
+    updatePanel->SetSize(GetSize());
+
+    wxStaticText *text = new wxStaticText(defaultPanel, wxID_ANY, "Profile", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+    text->SetFont(wxFont(14, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+    text->SetMinSize(text->GetTextExtent(text->GetLabel()));
+
+    wxStaticText *updateText = new wxStaticText(updatePanel, wxID_ANY, "Update Profile", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
+    updateText->SetFont(wxFont(14, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+    updateText->SetMinSize(updateText->GetTextExtent(updateText->GetLabel()));
 
     txtUsername = new wxTextCtrl(updatePanel, wxID_ANY, wxString(user->Username()));
     txtName = new wxTextCtrl(updatePanel, wxID_ANY, wxString(user->Name()));
@@ -24,24 +34,28 @@ ProfilePanel::ProfilePanel(wxWindow *parent, User *user) : wxPanel(parent->GetPa
     btnCancel = new wxButton(updatePanel, wxID_ANY, wxT("Cancel"));
 
     wxBoxSizer *defaultPanelSizer = new wxBoxSizer(wxVERTICAL);
+    defaultPanelSizer->Add(text, wxSizerFlags(0).Expand().Border(wxALL, 5));
     defaultPanelSizer->Add(lblUsername, wxSizerFlags(0).Expand().Border(wxALL, 5));
     defaultPanelSizer->Add(lblName, wxSizerFlags(0).Expand().Border(wxALL, 5));
     defaultPanelSizer->Add(lblSurname, wxSizerFlags(0).Expand().Border(wxALL, 5));
     defaultPanelSizer->Add(lblEloPointsD, wxSizerFlags(0).Expand().Border(wxALL, 5));
-    defaultPanelSizer->Add(btnUpdateMode, wxSizerFlags(0).Expand().Border(wxALL, 5));
-    defaultPanelSizer->Add(btnBack, wxSizerFlags(0).Expand().Border(wxALL, 5));
-    defaultPanel->SetSizerAndFit(defaultPanelSizer);
+    defaultPanelSizer->Add(btnUpdateMode, wxSizerFlags(0).Border(wxALL, 5));
+    defaultPanelSizer->Add(btnBack, wxSizerFlags(0).Border(wxALL, 5));
+    defaultPanel->SetSizer(defaultPanelSizer);
     defaultPanel->Show();
+    defaultPanel->Layout();
 
     wxBoxSizer *updatePanelSizer = new wxBoxSizer(wxVERTICAL);
-    updatePanelSizer->Add(txtUsername, wxSizerFlags(0).Expand().Border(wxALL, 5));
-    updatePanelSizer->Add(txtName, wxSizerFlags(0).Expand().Border(wxALL, 5));
-    updatePanelSizer->Add(txtSurname, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    updatePanelSizer->Add(updateText, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    updatePanelSizer->Add(txtUsername, wxSizerFlags(0).Border(wxALL, 5));
+    updatePanelSizer->Add(txtName, wxSizerFlags(0).Border(wxALL, 5));
+    updatePanelSizer->Add(txtSurname, wxSizerFlags(0).Border(wxALL, 5));
     updatePanelSizer->Add(lblEloPointsU, wxSizerFlags(0).Expand().Border(wxALL, 5));
-    updatePanelSizer->Add(btnSave, wxSizerFlags(0).Expand().Border(wxALL, 5));
-    updatePanelSizer->Add(btnCancel, wxSizerFlags(0).Expand().Border(wxALL, 5));
-    updatePanel->SetSizerAndFit(updatePanelSizer);
+    updatePanelSizer->Add(btnSave, wxSizerFlags(0).Border(wxALL, 5));
+    updatePanelSizer->Add(btnCancel, wxSizerFlags(0).Border(wxALL, 5));
+    updatePanel->SetSizer(updatePanelSizer);
     updatePanel->Hide();
+    updatePanel->Layout();
 }
 
 void ProfilePanel::ShowUpdate()

@@ -8,7 +8,9 @@ GameMode::GameMode(wxWindow *parent) : wxPanel(parent->GetParent())
     wxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
     wxPanel *leftPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    leftPanel->SetBackgroundColour(wxColour(118, 150, 86));
     wxPanel *rightPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_DOUBLE);
+    rightPanel->SetBackgroundColour(wxColour(118, 150, 86));
 
     btnMultiplayer = new wxButton(leftPanel, wxID_ANY, "Play online", wxPoint(10, 50));
     btnComputer = new wxButton(leftPanel, wxID_ANY, "Play against computer", wxPoint(10, 100));

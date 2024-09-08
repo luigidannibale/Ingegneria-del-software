@@ -1,24 +1,24 @@
 #ifndef LOGINPANEL_H
-#define  LOGINPANEL_H
+#define LOGINPANEL_H
 
 #include "../lib.hpp"
 
-
-class LoginPanel : public wxPanel{
+class LoginPanel : public wxPanel
+{
 public:
-    LoginPanel(wxWindow* parent);
+    LoginPanel(wxWindow *parent);
     // wxString GetUsername();
-    
-    wxTextCtrl* getUsername();
-    wxButton* getLoginButton();
+
+    wxTextCtrl *getUsername();
+    wxButton *getLoginButton();
 
     void ShowError(const wxString &message);
+    wxStaticText *GetErrorLabel();
 
 private:
-    wxTextCtrl* txtUsername;
-    wxStaticText* errorLabel;
-    wxButton* btnLogin;
-    
+    wxTextCtrl *txtUsername;
+    wxStaticText *errorLabel;
+    wxButton *btnLogin;
 };
 
 #endif // LOGINPANEL_H

@@ -8,7 +8,9 @@ SettingsPanel::SettingsPanel(wxWindow *parent, GameGraphicOptions *graphicOption
     wxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
 
     wxPanel *leftPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    leftPanel->SetBackgroundColour(wxColour(118, 150, 86));
     wxPanel *rightPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    rightPanel->SetBackgroundColour(wxColour(118, 150, 86));
     wxPanel *border = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
     border->SetBackgroundColour(wxColour(0, 0, 0));
     border->SetSize(10, 810);
@@ -52,7 +54,7 @@ SettingsPanel::SettingsPanel(wxWindow *parent, GameGraphicOptions *graphicOption
     btnBack = new wxButton(leftPanel, wxID_ANY, "Back", wxDefaultPosition, wxDefaultSize);
     btnSave = new wxButton(leftPanel, wxID_ANY, "Save", wxDefaultPosition, wxDefaultSize);
 
-    wxStaticText *staticText = new wxStaticText(rightPanel, wxID_ANY, "Configurazione attuale (quella sotto)", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+    wxStaticText *staticText = new wxStaticText(rightPanel, wxID_ANY, "Current configuration", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
     // staticText->SetPosition(wxPoint(150, 250)); // Imposta la posizione
     // selectedChessboard = chessboard3;
     chessboardSelectedBitmap = new wxStaticBitmap(rightPanel, wxID_ANY, wxNullBitmap);
@@ -64,10 +66,10 @@ SettingsPanel::SettingsPanel(wxWindow *parent, GameGraphicOptions *graphicOption
     this->graphicOptions = graphicOptions;
     SetGameGraphicOptions(graphicOptions);
 
-    wxStaticText *chooseText = new wxStaticText(leftPanel, wxID_ANY, "Scegliere una configurazione", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
-    leftSizer->Add(chooseText, wxSizerFlags(0).Expand().Border(wxALL, 5));
+    wxStaticText *chooseText = new wxStaticText(leftPanel, wxID_ANY, "Choose a configuration", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+    leftSizer->Add(chooseText, wxSizerFlags(0).Expand().Center().Border(wxALL, 5));
 
-    wxStaticText *chessboardText = new wxStaticText(leftPanel, wxID_ANY, "Tipo di scacchiera", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+    wxStaticText *chessboardText = new wxStaticText(leftPanel, wxID_ANY, "Chessboard style", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
     leftSizer->Add(chessboardText, wxSizerFlags(0).Expand().Border(wxALL, 5));
 
     wxSizer *chessboardSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -76,7 +78,7 @@ SettingsPanel::SettingsPanel(wxWindow *parent, GameGraphicOptions *graphicOption
     chessboardSizer->Add(chessboard3Bitmap, wxSizerFlags(1).Align(wxALIGN_CENTER).Border(wxALL, 5));
     leftSizer->Add(chessboardSizer, wxSizerFlags(0).Expand().Border(wxALL, 5));
 
-    wxStaticText *piecesText = new wxStaticText(leftPanel, wxID_ANY, "Tipo di pezzi", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
+    wxStaticText *piecesText = new wxStaticText(leftPanel, wxID_ANY, "Pieces style", wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT);
     leftSizer->Add(piecesText, wxSizerFlags(0).Expand().Border(wxALL, 5));
 
     wxSizer *piecesSizer = new wxBoxSizer(wxHORIZONTAL);

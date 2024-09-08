@@ -334,28 +334,17 @@ void Database::createSchema()
         "CREATE TYPE Chessboard_style AS ENUM('blue','brown','black');",
         "CREATE TYPE Pieces_style AS ENUM('neo','pixel');",
 
-        // "CREATE TABLE Theme ("
-        // "ID SERIAL PRIMARY KEY NOT NULL,"
-        // "ChessboardColor Chessboard_style NOT NULL,"
-        // "PiecesColor Pieces_style NOT NULL"
-        // ");",
         "CREATE TABLE Player ("
         "Username VARCHAR(20) PRIMARY KEY NOT NULL,"
         "Nome VARCHAR(20) NOT NULL,"
         "Cognome VARCHAR(25) NOT NULL,"
         "PuntiElo INTEGER NOT NULL,"
-        // "Theme INTEGER NOT NULL REFERENCES Theme(ID)"
         "ChessboardColor Chessboard_style DEFAULT 'brown',"
         "PiecesColor Pieces_style DEFAULT 'neo'"
         ");",
-        // In teoria basta mettere il tema nella tabella user
-        /*"CREATE TABLE UserPreference("
-        "Username VARCHAR(20) PRIMARY KEY REFERENCES Player(Username),"
-        "Theme INTEGER NOT NULL REFERENCES Theme(ID),"
-        ")",*/
 
         "CREATE TABLE Game("
-        "ID PRIMARY KEY NOT NULL, "
+        "ID SERIAL PRIMARY KEY NOT NULL, "
         "White VARCHAR(20) NOT NULL REFERENCES Player(Username),"
         "Black VARCHAR(20) NOT NULL REFERENCES Player(Username),"
         "TimeDuration INTEGER NOT NULL,"
