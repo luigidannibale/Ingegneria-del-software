@@ -25,7 +25,7 @@ GameMode::GameMode(wxWindow *parent) : wxPanel(parent->GetParent())
     gameTime.Add("10|5");
     gameTime.Add("15|10");
     gameTime.Add("90|30");
-    multiplayerTimeBox = new wxRadioBox(multiplayerPanel, wxID_ANY, "Choose the time duration \n(the number after the | is the increments in seconds)", wxDefaultPosition, wxDefaultSize, gameTime, 1, wxRA_SPECIFY_COLS | wxNO_BORDER);
+    multiplayerTimeBox = new wxRadioBox(multiplayerPanel, wxID_ANY, "Choose the time duration (time in minutes | increment in seconds)", wxDefaultPosition, wxDefaultSize, gameTime, 1, wxRA_SPECIFY_COLS | wxNO_BORDER);
     multiplayerTimeBox->SetPosition(wxPoint(20, 20));
     multiplayerTimeBox->SetSelection(1);
 
@@ -38,7 +38,7 @@ GameMode::GameMode(wxWindow *parent) : wxPanel(parent->GetParent())
     initPanel(computerPanel);
 
     // Cadenza di gioco
-    computerTimeBox = new wxRadioBox(computerPanel, wxID_ANY, "Choose the time duration \n(the number after the | is the increments in seconds)", wxDefaultPosition, wxDefaultSize, gameTime, 2, wxRA_SPECIFY_COLS | wxNO_BORDER);
+    computerTimeBox = new wxRadioBox(computerPanel, wxID_ANY, "Choose the time duration (time in minutes | increment in seconds)", wxDefaultPosition, wxDefaultSize, gameTime, 2, wxRA_SPECIFY_COLS | wxNO_BORDER);
     computerTimeBox->SetPosition(wxPoint(20, 20));
     computerTimeBox->SetSelection(1);
 
