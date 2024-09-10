@@ -8,95 +8,130 @@ Server::Server()
     this->redisManager = new RedisManager();
 
     db = new Database();
+    if (!db->IsOkay())
+    {
+        std::cerr << "Error connecting to database" << std::endl;
+        return;
+    }
 
     // Redis connection part
-    redisManager->Connect();
-    bool accepted = redisManager->SubscribeToChannel(NEW_CLIENTS_CHANNEL.c_str());
-    std::string s = accepted ? "Connection accepted" : "Connection not accepted";
-    std::cout << s << std::endl;
-    listen_for_clients();
+    if (!redisManager->Connect())
+    {
+        std::cerr << "Error connecting to Redis" << std::endl;
+        return;
+    }
 
-    // db->Disconnect();
-    // db->ConnectDefault();
-    // db->deleteDatabase("chess");
+    if (!redisManager->SubscribeToChannel(NEW_CLIENTS_CHANNEL.c_str()))
+    {
+        std::cerr << "Error subscribing to channel" << std::endl;
+        redisManager->Disconnect();
+        return;
+    }
+
+    users["180+2"] = std::vector<std::string>();
+    users["600+5"] = std::vector<std::string>();
+    users["900+10"] = std::vector<std::string>();
+    users["5400+30"] = std::vector<std::string>();
+
+    listen_for_clients();
 }
 
 void Server::handle_client(std::string messaggio)
 {
     json jmess;
+    Richiesta r;
     try
     {
         jmess = json::parse(messaggio);
+        r = Richiesta::fromJson(jmess);
     }
     catch (nlohmann::json::parse_error &e)
     {
         std::cerr << "Cannot parse message: " << messaggio << std::endl;
         return;
     }
+    catch (nlohmann::json::exception &e)
+    {
+        std::cerr << "Cannot parse message: " << messaggio << std::endl;
+        return;
+    }
 
-    Richiesta r = Richiesta::fromJson(jmess);
     std::cout << "Received request: " << r.toJson().dump() << std::endl;
 
-    switch (r.getCodice())
+    try
     {
-    case CodiceRichiesta::new_game:
-        new_game(r.getPayload().at("time_duration"),
-                 r.getPayload().at("time_increment"),
-                 r.getPayload().at("black"),
-                 r.getPayload().at("white"));
-        break;
-    case CodiceRichiesta::search_opponent:
-        search_opponent(r.getPayload().at("user"),
-                        r.getPayload().at("time_duration"),
-                        r.getPayload().at("time_increment"));
-        break;
-    case CodiceRichiesta::quit_search_opponent:
-        search_opponent(r.getPayload().at("user"),
-                        r.getPayload().at("time_duration"),
-                        r.getPayload().at("time_increment"),
-                        true);
-        break;
-    case CodiceRichiesta::update_game:
-        update_game(r.getPayload().at("game_id"),
-                    r.getPayload().at("moves"),
-                    r.getPayload().at("esito"),
-                    r.getPayload().at("motivo"));
-        break;
-    case CodiceRichiesta::search_game:
-        search_game(r.getPayload().at("game_id"));
-        break;
-    case CodiceRichiesta::list_games:
-        list_games(r.getPayload().at("username"));
-        break;
-    case CodiceRichiesta::new_user:
-        // new_user(r.getPayload().at("username"),
-        //          r.getPayload().at("nome"),
-        //          r.getPayload().at("cognome"),
-        //          r.getPayload().at("elo"),
-        //          r.getPayload().at("chessboard_style"),
-        //          r.getPayload().at("pieces_style"));
-        new_user(r.getPayload().at("username"));
-        break;
-    case CodiceRichiesta::update_user:
-        update_user(r.getPayload().at("username"),
-                    r.getPayload().at("new_username"),
-                    r.getPayload().at("nome"),
-                    r.getPayload().at("cognome"),
-                    r.getPayload().at("elo"));
-        break;
-    case CodiceRichiesta::update_userPreference:
-        update_userPreference(r.getPayload().at("username"),
-                              r.getPayload().at("chessboard_style"),
-                              r.getPayload().at("pieces_style"));
-        break;
-    case CodiceRichiesta::delete_user:
-        delete_user(r.getPayload().at("username"));
-        break;
+        switch (r.getCodice())
+        {
+        // case CodiceRichiesta::new_game:
+        //     new_game(r.getPayload().at("time_duration"),
+        //              r.getPayload().at("time_increment"),
+        //              r.getPayload().at("black"),
+        //              r.getPayload().at("white"));
+        //     break;
+        case CodiceRichiesta::search_opponent:
+            search_opponent(r.getPayload().at("user"),
+                            r.getPayload().at("time_duration"),
+                            r.getPayload().at("time_increment"));
+            break;
+        case CodiceRichiesta::quit_search_opponent:
+            search_opponent(r.getPayload().at("user"),
+                            r.getPayload().at("time_duration"),
+                            r.getPayload().at("time_increment"),
+                            true);
+            break;
+        case CodiceRichiesta::update_game:
+            update_game(r.getPayload().at("game_id"),
+                        r.getPayload().at("moves"),
+                        r.getPayload().at("esito"),
+                        r.getPayload().at("motivo"));
+            break;
+        case CodiceRichiesta::search_game:
+            search_game(r.getPayload().at("game_id"));
+            break;
+        case CodiceRichiesta::list_games:
+            list_games(r.getPayload().at("username"));
+            break;
+        case CodiceRichiesta::new_user:
+            // new_user(r.getPayload().at("username"),
+            //          r.getPayload().at("nome"),
+            //          r.getPayload().at("cognome"),
+            //          r.getPayload().at("elo"),
+            //          r.getPayload().at("chessboard_style"),
+            //          r.getPayload().at("pieces_style"));
+            new_user(r.getPayload().at("username"));
+            break;
+        case CodiceRichiesta::update_user:
+            update_user(r.getPayload().at("username"),
+                        r.getPayload().at("new_username"),
+                        r.getPayload().at("nome"),
+                        r.getPayload().at("cognome"),
+                        r.getPayload().at("elo"));
+            break;
+        case CodiceRichiesta::update_userPreference:
+            update_userPreference(r.getPayload().at("username"),
+                                  r.getPayload().at("chessboard_style"),
+                                  r.getPayload().at("pieces_style"));
+            break;
+        // case CodiceRichiesta::delete_user:
+        //     delete_user(r.getPayload().at("username"));
+        //     break;
+        default:
+            break;
+        }
+    }
+    catch (nlohmann::json::exception &e)
+    {
+        std::cerr << "Error in parsing JSON: " << e.what() << std::endl;
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
     }
 }
 
 void Server::listen_for_clients()
 {
+    std::cout << "Server is listening for clients" << std::endl;
     while (!stop_server)
     {
         std::string message = redisManager->WaitResponse();
@@ -106,7 +141,7 @@ void Server::listen_for_clients()
     }
 }
 
-json Server::new_game(int duration, int increment, std::string u_id_b, std::string u_id_w)
+void Server::new_game(int duration, int increment, std::string u_id_b, std::string u_id_w)
 {
     // int gameID = db->InsertNewGame(u_id_b.c_str(), u_id_w.c_str(), duration, increment);
     // if (gameID == -1)
@@ -115,24 +150,62 @@ json Server::new_game(int duration, int increment, std::string u_id_b, std::stri
     //     return json();
     // }
     // // non errore
-    return json();
 }
 
-json Server::search_opponent(std::string u_id, int duration, int increment, bool quit)
+void Server::search_opponent(std::string u_id, int duration, int increment, bool quit)
 {
     std::string key = std::to_string(duration) + "+" + std::to_string(increment);
+
+    if (users.find(key) == users.end())
+    {
+        std::cerr << "key not found" << std::endl;
+        json mess;
+        mess["codice"] = CodiceRisposta::bad_request;
+        mess["input"] = {};
+        redisManager->PublishToChannel(u_id.c_str(), mess.dump().c_str());
+        return;
+    }
 
     if (quit) // User has quit the search
     {
         std::vector<std::string>::iterator it = std::find(users[key].begin(), users[key].end(), u_id);
         if (it != users[key].end())
+        {
             users[key].erase(it);
 
+            json mess;
+            mess["codice"] = CodiceRisposta::ok;
+            mess["input"] = {};
+            redisManager->PublishToChannel(u_id.c_str(), mess.dump().c_str());
+        }
+        else // User not found
+        {
+            json mess;
+            mess["codice"] = CodiceRisposta::not_found;
+            mess["input"] = {};
+            redisManager->PublishToChannel(u_id.c_str(), mess.dump().c_str());
+        }
+        return;
+    }
+
+    // Check user exists
+    User user;
+    int res = db->FindUser(u_id.c_str(), user);
+    if (res == 0)
+    {
         json mess;
-        mess["codice"] = CodiceRisposta::ok;
+        mess["codice"] = CodiceRisposta::not_found;
         mess["input"] = {};
         redisManager->PublishToChannel(u_id.c_str(), mess.dump().c_str());
-        return json();
+        return;
+    }
+    else if (res == -1)
+    {
+        json mess;
+        mess["codice"] = CodiceRisposta::server_error;
+        mess["input"] = {};
+        redisManager->PublishToChannel(u_id.c_str(), mess.dump().c_str());
+        return;
     }
 
     // Add user to the list of users searching for an opponent
@@ -140,7 +213,12 @@ json Server::search_opponent(std::string u_id, int duration, int increment, bool
     json mess;
     mess["codice"] = CodiceRisposta::ok;
     mess["input"] = {};
-    redisManager->PublishToChannel(u_id.c_str(), mess.dump().c_str());
+    if (!redisManager->PublishToChannel(u_id.c_str(), mess.dump().c_str()))
+    {
+        std::cerr << "Error publishing message to channel" << std::endl;
+        users[key].pop_back();
+        return;
+    }
 
     if (users[key].size() >= 2)
     {
@@ -150,6 +228,11 @@ json Server::search_opponent(std::string u_id, int duration, int increment, bool
         users[key].pop_back();
         try
         {
+            if (white.compare(black) == 0)
+            {
+                throw std::runtime_error("Same user");
+            }
+
             json reply_white;
             reply_white["codice"] = CodiceRisposta::game_created;
             reply_white["input"]["opponent"] = black;
@@ -168,7 +251,6 @@ json Server::search_opponent(std::string u_id, int duration, int increment, bool
             if (gameID == -1)
             {
                 throw std::runtime_error("Error creating game");
-                return json();
             }
 
             reply_white["input"]["game_id"] = gameID;
@@ -185,10 +267,9 @@ json Server::search_opponent(std::string u_id, int duration, int increment, bool
             redisManager->PublishToChannel(black.c_str(), mess.dump().c_str());
         }
     }
-    return json();
 }
 
-json Server::update_game(int g_id, std::string moves, Esito e, Motivo m)
+void Server::update_game(int g_id, std::string moves, Esito e, Motivo m)
 {
     json esito = e;
     json motivo = m;
@@ -213,10 +294,9 @@ json Server::update_game(int g_id, std::string moves, Esito e, Motivo m)
 
     std::string channel = "game" + std::to_string(g_id);
     redisManager->PublishToChannel(channel.c_str(), mess.dump().c_str());
-    return json();
 }
 
-json Server::search_game(int g_id)
+void Server::search_game(int g_id)
 {
     Game game = db->SearchGame(g_id);
     json mess;
@@ -239,10 +319,9 @@ json Server::search_game(int g_id)
 
     std::string channel = "game" + std::to_string(g_id);
     redisManager->PublishToChannel(channel.c_str(), mess.dump().c_str());
-    return json();
 }
 
-json Server::list_games(std::string user_id)
+void Server::list_games(std::string user_id)
 {
     std::vector<Game> games;
     bool res = db->ListGames(user_id.c_str(), games);
@@ -262,7 +341,6 @@ json Server::list_games(std::string user_id)
         mess["input"] = "Internal server error";
     }
     redisManager->PublishToChannel(user_id.c_str(), mess.dump().c_str());
-    return json();
 }
 
 // json Server::new_user(std::string username, std::string nome, std::string cognome, int elo, Chessboard_style c_st,
@@ -274,8 +352,13 @@ json Server::list_games(std::string user_id)
 //     return json();
 // }
 
-json Server::new_user(std::string username)
+void Server::new_user(std::string username)
 {
+    if (username.empty())
+    {
+        return;
+    }
+
     User user;
     int res = db->FindUser(username.c_str(), user);
     json mess;
@@ -318,10 +401,9 @@ json Server::new_user(std::string username)
     }
 
     redisManager->PublishToChannel(username.c_str(), mess.dump().c_str());
-    return mess;
 }
 
-json Server::update_user(std::string username, std::string new_username, std::string nome, std::string cognome, int elo)
+void Server::update_user(std::string username, std::string new_username, std::string nome, std::string cognome, int elo)
 {
     json mess;
     mess["input"] = "{}"; // Default value
@@ -344,10 +426,9 @@ json Server::update_user(std::string username, std::string new_username, std::st
     }
 
     redisManager->PublishToChannel(username.c_str(), mess.dump().c_str());
-    return mess;
 }
 
-json Server::update_userPreference(std::string username, Chessboard_style c_st, Pieces_style p_st)
+void Server::update_userPreference(std::string username, Chessboard_style c_st, Pieces_style p_st)
 {
     json mess;
     mess["input"] = "{}"; // Default value
@@ -368,28 +449,12 @@ json Server::update_userPreference(std::string username, Chessboard_style c_st, 
     }
 
     redisManager->PublishToChannel(username.c_str(), mess.dump().c_str());
-    return mess;
 }
 
-json Server::delete_user(std::string username)
+void Server::delete_user(std::string username)
 {
     db->DeleteUser(username.c_str());
-    return json();
 }
-
-int main()
-{
-    Server server = Server();
-    return 0;
-}
-
-// Serializzazione e deserializzazione per Esito
-// NLOHMANN_JSON_SERIALIZE_ENUM(Esito, {
-//     {Esito::W, "W"},
-//     {Esito::D, "D"},
-//     {Esito::B, "B"},
-//     {Esito::NF, "NF"}
-// })
 
 // Function to convert Esito to JSON
 void to_json(json &j, const Esito &esito)
@@ -424,18 +489,6 @@ void from_json(const json &j, Esito &esito)
     else if (esitoStr == "NF")
         esito = Esito::NF;
 }
-
-// Serializzazione e deserializzazione per Motivo
-// NLOHMANN_JSON_SERIALIZE_ENUM(Motivo, {
-// {Motivo::checkmate, "checkmate"},
-// {Motivo::wonOnTime, "wonOnTime"},
-// {Motivo::quitmate, "quitmate"},
-// {Motivo::stalemate, "stalemate"},
-// {Motivo::insufficientMaterial, "insufficientMaterial"},
-// {Motivo::threefoldRepetition, "threefoldRepetition"},
-// {Motivo::fiftyMoveRule, "fiftyMoveRule"},
-// {Motivo::NF, "NF"}
-// })
 
 void to_json(json &j, const Motivo &motivo)
 {
@@ -489,17 +542,6 @@ void from_json(const json &j, Motivo &motivo)
     else if (motivoStr == "NF")
         motivo = Motivo::NF;
 }
-// Serializzazione e deserializzazione per Chessboard_Style
-// NLOHMANN_JSON_SERIALIZE_ENUM(Chessboard_style, {
-// {Chessboard_style::blue, "blue"},
-// {Chessboard_style::brown, "brown"},
-// {Chessboard_style::black, "black"}
-// })
-// // Serializzazione e deserializzazione per Pieces_style
-// NLOHMANN_JSON_SERIALIZE_ENUM(Pieces_style, {
-// {Pieces_style::neo, "neo"},
-// {Pieces_style::pixel, "pixel"}
-// })
 
 void to_json(json &j, const Chessboard_style &chessboard_style)
 {
@@ -552,4 +594,22 @@ void from_json(const json &j, Pieces_style &pieces_style)
     {
         pieces_style = Pieces_style::pixel;
     }
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc > 1)
+    {
+        std::string argument = argv[1];
+
+        // Check if the argument is "--test"
+        if (argument == "--test")
+        {
+            Test();
+            return 0;
+        }
+    }
+
+    Server();
+    return 0;
 }

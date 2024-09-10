@@ -118,6 +118,10 @@ void GameplayController::OnClose(wxCloseEvent &event)
         if (!redisManager->PublishToChannel(redisManager->SERVER_CHANNEL, j.dump().c_str()))
         {
             wxLogMessage("Failed to save the game");
+            returnPanel->GetParent()->Show();
+            gameClosed = true;
+            delete gameManager;
+            return;
         }
 
         std::string channel = "game" + std::to_string(gameId);
@@ -182,7 +186,7 @@ void GameplayController::OnPrevMove(wxCommandEvent &event)
     gameManager->updateBoard(c);
     frame->GetChessboard()->update(gameManager->GetBoard().getFen());
     bool inCheck = gameManager->GetBoard().inCheck();
-    printMove(piece, move, false, inCheck);
+    frame->RemoveLastMoveFromList();
 }
 
 void GameplayController::UpdateTime(wxTimerEvent &event)
@@ -389,6 +393,8 @@ void GameplayController::AsyncHumanMove()
         while (!gameEnded || !gameClosed)
         {
             std::string response = redisManager->WaitResponse(false);
+            if (gameEnded || gameClosed)
+                return;
 
             if (response == "quit")
             {
@@ -604,6 +610,9 @@ void to_json(nlohmann::json &j, const GameResult &result)
     case GameResult::DRAW:
         j = "D";
         break;
+    case GameResult::NF:
+        j = "NF";
+        break;
     }
 }
 
@@ -614,6 +623,8 @@ void from_json(const nlohmann::json &j, GameResult &result)
         result = GameResult::WIN;
     else if (s == "D")
         result = GameResult::DRAW;
+    else if (s == "NF")
+        result = GameResult::NF;
 }
 
 void to_json(nlohmann::json &j, const ResultReason &reason)
@@ -641,6 +652,9 @@ void to_json(nlohmann::json &j, const ResultReason &reason)
     case ResultReason::QUITMATE:
         j = "quitmate";
         break;
+    case ResultReason::NF:
+        j = "NF";
+        break;
     }
 }
 
@@ -661,4 +675,6 @@ void from_json(const nlohmann::json &j, ResultReason &reason)
         reason = ResultReason::TIME_OVER;
     else if (s == "quitmate")
         reason = ResultReason::QUITMATE;
+    else if (s == "NF")
+        reason = ResultReason::NF;
 }

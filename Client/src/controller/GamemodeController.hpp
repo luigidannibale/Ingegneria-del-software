@@ -2,6 +2,7 @@
 #define GAMEMODECONTROLLER_H
 
 #include <cstdio>
+#include <atomic>
 #include "../lib.hpp"
 #include "../view/GameMode.hpp"
 #include "../view/LoginPanel.hpp"
@@ -25,11 +26,13 @@ private:
     GameGraphicOptions *configuration;
 
     bool searching = false;
+    bool quitting = false;
     std::string message;
     GameplayController *gameplayController;
     RedisManager *red;
     User *user;
 
+    std::atomic<bool> searchingOpponent;
     Ricerca ricerca;
 
     void addButtonEvents();

@@ -93,12 +93,18 @@ bool RedisManager::UnsubscribeFromChannel(const char *channel)
     isCommandRunning.store(true);
     redisReply *reply = nullptr;
     if (channel == nullptr)
+    {
+        std::cout << "Unsubscribing from all channels" << std::endl;
         reply = (redisReply *)redisCommand(input, "UNSUBSCRIBE");
+        freeReplyObject(reply);
+        isCommandRunning.store(false);
+        return true;
+    }
     else
         reply = (redisReply *)redisCommand(input, "UNSUBSCRIBE %s", channel);
     if (reply == NULL || reply->type != REDIS_REPLY_ARRAY)
     {
-        std::cerr << "Failed to subscribe to " << channel << std::endl;
+        std::cerr << "Failed to unsubscribe from channel" << std::endl;
         freeReplyObject(reply);
         isCommandRunning.store(false);
         return false;
@@ -109,19 +115,27 @@ bool RedisManager::UnsubscribeFromChannel(const char *channel)
     return true;
 }
 
-std::string RedisManager::WaitResponse()
+std::string RedisManager::WaitResponse(bool timeout)
 {
     isCommandRunning.store(true);
     isWaitingResponse.store(true);
+
+    struct timeval timer;
+    timer.tv_sec = 0;
+    timer.tv_usec = 0;
+    if (timeout)
+        timer.tv_sec = 5;
+    redisSetTimeout(input, timer);
+
     while (isWaitingResponse.load())
     {
         redisReply *reply = nullptr;
         redisGetReply(input, (void **)&reply);
         if (reply == NULL)
         {
-            //            std::cerr << "Failed to get reply from redis" << std::endl;
-            //            freeReplyObject(reply);
-            //            isCommandRunning.store(false);
+            std::cerr << "Failed to get reply from redis" << std::endl;
+            freeReplyObject(reply);
+            isCommandRunning.store(false);
             return "";
         }
         if (reply->type == REDIS_REPLY_ARRAY)

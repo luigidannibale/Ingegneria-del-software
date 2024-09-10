@@ -18,7 +18,8 @@
 enum GameResult
 {
     WIN,
-    DRAW
+    DRAW,
+    NF
 };
 
 enum class ResultReason
@@ -29,7 +30,8 @@ enum class ResultReason
     FIFTY_MOVE_RULE = static_cast<int>(chess::GameResultReason::FIFTY_MOVE_RULE),
     THREEFOLD_REPETITION = static_cast<int>(chess::GameResultReason::THREEFOLD_REPETITION),
     TIME_OVER,
-    QUITMATE
+    QUITMATE,
+    NF
 };
 
 struct Game

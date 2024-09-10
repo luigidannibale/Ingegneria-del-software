@@ -9,6 +9,8 @@ set(SOURCES
         src/RedisManager.hpp
         src/Database.cpp
         src/Database.hpp
+        src/Test.cpp
+        src/Test.hpp
 )
 add_executable(Server ${SOURCES})
 

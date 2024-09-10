@@ -1,7 +1,7 @@
 
 #include "GameplayFrame.hpp"
 
-GameplayFrame::GameplayFrame(bool isWhite, GameOptions *options, GameGraphicOptions *graphicOptions, std::string user_id, std::string opponent_id) : wxFrame(NULL, wxID_ANY, wxString("Gioca la partita vinci la fatica"), wxPoint(0, 0), wxSize(0, 0), wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER)
+GameplayFrame::GameplayFrame(bool isWhite, GameOptions *options, GameGraphicOptions *graphicOptions, std::string user_id, std::string opponent_id) : wxFrame(NULL, wxID_ANY, wxString("Gioco degli scacchi"), wxPoint(0, 0), wxSize(0, 0), wxDEFAULT_FRAME_STYLE & ~wxRESIZE_BORDER)
 {
     float scal = static_cast<float>(wxSystemSettings::GetMetric(wxSYS_SCREEN_Y)) / 1080; // optimized for 1080 width screen and scaled to be played on all screen
     chessX *= scal;
@@ -13,7 +13,9 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions *options, GameGraphicOpti
 
     wxSizer *mainSizer = new wxBoxSizer(wxHORIZONTAL);
     wxPanel *leftPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    leftPanel->SetBackgroundColour(wxColour(118, 150, 86));
     wxPanel *rightPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    rightPanel->SetBackgroundColour(wxColour(118, 150, 86));
     wxImage boardImg;
     std::string board;
     switch (graphicOptions->GetBoardStyle())
@@ -89,8 +91,8 @@ GameplayFrame::GameplayFrame(bool isWhite, GameOptions *options, GameGraphicOpti
         std::string time = secondsToString(options->GetGameDurationInSeconds());
         whiteTimerText = new wxStaticText(rightPanel, wxID_ANY, wxString(time));
         blackTimerText = new wxStaticText(rightPanel, wxID_ANY, wxString(time));
-        int whiteY = isWhite ? 500 : 100;
-        int blackY = isWhite ? 100 : 500;
+        int whiteY = isWhite ? 600 : 200;
+        int blackY = isWhite ? 200 : 600;
         whiteTimerText->Move(100 * scal, whiteY * scal);
         blackTimerText->Move(100 * scal, blackY * scal);
     }
@@ -162,6 +164,21 @@ void GameplayFrame::AddMoveToList(std::string move)
     movesPlayedList->SetItem(index, whiteMove ? 1 : 2, move);
     whiteMove = !whiteMove;
     movesPlayedList->EnsureVisible(index);
+}
+
+void GameplayFrame::RemoveLastMoveFromList()
+{
+    long index = movesPlayedList->GetItemCount() - 1;
+    if (!whiteMove)
+    {
+        movesPlayedList->DeleteItem(index);
+        index--;
+    }
+    else
+        movesPlayedList->SetItem(index, 2, "");
+    whiteMove = !whiteMove;
+    if (index >= 0)
+        movesPlayedList->EnsureVisible(index);
 }
 
 std::string GameplayFrame::secondsToString(int seconds)

@@ -4,10 +4,8 @@ Database::Database()
 {
     conn = nullptr;
     res = nullptr;
-    std::cerr << "1" << std::endl;
     if (!Connect(default_connection))
         return;
-    std::cerr << "2" << std::endl;
     bool exists = databaseExists(targetDbName);
     if (!exists)
     {
@@ -17,13 +15,27 @@ Database::Database()
     {
         std::cout << "Database " << targetDbName << " already exists." << std::endl;
     }
-    std::cerr << "3" << std::endl;
     Disconnect();
-    std::cerr << "4" << std::endl;
     if (!Connect(database_connection))
         return;
     if (!exists)
-        createSchema();
+    {
+        if (!createSchema())
+        {
+            std::cerr << "Failed to create schema" << std::endl;
+            Disconnect();
+            if (!Connect(default_connection))
+            {
+                std::cerr << "Failed to delete database" << std::endl;
+                return;
+            }
+            deleteDatabase(targetDbName);
+            std::cerr << "Database deleted" << std::endl;
+            return;
+        }
+        std::cout << "Database created" << std::endl;
+    }
+    isOkay = true;
 }
 
 Database::~Database()
@@ -52,6 +64,11 @@ bool Database::Connect(const char *connection_string)
 void Database::Disconnect()
 {
     PQfinish(conn);
+}
+
+bool Database::IsOkay()
+{
+    return isOkay;
 }
 
 // Function to escape string literals
@@ -119,6 +136,7 @@ void Database::createDatabase(const char *dbName)
 
 void Database::deleteDatabase(const char *dbName)
 {
+    deleteSchema();
     std::string query = "DROP DATABASE IF EXISTS " + escape_identifier(conn, dbName);
     res = PQexec(conn, query.c_str());
     // res = PQexecParasms(conn, query, 1, nullptr, paramValues, nullptr, nullptr, 0);
@@ -128,7 +146,7 @@ void Database::deleteDatabase(const char *dbName)
         PQclear(res);
         return;
     }
-    std::cout << "Database " << dbName << " deleted.\n";
+    // std::cout << "Database " << dbName << " deleted.\n";
     PQclear(res);
 }
 
@@ -326,7 +344,7 @@ bool Database::ListGames(const char *username, std::vector<Game> &games)
     return false;
 }
 
-void Database::createSchema()
+bool Database::createSchema()
 {
     const char *queries[] = {
         "CREATE TYPE Esito AS ENUM('W','D','B','NF');",
@@ -353,11 +371,12 @@ void Database::createSchema()
         "Esito Esito,"
         "Motivo Motivo"
         ");",
-        "CREATE TABLE Log("
-        "ID SERIAL PRIMARY KEY NOT NULL, "
-        "Azione VARCHAR(200) NOT NULL,"
-        "Timestamp TIMESTAMP NOT NULL"
-        ");",
+
+        // "CREATE TABLE Log("
+        // "ID SERIAL PRIMARY KEY NOT NULL, "
+        // "Azione VARCHAR(200) NOT NULL,"
+        // "Timestamp TIMESTAMP NOT NULL"
+        // ");",
     };
 
     for (const char *query : queries)
@@ -376,6 +395,32 @@ void Database::createSchema()
                 continue;
             }
             std::cerr << "Failed to create schema: " << PQerrorMessage(conn) << std::endl;
+            PQclear(res);
+            deleteSchema();
+            return false;
+        }
+        PQclear(res);
+    }
+    return true;
+}
+
+void Database::deleteSchema()
+{
+    const char *drop_queries[] = {
+        "DROP TABLE IF EXISTS Game;",
+        "DROP TABLE IF EXISTS Player;",
+        "DROP TYPE IF EXISTS Esito;",
+        "DROP TYPE IF EXISTS Motivo;",
+        "DROP TYPE IF EXISTS Chessboard_style;",
+        "DROP TYPE IF EXISTS Pieces_style;",
+    };
+
+    for (const char *query : drop_queries)
+    {
+        res = PQexec(conn, query);
+        if (PQresultStatus(res) != PGRES_COMMAND_OK)
+        {
+            std::cerr << "Failed to drop schema: " << PQerrorMessage(conn) << std::endl;
             PQclear(res);
             return;
         }

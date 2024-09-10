@@ -10,6 +10,7 @@ GamemodeController::GamemodeController(wxPanel *parent, RedisManager *red, User 
     panel->Hide();
     backPanel = parent;
     addButtonEvents();
+    searchingOpponent.store(false);
 
     this->red = red;
     this->user = &user;
@@ -32,7 +33,7 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
 {
     if (searching)
         return;
-
+    searching = true;
     std::cout << "Searching for opponent" << std::endl;
 
     GameOptions *options = panel->GetGameOptions();
@@ -68,11 +69,12 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
     if (!red->PublishToChannel(red->SERVER_CHANNEL, j.dump().c_str()))
     {
         std::cerr << "Failed to publish message to " << red->SERVER_CHANNEL << " channel" << std::endl;
+        searching = false;
         return;
     }
 
     // Set this to true so that the user can't search for another opponent
-    searching = true;
+    searchingOpponent.store(true);
     panel->GetBtnQuitMultiplayer()->Show();
     panel->GetBtnBack()->Disable();
 
@@ -80,6 +82,10 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
     if (!red->SubscribeToChannel(ricerca.user.c_str()))
     {
         std::cerr << "Failed to subscribe to " << ricerca.user << " channel" << std::endl;
+        searchingOpponent.store(false);
+        searching = false;
+        panel->GetBtnQuitMultiplayer()->Hide();
+        panel->GetBtnBack()->Enable();
         return;
     }
 
@@ -88,6 +94,16 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
     {
         // Wait for ok from the server
         std::string response = red->WaitResponse();
+        if (!searchingOpponent.load())
+        {
+            red->UnsubscribeFromChannel();
+            panel->CallAfter([this]()
+                             {
+                searching = false;
+                panel->GetBtnQuitMultiplayer()->Hide();
+                panel->GetBtnBack()->Enable(); });
+            return;
+        }
         Messaggio risposta;
         try
         {
@@ -180,6 +196,9 @@ void GamemodeController::SearchOpponent(wxCommandEvent &event)
 
 void GamemodeController::StopSearchOpponent(wxCommandEvent &event)
 {
+    if (quitting)
+        return;
+    quitting = true;
     std::cout << "Quit search multiplayer" << std::endl;
 
     // if (!red->UnsubscribeFromChannel())
@@ -195,12 +214,14 @@ void GamemodeController::StopSearchOpponent(wxCommandEvent &event)
     if (!red->PublishToChannel(red->SERVER_CHANNEL, j.dump().c_str()))
     {
         wxLogMessage("Failed to contact the server");
+        quitting = false;
         return;
     }
+    searchingOpponent.store(false);
 
     auto f = [this]()
     {
-        std::string response = red->WaitResponse();
+        std::string response = red->WaitResponse(true);
         Messaggio risposta;
         try
         {
@@ -209,16 +230,19 @@ void GamemodeController::StopSearchOpponent(wxCommandEvent &event)
         catch (json::parse_error &e)
         {
             wxLogMessage("Failed to parse response");
+            quitting = false;
             return;
         }
         if (risposta.codice != static_cast<int>(CodiceRisposta::ok))
         {
             wxLogMessage("Failed to quit search");
+            quitting = false;
             return;
         }
         panel->CallAfter([this]()
                          {
             searching = false;
+            quitting =false;
             panel->GetBtnQuitMultiplayer()->Hide();
             panel->GetBtnBack()->Enable(); });
         red->UnsubscribeFromChannel();

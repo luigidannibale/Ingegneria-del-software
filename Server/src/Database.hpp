@@ -251,9 +251,11 @@ public:
     bool Connect(const char *connection_string);
     bool ConnectDefault();
     void Disconnect();
+    bool IsOkay();
     bool ExecuteQuery(const char *query);
     PGresult *GetResult();
-    void createSchema();
+    bool createSchema();
+    void deleteSchema();
     void createDatabase(const char *dbName);
     void deleteDatabase(const char *dbName);
 
@@ -277,6 +279,7 @@ private:
 
     bool databaseExists(const char *dbName);
 
+    bool isOkay = false;
     PGconn *conn;
     PGresult *res;
 };

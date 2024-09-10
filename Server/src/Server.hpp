@@ -8,6 +8,7 @@
 
 #include "Database.hpp"
 #include "RedisManager.hpp"
+#include "Test.hpp"
 
 // Enum class CodiceRichiesta
 enum class CodiceRichiesta
@@ -46,6 +47,7 @@ private:
 
 public:
     // Costruttore
+    Richiesta() {};
     Richiesta(CodiceRichiesta codice, const json &input)
         : codice_(codice), input_string_(input) {}
 
@@ -87,16 +89,16 @@ private:
     void listen_for_clients();
 
     // Operations
-    json new_game(int duration, int increment, std::string u_id_b, std::string u_id_w);
-    json search_opponent(std::string u_id, int duration, int increment, bool quit = false);
-    json update_game(int g_id, std::string moves, Esito e, Motivo m);
-    json search_game(int g_id);
-    json list_games(std::string user_id);
+    void new_game(int duration, int increment, std::string u_id_b, std::string u_id_w);
+    void search_opponent(std::string u_id, int duration, int increment, bool quit = false);
+    void update_game(int g_id, std::string moves, Esito e, Motivo m);
+    void search_game(int g_id);
+    void list_games(std::string user_id);
     // json new_user(std::string username, std::string nome, std::string cognome, int elo, Chessboard_style c_st, Pieces_style p_st);
-    json new_user(std::string username);
-    json update_user(std::string username, std::string new_username, std::string nome, std::string cognome, int elo);
-    json update_userPreference(std::string username, Chessboard_style c_st, Pieces_style p_st);
-    json delete_user(std::string username);
+    void new_user(std::string username);
+    void update_user(std::string username, std::string new_username, std::string nome, std::string cognome, int elo);
+    void update_userPreference(std::string username, Chessboard_style c_st, Pieces_style p_st);
+    void delete_user(std::string username);
 
     std::unordered_map<std::string, std::vector<std::string>> connectedClients;
     bool stop_server;

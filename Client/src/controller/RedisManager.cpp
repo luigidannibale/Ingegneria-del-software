@@ -100,7 +100,7 @@ bool RedisManager::SubscribeToChannel(const char *channel)
     redisReply *reply = (redisReply *)redisCommand(input, "SUBSCRIBE %s", channel);
     if (reply == NULL || reply->type != REDIS_REPLY_ARRAY)
     {
-        std::cerr << "Failed to subscribe to new_clients channel" << std::endl;
+        std::cerr << "Failed to subscribe to " << channel << " channel" << std::endl;
         freeReplyObject(reply);
         isCommandRunning.store(false);
         return false;
@@ -127,7 +127,7 @@ bool RedisManager::UnsubscribeFromChannel(const char *channel)
         reply = (redisReply *)redisCommand(input, "UNSUBSCRIBE %s", channel);
     if (reply == NULL || reply->type != REDIS_REPLY_ARRAY)
     {
-        std::cerr << "Failed to unsubscribe from new_clients channel" << std::endl;
+        std::cerr << "Failed to unsubscribe from channel" << std::endl;
         freeReplyObject(reply);
         isCommandRunning.store(false);
         return false;

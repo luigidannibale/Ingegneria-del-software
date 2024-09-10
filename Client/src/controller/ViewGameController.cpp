@@ -62,7 +62,16 @@ void ViewGameController::ShowPanel(std::string username)
             return;
         }
 
-        std::vector<Game> games = risposta.input.get<std::vector<Game>>();
+        std::vector<Game> games;
+        try
+        {
+            games = risposta.input.get<std::vector<Game>>();
+        }
+        catch (const std::exception &e)
+        {
+            wxLogMessage("Error parsing server response");
+            return;
+        }
 
         panel->CallAfter([games, this]()
                          {         
@@ -71,14 +80,23 @@ void ViewGameController::ShowPanel(std::string username)
 
         for (int i = 0; i < games.size(); i++)
         {
-            table->AppendRows(1);
-            table->SetCellValue(i, 0, std::to_string(games[i].ID));
-            table->SetCellValue(i, 1, games[i].u_id_w);
-            table->SetCellValue(i, 2, games[i].u_id_b);
-            std::string esito = json(games[i].esito);
-            table->SetCellValue(i, 3, esito);
-            std::string motivo = json(games[i].motivo);
-            table->SetCellValue(i, 4, motivo);
+            try {
+                table->AppendRows(1);
+                table->SetCellValue(i, 0, std::to_string(games[i].ID));
+                table->SetCellValue(i, 1, games[i].u_id_w);
+                table->SetCellValue(i, 2, games[i].u_id_b);
+                std::string esito = json(games[i].esito);
+                table->SetCellValue(i, 3, esito);
+                std::string motivo = json(games[i].motivo);
+                table->SetCellValue(i, 4, motivo);
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "Error setting cell value " << e.what() <<std::endl;
+                if (table->GetNumberRows() > 0)
+                    table->DeleteRows(table->GetNumberRows() - 1);
+                return;
+            }
         }
 
         panel->SetTableHeight(); });

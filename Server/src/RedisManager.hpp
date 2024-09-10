@@ -19,7 +19,9 @@ public:
     bool SubscribeToChannel(const char *channel);
     bool UnsubscribeFromChannel(const char *channel = nullptr);
     bool PublishToChannel(const char *channel, const char *message);
-    std::string WaitResponse();
+    std::string WaitResponse(bool timeout = false);
+
+    const char *SERVER_CHANNEL = "new_clients";
 
 private:
     redisContext *input;

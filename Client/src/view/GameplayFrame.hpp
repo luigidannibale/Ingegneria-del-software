@@ -24,6 +24,7 @@ public:
     void HideTransparentPanel();
     void UpdateTransparentPanel(std::string);
     void AddMoveToList(std::string);
+    void RemoveLastMoveFromList();
     wxStaticBitmap *GetBoard();
     ChessboardView *GetChessboard();
     wxButton *GetNextMoveButton();
