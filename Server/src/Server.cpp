@@ -279,10 +279,18 @@ void Server::update_game(int g_id, std::string moves, Esito e, Motivo m)
 
     json mess;
 
-    if (db->UpdateGame(g_id, moves.c_str(), esito_str.c_str(), motivo_str.c_str()))
+    int res = db->UpdateGame(g_id, moves.c_str(), esito_str.c_str(), motivo_str.c_str());
+
+    if (res == 1)
     {
         // Game updated successfully
         mess["codice"] = CodiceRisposta::ok;
+        mess["input"] = {};
+    }
+    else if (res == 0)
+    {
+        // Game not found
+        mess["codice"] = CodiceRisposta::not_found;
         mess["input"] = {};
     }
     else
@@ -419,7 +427,11 @@ void Server::update_user(std::string username, std::string new_username, std::st
         {
             mess["codice"] = CodiceRisposta::bad_request;
         }
-        else
+        else if (res == 0) // User not found
+        {
+            mess["codice"] = CodiceRisposta::not_found;
+        }
+        else // Internal server error
         {
             mess["codice"] = CodiceRisposta::server_error;
         }
@@ -439,9 +451,15 @@ void Server::update_userPreference(std::string username, Chessboard_style c_st, 
     std::string chessboard_str = chessboard.get<std::string>();
     std::string pieces_str = pieces.get<std::string>();
 
-    if (db->UpdateUserPreference(username.c_str(), chessboard_str, pieces_str))
+    int res = db->UpdateUserPreference(username.c_str(), chessboard_str, pieces_str);
+
+    if (res == 1)
     {
         mess["codice"] = CodiceRisposta::ok;
+    }
+    else if (res == 0)
+    {
+        mess["codice"] = CodiceRisposta::not_found;
     }
     else
     {

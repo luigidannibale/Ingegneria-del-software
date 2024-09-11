@@ -77,6 +77,10 @@ void ViewGameController::ShowPanel(std::string username)
                          {         
         wxGrid *table = panel->GetTable();
         table->ClearGrid();
+        if (table->GetNumberRows() > 0)
+        {
+            table->DeleteRows(0, table->GetNumberRows());
+        }
 
         for (int i = 0; i < games.size(); i++)
         {

@@ -261,12 +261,12 @@ public:
 
     bool InsertUser(const char *username, const char *nome, const char *cognome, int elo, const std::string chessboard_style, const std::string pieces_style);
     bool UpdateUser(const char *username, const char *new_username, const char *nome, const char *cognome, int elo);
-    bool UpdateUserPreference(const char *username, const std::string chessboard_style, const std::string pieces_style);
+    int UpdateUserPreference(const char *username, const std::string chessboard_style, const std::string pieces_style);
     void DeleteUser(const char *username);
     int FindUser(const char *username, User &user);
 
     int InsertNewGame(const char *white, const char *black, int timeDuration, int timeIncrement);
-    bool UpdateGame(int game_id, const char *moves, const char *esito, const char *motivo);
+    int UpdateGame(int game_id, const char *moves, const char *esito, const char *motivo);
     Game SearchGame(int game_id);
     bool ListGames(const char *username, std::vector<Game> &games);
 

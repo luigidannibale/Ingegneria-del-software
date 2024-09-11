@@ -124,7 +124,7 @@ std::string RedisManager::WaitResponse(bool timeout)
     timer.tv_sec = 0;
     timer.tv_usec = 0;
     if (timeout)
-        timer.tv_sec = 5;
+        timer.tv_sec = 2;
     redisSetTimeout(input, timer);
 
     while (isWaitingResponse.load())
@@ -136,6 +136,7 @@ std::string RedisManager::WaitResponse(bool timeout)
             std::cerr << "Failed to get reply from redis" << std::endl;
             freeReplyObject(reply);
             isCommandRunning.store(false);
+            Connect();
             return "";
         }
         if (reply->type == REDIS_REPLY_ARRAY)

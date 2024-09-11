@@ -188,23 +188,37 @@ bool Database::UpdateUser(const char *username, const char *new_username, const 
                         " WHERE Username = " + escape_literal(conn, username) + ";";
     if (ExecuteQuery(query.c_str()))
     {
+        char *affectedRows = PQcmdTuples(res);
+        if (strcmp(affectedRows, "0") == 0)
+        {
+            std::cerr << "No rows were updated" << std::endl;
+            PQclear(res);
+            return false;
+        }
         PQclear(res);
         return true;
     }
     return false;
 }
 
-bool Database::UpdateUserPreference(const char *username, const std::string chessboard_style, const std::string pieces_style)
+int Database::UpdateUserPreference(const char *username, const std::string chessboard_style, const std::string pieces_style)
 {
     std::string query = "UPDATE Player SET ChessboardColor = " + escape_literal(conn, chessboard_style) +
                         ", PiecesColor = " + escape_literal(conn, pieces_style) +
                         " WHERE Username = " + escape_literal(conn, username) + ";";
     if (ExecuteQuery(query.c_str()))
     {
+        char *affectedRows = PQcmdTuples(res);
+        if (strcmp(affectedRows, "0") == 0)
+        {
+            std::cerr << "No rows were updated" << std::endl;
+            PQclear(res);
+            return 0;
+        }
         PQclear(res);
-        return true;
+        return 1;
     }
-    return false;
+    return -1;
 }
 
 void Database::DeleteUser(const char *username)
@@ -269,7 +283,7 @@ int Database::InsertNewGame(const char *white, const char *black, int timeDurati
     return -1;
 }
 
-bool Database::UpdateGame(int gameId, const char *moves, const char *esito, const char *motivo)
+int Database::UpdateGame(int gameId, const char *moves, const char *esito, const char *motivo)
 {
     std::string query = "UPDATE Game SET Moves = " + escape_literal(conn, moves) +
                         ", Esito = " + escape_literal(conn, esito) +
@@ -277,10 +291,17 @@ bool Database::UpdateGame(int gameId, const char *moves, const char *esito, cons
                         " WHERE ID = " + std::to_string(gameId) + ";";
     if (ExecuteQuery(query.c_str()))
     {
+        char *affectedRows = PQcmdTuples(res);
+        if (strcmp(affectedRows, "0") == 0)
+        {
+            std::cerr << "No rows were updated" << std::endl;
+            PQclear(res);
+            return 0;
+        }
         PQclear(res);
-        return true;
+        return 1;
     }
-    return false;
+    return -1;
 }
 
 Game Database::SearchGame(int gameId)
@@ -294,7 +315,7 @@ Game Database::SearchGame(int gameId)
             PQclear(res);
             Game emptyGame;
             emptyGame.setID(-1);
-            return Game();
+            return emptyGame;
         }
         json esito = PQgetvalue(res, 0, 6);
         json motivo = PQgetvalue(res, 0, 7);

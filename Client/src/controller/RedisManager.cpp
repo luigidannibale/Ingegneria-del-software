@@ -150,31 +150,45 @@ std::string RedisManager::WaitResponse(bool timeout)
         timer.tv_sec = 5;
     redisSetTimeout(input, timer);
 
-    while (isWaitingResponse.load())
+    std::string response = "";
+    try
     {
-        redisReply *reply = nullptr;
-        if (redisGetReply(input, (void **)&reply) == REDIS_OK && reply != nullptr)
+        while (isWaitingResponse.load())
         {
-            if (reply != NULL)
+            redisReply *reply = nullptr;
+            if (redisGetReply(input, (void **)&reply) == REDIS_OK && reply != nullptr)
             {
-                std::cout << "Received message: " << reply->element[2]->str << std::endl;
-                isWaitingResponse.store(false);
-                return reply->element[2]->str;
+                if (reply != NULL)
+                {
+                    std::cout << "Received message: " << reply->element[2]->str << std::endl;
+                    isWaitingResponse.store(false);
+                    isCommandRunning.store(false);
+                    response = std::string(reply->element[2]->str);
+                    freeReplyObject(reply);
+                    return response;
+                }
+                else
+                {
+                    std::cerr << "Failed to receive message" << std::endl;
+                    Connect();
+                }
+                freeReplyObject(reply);
+                break;
             }
-            else
-            {
-                std::cerr << "Failed to receive message" << std::endl;
-            }
-            freeReplyObject(reply);
+            std::cout << "no risposta" << std::endl;
             break;
         }
-        std::cout << "no risposta" << std::endl;
-        break;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Error while waiting response: " << e.what() << std::endl;
+        Disconnect();
+        Connect();
     }
     std::cout << "Quitting" << std::endl;
     isCommandRunning.store(false);
     isWaitingResponse.store(false);
-    return "";
+    return response;
 }
 
 void RedisManager::StopWaitingResponse()

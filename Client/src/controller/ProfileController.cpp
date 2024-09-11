@@ -93,6 +93,7 @@ void ProfileController::SaveUser(wxCommandEvent &event)
                 panel->ShowDefault(); });
             return;
         }
+        red->UnsubscribeFromChannel(user->Username().c_str());
 
         if (risposta.codice == static_cast<int>(CodiceRisposta::ok))
         {
@@ -113,7 +114,6 @@ void ProfileController::SaveUser(wxCommandEvent &event)
         {
             wxLogMessage("Error contacting the server");
         }
-
         panel->CallAfter([this]()
                          {
                 panel->UpdateUserDatas(user);
